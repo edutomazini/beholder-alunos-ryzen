@@ -71,5 +71,13 @@ module.exports = (settings, wss) => {
         }
     )
 
+    function processChartData(closes, callback){
+        //console.log(closes)
+    }
+
+    exchange.chartStream('BTCUSDT', '1m', (ohlc) => {
+        processChartData(ohlc.close);
+    })
+
     console.log('App Exchange Monitor is running!');
 }

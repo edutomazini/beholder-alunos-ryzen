@@ -63,6 +63,13 @@ module.exports = (settings) => {
         });
     }
 
+    function chartStream(symbol, interval, callback) {
+        binance.websockets.chart(symbol, interval, (symbol, interval, chart) => {
+            const ohlc = binance.ohlc(chart);
+            callback(ohlc);
+        });
+    }
+
     function userDataStream(balanceCallback, executionCallback, listStatusCallback) {
         binance.websockets.userData(
             balance => balanceCallback(balance),
@@ -79,6 +86,7 @@ module.exports = (settings) => {
         cancel,
         miniTickerStream,
         bookStream,
+        chartStream,
         userDataStream,
         orderStatus,
         orderTrade
