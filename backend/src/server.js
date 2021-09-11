@@ -4,16 +4,22 @@ const settingsRepository = require('./repositories/settingsRepository');
 const appEm = require('./app-em');
 const appWs = require('./app-ws');
 
-settingsRepository.getDefaultSettings()
-    .then(settings => {
-        const server = app.listen(process.env.PORT, () => {
-            console.log('App is running at ' + process.env.PORT);
-        })
+(async () => {
+    console.log('Getting the default settings...');
+    const settings = await settingsRepository.getDefaultSettings()
+    if(!settings) throw new Error(`There is no settings.`);
 
-        const wss = appWs(server);
+    console.log('Initializing the Beholder Brain...');
 
-        appEm(settings, wss);
+    //inicializar o Beholder aqui
+
+    console.log(`Starting the server apps...`);
+    const server = app.listen(process.env.PORT, () => {
+        console.log('App is running at ' + process.env.PORT);
     })
-    .catch(err => {
-        console.error(err);
-    })
+
+    const wss = appWs(server);
+
+    appEm.init(settings, wss, {});//passar o beholder
+
+})();

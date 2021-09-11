@@ -27,7 +27,7 @@ function Wallet(props) {
                         if (a.symbol < b.symbol) return -1;
                         return 0;
                     });
-                    
+
                 if (props.onUpdate)
                     props.onUpdate(balances);
 
@@ -39,7 +39,10 @@ function Wallet(props) {
     }
 
     useEffect(() => {
-        getBalanceCall();
+        if (props.data && Object.entries(props.data).length)
+            setBalances(props.data);
+        else
+            getBalanceCall();
     }, [props.data])
 
     return (<React.Fragment>
