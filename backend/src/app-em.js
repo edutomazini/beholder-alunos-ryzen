@@ -12,7 +12,18 @@ function startMiniTickerMonitor(broadcastLabel, logs) {
         if (logs) console.log(markets);
 
         try {
-            //enviar para o Beholder
+            Object.entries(markets).map(mkt => {
+                delete mkt[1].volume;
+                delete mkt[1].quoteVolume;
+                delete mkt[1].eventTime;
+
+                const converted = {};
+                Object.entries(mkt[1]).map(prop => {
+                    converted[prop[0]] = parseFloat(prop[1])
+                });
+
+                beholder.updateMemory(mkt[0], indexKeys.MINI_TICKER, null, converted);
+            })
 
             if (broadcastLabel && WSS) WSS.broadcast({ [broadcastLabel]: markets });
         } catch (err) {
@@ -36,7 +47,16 @@ function startBookMonitor(broadcastLabel, logs) {
             }
             else book.push({ ...order });
 
-            //enviar para o Beholder
+            const orderCopy = { ...order };
+            delete orderCopy.symbol;
+            delete orderCopy.updateId;
+            delete orderCopy.bestAskQty;
+            delete orderCopy.bestBidQty;
+
+            const converted = {};
+            Object.entries(orderCopy).map(prop => converted[prop[0]] = parseFloat(prop[1]));
+            beholder.updateMemory(order.symbol, indexKeys.BOOK, null, converted);
+
         } catch (err) {
             if (logs) console.error(err);
         }
@@ -48,7 +68,8 @@ async function loadWallet() {
     if (!exchange) return new Error('Exchange Monitor not initialized yet.');
     const info = await exchange.balance();
     const wallet = Object.entries(info).map(async (item) => {
-        //enviar para o Beholder
+
+        beholder.updateMemory(item[0], indexKeys.WALLET, null, parseFloat(item[1].available));
 
         return {
             symbol: item[0],
@@ -88,7 +109,9 @@ function processExecutionData(executionData, broadcastLabel) {
         ordersRepository.updateOrderByOrderId(order.orderId, order.clientOrderId, order)
             .then(order => {
                 if (order) {
-                    //enviar para o beholder
+
+                    beholder.updateMemory(order.symbol, indexKeys.LAST_ORDER, null, order);
+
                     if (broadcastLabel && WSS)
                         WSS.broadcast({ [broadcastLabel]: order });
                 }
@@ -132,12 +155,10 @@ async function processChartData(symbol, indexes, interval, ohlc, logs) {
         params.splice(0, 1);
 
         switch (indexName) {
-            case indexKeys.RSI: {
-                //calcula RSI
-            }
-            case indexKeys.MACD: {
-                //calcula MACD
-            }
+            case indexKeys.RSI:
+                return beholder.updateMemory(symbol, indexKeys.RSI, interval, RSI(ohlc.close));
+            case indexKeys.MACD:
+                return beholder.updateMemory(symbol, indexKeys.MACD, interval, MACD(ohlc.close));
             default: return;
         }
     });
@@ -158,7 +179,7 @@ function startChartMonitor(symbol, interval, indexes, broadcastLabel, logs) {
 
         if (logs) console.log(lastCandle);
 
-        //enviar para o beholder
+        beholder.updateMemory(symbol, indexKeys.LAST_CANDLE, interval, lastCandle);
 
         try {
 
