@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from './BaseService';
 
 const ORDERS_URL = `${process.env.REACT_APP_API_URL}/orders/`;
 const { STOP_TYPES } = require('./ExchangeService');

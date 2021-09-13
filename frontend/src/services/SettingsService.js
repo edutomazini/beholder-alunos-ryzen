@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from './BaseService';
 
 const SETTINGS_URL = `${process.env.REACT_APP_API_URL}/settings` || 'http://localhost:3001/settings';
 

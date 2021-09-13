@@ -3,6 +3,7 @@ import { useHistory } from 'react-router-dom';
 import { getSettings, updateSettings } from '../../services/SettingsService';
 import Menu from '../../components/Menu/Menu';
 import Symbols from '../Settings/Symbols';
+import Footer from '../../components/Footer/Footer';
 
 function Settings() {
 
@@ -163,6 +164,7 @@ function Settings() {
                     </div>
                 </div>
                 <Symbols />
+                <Footer />
             </main>
         </React.Fragment>
     );
