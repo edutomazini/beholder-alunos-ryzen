@@ -12,6 +12,7 @@ const indexKeys = {
     WALLET: 'WALLET',
     LAST_ORDER: 'LAST_ORDER',
     LAST_CANDLE: 'LAST_CANDLE',
+    TICKER: 'TICKER',
 }
 
 function RSI(closes, period = 14) {
