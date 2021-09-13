@@ -54,10 +54,14 @@ function MonitorIndex(props) {
                         <div className="input-group input-group-merge">
                             <select id="type" className="form-select" defaultValue="NONE" onChange={onIndexChange}>
                                 <option value="NONE">None</option>
+                                <option value="BB">Bollinger Bands</option>
+                                <option value="EMA">EMA</option>
                                 <option value="MACD">MACD</option>
                                 <option value="RSI">RSI</option>
+                                <option value="SMA">SMA</option>
+                                <option value="Stoch RSI">Stochastic RSI</option>
                             </select>
-                            <input ref={inputPeriod} id="params" type="text" placeholder="" className="d-none" />
+                            <input ref={inputPeriod} id="params" type="text" placeholder="params" className="form-control" />
                             <button type="button" className="btn btn-secondary" ref={btnAddIndex} onClick={onAddIndexClick}>
                                 <svg className="icon icon-xs" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />

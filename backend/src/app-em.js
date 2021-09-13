@@ -1,7 +1,7 @@
 const ordersRepository = require('./repositories/ordersRepository');
 const { orderStatus } = require('./repositories/ordersRepository');
 const { monitorTypes, getActiveMonitors } = require('./repositories/monitorsRepository');
-const { MACD, RSI, indexKeys } = require('./utils/indexes');
+const { MACD, RSI, bollingerBands, EMA, SMA, StochRSI, indexKeys } = require('./utils/indexes');
 
 let WSS, beholder, exchange;
 
@@ -154,13 +154,20 @@ async function processChartData(symbol, indexes, interval, ohlc, logs) {
         const indexName = params[0];
         params.splice(0, 1);
 
+        let calc;
         switch (indexName) {
-            case indexKeys.RSI:
-                return beholder.updateMemory(symbol, indexKeys.RSI, interval, RSI(ohlc.close));
-            case indexKeys.MACD:
-                return beholder.updateMemory(symbol, indexKeys.MACD, interval, MACD(ohlc.close));
+            case indexKeys.RSI: calc = RSI(ohlc.close, ...params); break;
+            case indexKeys.MACD: calc = MACD(ohlc.close, ...params); break;
+            case indexKeys.BOLLINGER_BANDS: calc = bollingerBands(ohlc.close, ...params); break;
+            case indexKeys.EMA: calc = EMA(ohlc.close, ...params); break;
+            case indexKeys.SMA: calc = SMA(ohlc.close, ...params); break;
+            case indexKeys.STOCH_RSI: calc = StochRSI(ohlc.close, ...params); break;
             default: return;
         }
+
+        if (logs) console.log(`${index} calculated: ${JSON.stringify(calc)}`);
+
+        return beholder.updateMemory(symbol, index, interval, calc);
     });
 }
 
@@ -207,17 +214,6 @@ function stopChartMonitor(symbol, interval, indexes, logs) {
 
     if (indexes && Array.isArray(indexes))
         indexes.map(ix => beholder.deleteMemory(symbol, ix, interval));
-}
-
-function stopTickerMonitor(symbol, logs) {
-    if (!symbol) return;
-    if (!exchange) return new Error('Exchange Monitor not initialized yet.');
-
-    exchange.terminateTickerStream(symbol);
-
-    if (logs) console.log(`Ticker Monitor ${symbol} stopped!`);
-
-    beholder.deleteMemory(symbol, indexKeys.TICKER);
 }
 
 async function init(settings, wssInstance, beholderInstance) {

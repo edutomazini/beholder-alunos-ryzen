@@ -53,8 +53,13 @@ function MonitorModal(props) {
                     <div className="modal-body">
                         <div className="form-group">
                             <div className="row">
+                                <div className="col-md-6 mb-3">
+                                    <div className="form-group mb-4">
+                                        <MonitorType onChange={onInputChange} type={monitor.type} />
+                                    </div>
+                                </div>
                                 {
-                                    monitor.type === 'CANDLES'
+                                    monitor.type === 'CANDLES' || monitor.type === 'TICKER'
                                         ? <div className="col-md-6 mb-3">
                                             <div className="form-group mb-4">
                                                 <label htmlFor="symbol">Symbol:</label>
@@ -67,7 +72,8 @@ function MonitorModal(props) {
                             <div className="row">
                                 <div className="col-md-6 mb-3">
                                     <div className="form-group mb-4">
-                                        <MonitorType onChange={onInputChange} type={monitor.type} />
+                                        <label htmlFor="symbol">Broadcast Label: <span data-bs-toggle="tooltip" data-bs-placement="top" title="Label to broadcast the info via WebSockets" className="badge bg-warning py-1">?</span></label>
+                                        <input type="text" id="broadcastLabel" className="form-control" onChange={onInputChange} defaultValue={monitor.broadcastLabel} placeholder="none" />
                                     </div>
                                 </div>
                                 {
@@ -99,7 +105,7 @@ function MonitorModal(props) {
                             </div>
                         </div>
                     </div>
-                    <div className="modal-footer">
+                    <div className="modal-footer"> 
                         {
                             error
                                 ? <div className="alert alert-danger mt-1 col-9 py-1">{error}</div>
