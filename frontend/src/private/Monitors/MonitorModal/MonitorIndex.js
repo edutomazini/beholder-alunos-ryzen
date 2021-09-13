@@ -9,6 +9,7 @@ import SmartBadge from '../../../components/SmartBadge/SmartBadge';
 function MonitorIndex(props) {
 
     const btnAddIndex = useRef('');
+    const inputPeriod = useRef('');
 
     const [indexes, setIndexes] = useState([]);
     const [selectedIndex, setSelectedIndex] = useState('');
@@ -19,9 +20,13 @@ function MonitorIndex(props) {
 
     function onAddIndexClick(event) {
         if (selectedIndex !== 'NONE' && indexes.indexOf(selectedIndex) === -1) {
-            indexes.push(selectedIndex);
+            inputPeriod.current.value = inputPeriod.current.value === 'params' ? '' : inputPeriod.current.value.trim();
+            const params = inputPeriod.current.value ? '_' + inputPeriod.current.value.split(',').join('_') : '';
+            indexes.push(selectedIndex + params);
 
             setSelectedIndex('NONE');
+            inputPeriod.current.value = '';
+
             setIndexes(indexes);
             if (props.onChange) props.onChange({ target: { id: 'indexes', value: indexes.join(',') } });
         }
@@ -52,6 +57,7 @@ function MonitorIndex(props) {
                                 <option value="MACD">MACD</option>
                                 <option value="RSI">RSI</option>
                             </select>
+                            <input ref={inputPeriod} id="params" type="text" placeholder="" className="d-none" />
                             <button type="button" className="btn btn-secondary" ref={btnAddIndex} onClick={onAddIndexClick}>
                                 <svg className="icon icon-xs" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />

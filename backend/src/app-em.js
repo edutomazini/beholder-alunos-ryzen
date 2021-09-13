@@ -197,6 +197,29 @@ function startChartMonitor(symbol, interval, indexes, broadcastLabel, logs) {
     console.log(`Chart Monitor has started for ${symbol}_${interval}!`);
 }
 
+function stopChartMonitor(symbol, interval, indexes, logs) {
+    if (!symbol) return;
+    if (!exchange) return new Error('Exchange Monitor not initialized yet.');
+    exchange.terminateChartStream(symbol, interval);
+    if (logs) console.log(`Chart Monitor ${symbol}_${interval} stopped!`);
+
+    beholder.deleteMemory(symbol, indexKeys.LAST_CANDLE, interval);
+
+    if (indexes && Array.isArray(indexes))
+        indexes.map(ix => beholder.deleteMemory(symbol, ix, interval));
+}
+
+function stopTickerMonitor(symbol, logs) {
+    if (!symbol) return;
+    if (!exchange) return new Error('Exchange Monitor not initialized yet.');
+
+    exchange.terminateTickerStream(symbol);
+
+    if (logs) console.log(`Ticker Monitor ${symbol} stopped!`);
+
+    beholder.deleteMemory(symbol, indexKeys.TICKER);
+}
+
 async function init(settings, wssInstance, beholderInstance) {
     if (!settings || !beholderInstance) throw new Error(`You can't init the Exchange Monitor App without his settings. Check your database and/or startup code.`);
 
@@ -225,5 +248,6 @@ async function init(settings, wssInstance, beholderInstance) {
 
 module.exports = {
     init,
-    startChartMonitor
+    startChartMonitor,
+    stopChartMonitor
 }

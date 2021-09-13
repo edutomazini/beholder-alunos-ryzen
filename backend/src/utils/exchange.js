@@ -70,6 +70,12 @@ module.exports = (settings) => {
         });
     }
 
+    function terminateChartStream(symbol, interval) {
+        //btcusdt@kline_1m
+        binance.websockets.terminate(`${symbol.toLowerCase()}@kline_${interval}`);
+        console.log(`Chart Stream ${symbol.toLowerCase()}@kline_${interval} terminated!`);
+    }
+
     function userDataStream(balanceCallback, executionCallback, listStatusCallback) {
         binance.websockets.userData(
             balance => balanceCallback(balance),
@@ -87,6 +93,7 @@ module.exports = (settings) => {
         miniTickerStream,
         bookStream,
         chartStream,
+        terminateChartStream,
         userDataStream,
         orderStatus,
         orderTrade
