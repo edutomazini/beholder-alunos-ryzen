@@ -3,9 +3,9 @@ import SelectSymbol from '../../../components/SelectSymbol/SelectSymbol';
 import SwitchInput from '../../../components/SwitchInput/SwitchInput';
 import { saveAutomation } from '../../../services/AutomationsService';
 import ConditionsArea from './ConditionsArea/ConditionsArea';
+import { getIndexes } from '../../../services/BeholderService';
 import '../Automations.css';
 import ActionsArea from './ActionsArea/ActionsArea';
-import ScheduleArea from './ScheduleArea/ScheduleArea';
 
 /**
  * props:
@@ -14,11 +14,11 @@ import ScheduleArea from './ScheduleArea/ScheduleArea';
  */
 function AutomationModal(props) {
 
+    const [indexes, setIndexes] = useState([]);
     const [error, setError] = useState('');
 
     const DEFAULT_AUTOMATION = {
         conditions: '',
-        schedule: '',
         actions: []
     }
 
@@ -49,6 +49,26 @@ function AutomationModal(props) {
         setAutomation(props.data);
     }, [props.data])
 
+    useEffect(() => {
+        if (!automation || !automation.symbol) return;
+        const token = localStorage.getItem('token');
+        getIndexes(token)
+            .then(indexes => {
+                const filteredIndexes = indexes.filter(k => k.symbol === automation.symbol);
+                const baseWallet = indexes.find(ix => ix.variable === 'WALLET' && automation.symbol.startsWith(ix.symbol));
+                if (baseWallet) filteredIndexes.splice(0, 0, baseWallet);
+
+                const quoteWallet = indexes.find(ix => ix.variable === 'WALLET' && automation.symbol.endsWith(ix.symbol));
+                if (quoteWallet) filteredIndexes.splice(0, 0, quoteWallet);
+
+                setIndexes(filteredIndexes);
+            })
+            .catch(err => {
+                console.error(err.response ? err.response.data : err.message);
+                setError(err.response ? err.response.data : err.message);
+            })
+    }, [automation.symbol])
+
     function onSymbolChange(event) {
         setAutomation({ ...DEFAULT_AUTOMATION, symbol: event.target.value });
     }
@@ -58,7 +78,7 @@ function AutomationModal(props) {
             <div className="modal-dialog modal-dialog-centered" role="document">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <p className="modal-title" id="modalTitleNotify">{props.data.id ? 'Edit ' : 'New '}{props.data.schedule ? 'Scheduled ' : ''}Automation</p>
+                        <p className="modal-title" id="modalTitleNotify">{props.data.id ? 'Edit ' : 'New '}Automation</p>
                         <button ref={btnClose} type="button" className="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
                     </div>
                     <div className="modal-body">
@@ -79,11 +99,6 @@ function AutomationModal(props) {
                                     </div>
                                 </div>
                             </div>
-                            {
-                                automation.schedule
-                                    ? <ScheduleArea schedule={automation.schedule} onChange={onInputChange} />
-                                    : <React.Fragment></React.Fragment>
-                            }
                             <ul className="nav nav-tabs" id="tabs" role="tablist">
                                 <li className="nav-item" role="presentation">
                                     <button className="nav-link active" id="conditions-tab" data-bs-toggle="tab" data-bs-target="#conditions" type="button" role="tab" aria-controls="home" aria-selected="true">
@@ -98,10 +113,10 @@ function AutomationModal(props) {
                             </ul>
                             <div className="tab-content px-3 mb-3" id="tabContent">
                                 <div className="tab-pane fade show active pt-3" id="conditions" role="tabpanel" aria-labelledby="conditions-tab">
-                                    <ConditionsArea />
+                                    <ConditionsArea symbol={automation.symbol} conditions={automation.conditions} indexes={indexes} onChange={onInputChange} />
                                 </div>
                                 <div className="tab-pane fade" id="actions" role="tabpanel" aria-labelledby="actions-tab">
-                                    <ActionsArea />
+                                    <ActionsArea symbol={automation.symbol} actions={automation.actions} onChange={onInputChange} />
                                 </div>
                             </div>
                             <div className="row">
