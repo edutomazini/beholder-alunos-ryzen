@@ -24,10 +24,15 @@ async function init(req, res, next) {
     res.json(beholder.getBrain());
 }
 
+function getAnalysisIndexes(req, res, next) {
+    res.json(indexes.getAnalysisIndexes());
+}
+
 module.exports = {
     getMemory,
     getMemoryIndexes,
     getBrain,
     getBrainIndexes,
+    getAnalysisIndexes,
     init
 }

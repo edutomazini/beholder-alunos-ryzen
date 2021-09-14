@@ -127,7 +127,7 @@ async function evalDecision(automation) {
     }
 }
 
-function updateMemory(symbol, index, interval, value) {
+function updateMemory(symbol, index, interval, value, executeAutomations = true) {
     const indexKey = interval ? `${index}_${interval}` : index;
     const memoryKey = `${symbol}:${indexKey}`;
     MEMORY[memoryKey] = value;
@@ -138,6 +138,8 @@ function updateMemory(symbol, index, interval, value) {
         if (LOGS) console.log(`Beholder brain is locked, sorry!`);
         return false;
     }
+
+    if(!executeAutomations) return false;
 
     try {
         const automations = findAutomations(memoryKey);
