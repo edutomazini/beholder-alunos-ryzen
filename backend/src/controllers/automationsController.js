@@ -1,4 +1,9 @@
 const automationsRepository = require('../repositories/automationsRepository');
+const beholder = require('../beholder');
+
+function validateConditions(conditions) {
+    return /^(MEMORY\[\'.+?\'\](\..+)?[><=!]+([0-9\.]+|(\'.+?\')|true|false|MEMORY\[\'.+?\'\](\..+)?)( && )?)+$/ig.test(conditions);
+}
 
 async function startAutomation(req, res, next) {
     const id = req.params.id;
@@ -7,7 +12,7 @@ async function startAutomation(req, res, next) {
 
     automation.isActive = true;
 
-    //beholder.updateBrain(automation.get({ plain: true }));
+    beholder.updateBrain(automation.get({ plain: true }));
 
     await automation.save();
 
@@ -21,7 +26,7 @@ async function stopAutomation(req, res, next) {
     const automation = await automationsRepository.getAutomation(id);
     if (!automation.isActive) return res.sendStatus(204);
 
-    //beholder.deleteBrain(automation.get({ plain: true }));
+    beholder.deleteBrain(automation.get({ plain: true }));
 
     automation.isActive = false;
     await automation.save();
@@ -46,13 +51,16 @@ async function getAutomations(req, res, next) {
 async function insertAutomation(req, res, next) {
     const newAutomation = req.body;
 
+    if (!validateConditions(newAutomation.conditions))
+        return res.status(400).json('Invalid conditions!');
+
     const exists = await automationsRepository.automationExists(newAutomation.name);
     if (exists) return res.status(409).json(`The automation ${newAutomation.name} already exists!`);
 
     const savedAutomation = await automationsRepository.insertAutomation(newAutomation);
 
     if (savedAutomation.isActive) {
-        //beholder.updateBrain(savedAutomation);
+        beholder.updateBrain(savedAutomation);
     }
 
     res.status(201).json(savedAutomation);
@@ -62,14 +70,17 @@ async function updateAutomation(req, res, next) {
     const id = req.params.id;
     const newAutomation = req.body;
 
+    if (!validateConditions(newAutomation.conditions))
+        return res.status(400).json('Invalid conditions!');
+
     const updatedAutomation = await automationsRepository.updateAutomation(id, newAutomation);
 
     if (updatedAutomation.isActive) {
-        //beholder.deleteBrain(updatedAutomation);
-        //beholder.updateBrain(updatedAutomation);
+        beholder.deleteBrain(updatedAutomation);
+        beholder.updateBrain(updatedAutomation);
     }
     else {
-        //beholder.deleteBrain(updatedAutomation);
+        beholder.deleteBrain(updatedAutomation);
     }
 
     res.json(updatedAutomation);
@@ -80,7 +91,7 @@ async function deleteAutomation(req, res, next) {
     const currentAutomation = await automationsRepository.getAutomation(id);
 
     if (currentAutomation.isActive) {
-        //beholder.deleteBrain(currentAutomation);
+        beholder.deleteBrain(currentAutomation);
     }
     await automationsRepository.deleteAutomation(id);
     res.sendStatus(204);
