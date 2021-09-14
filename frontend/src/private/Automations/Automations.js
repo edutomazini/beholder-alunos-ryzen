@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import Menu from '../../components/Menu/Menu';
 import Footer from '../../components/Footer/Footer';
+import AutomationModal from './AutomationModal/AutomationModal';
 import AutomationRow from './AutomationRow';
 import { getAutomations, startAutomation, stopAutomation, deleteAutomation } from '../../services/AutomationsService';
 import Pagination from '../../components/Pagination/Pagination';
@@ -139,6 +140,7 @@ function Automations() {
                 </div>
                 <Footer />
             </main>
+            <AutomationModal data={editAutomation} onSubmit={onAutomationSubmit} />
         </React.Fragment>
     );
 }
