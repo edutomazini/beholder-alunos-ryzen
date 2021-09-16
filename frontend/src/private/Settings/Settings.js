@@ -138,7 +138,7 @@ function Settings() {
                                     <div className="col-sm-12 mb-3">
                                         <div className="form-group">
                                             <label htmlFor="email">Secret Key</label>
-                                            <input ref={inputSecretKey} className="form-control" id="accessKey" type="password" placeholder="Your secret key" />
+                                            <input ref={inputSecretKey} className="form-control" id="secretKey" type="password" placeholder="Your secret key" />
                                         </div>
                                     </div>
                                 </div>

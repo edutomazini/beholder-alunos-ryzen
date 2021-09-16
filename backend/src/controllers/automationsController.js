@@ -1,4 +1,5 @@
 const automationsRepository = require('../repositories/automationsRepository');
+const actionsRepository = require('../repositories/actionsRepository');
 const beholder = require('../beholder');
 const db = require('../db');
 
