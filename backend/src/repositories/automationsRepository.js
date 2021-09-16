@@ -4,7 +4,7 @@ async function getActiveAutomations() {
     return automationModel.findAll({
         where: { isActive: true },
         distinct: true,
-        include: [{ all: true, nested: true }]
+        include: [{ all: true, nested: true }]//já inclui todas tabelas relacionadas
     });
 }
 
@@ -51,17 +51,18 @@ function getAutomations(page = 1) {
         limit: 10,
         offset: 10 * (page - 1),
         distinct: true,
-        include: [{ all: true, nested: true }]
+        include: [{ all: true, nested: true }]//inclui todas tabelas relacionadas
     });
 }
 
-function insertAutomation(newAutomation) {
-    return automationModel.create(newAutomation);
+function insertAutomation(newAutomation, transaction) {
+    return automationModel.create(newAutomation, { transaction });
 }
 
-function deleteAutomation(id) {
+function deleteAutomation(id, transaction) {
     return automationModel.destroy({
-        where: { id }
+        where: { id },
+        transaction
     })
 }
 
