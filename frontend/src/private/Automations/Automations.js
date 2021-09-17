@@ -6,6 +6,7 @@ import AutomationModal from './AutomationModal/AutomationModal';
 import AutomationRow from './AutomationRow';
 import { getAutomations, startAutomation, stopAutomation, deleteAutomation } from '../../services/AutomationsService';
 import Pagination from '../../components/Pagination/Pagination';
+import Toast from '../../components/Toast/Toast';
 
 function Automations() {
 
@@ -28,6 +29,8 @@ function Automations() {
 
     const [count, setCount] = useState(0);
 
+    const [notification, setNotification] = useState({ type: '', text: '' });
+
     const DEFAULT_AUTOMATION = {
         symbol: "BTCUSDT",
         conditions: "",
@@ -49,6 +52,7 @@ function Automations() {
             })
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message);
+                setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
             });
 
     }, [page])
@@ -65,7 +69,8 @@ function Automations() {
         stopAutomation(id, token)
             .then(automation => { history.go(0) })
             .catch(err => {
-                console.error(err.response ? err.response.data : err.message)
+                console.error(err.response ? err.response.data : err.message);
+                setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
             });
     }
 
@@ -75,7 +80,8 @@ function Automations() {
         startAutomation(id, token)
             .then(automation => { history.go(0) })
             .catch(err => {
-                console.error(err.response ? err.response.data : err.message)
+                console.error(err.response ? err.response.data : err.message);
+                setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
             });
     }
 
@@ -85,7 +91,8 @@ function Automations() {
         deleteAutomation(id, token)
             .then(automation => { history.go(0) })
             .catch(err => {
-                console.error(err.response ? err.response.data : err.message)
+                console.error(err.response ? err.response.data : err.message);
+                setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
             });
     }
 
@@ -141,6 +148,7 @@ function Automations() {
                 <Footer />
             </main>
             <AutomationModal data={editAutomation} onSubmit={onAutomationSubmit} />
+            <Toast type={notification.type} text={notification.text} />
         </React.Fragment>
     );
 }

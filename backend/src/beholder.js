@@ -93,7 +93,7 @@ function invertConditions(conditions) {
         .join(' && ');
 }
 
-async function evalDecision(automation) {
+function evalDecision(automation) {
     if (!automation) return false;
 
     try {
@@ -117,10 +117,11 @@ async function evalDecision(automation) {
             return false;
         }
 
-        const settings = await settingsRepository.getDefaultSettings();
+        //const settings = await settingsRepository.getDefaultSettings();
         //para cada action da automation, executa a action com as settings
 
         console.log('EXECUTEI A AÇÃO');
+        return { type: 'success', text: 'Executei a ação!' };
     } catch (err) {
         if (automation.logs) console.error(err);
         return { type: 'error', text: `Error at evalDecision for '${automation.name}': ${err}` };
@@ -139,7 +140,7 @@ function updateMemory(symbol, index, interval, value, executeAutomations = true)
         return false;
     }
 
-    if(!executeAutomations) return false;
+    if (!executeAutomations) return false;
 
     try {
         const automations = findAutomations(memoryKey);
@@ -147,7 +148,7 @@ function updateMemory(symbol, index, interval, value, executeAutomations = true)
 
         LOCK_BRAIN = true;
 
-        let results = automations.map(async (auto) => {
+        let results = automations.map((auto) => {
             return evalDecision(auto);
         }).flat();
 

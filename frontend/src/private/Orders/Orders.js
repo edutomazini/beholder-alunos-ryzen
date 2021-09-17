@@ -10,6 +10,7 @@ import Pagination from '../../components/Pagination/Pagination';
 import ViewOrderModal from './ViewOrderModal';
 import { getBalance } from '../../services/ExchangeService';
 import Footer from '../../components/Footer/Footer';
+import Toast from '../../components/Toast/Toast';
 
 function Orders() {
 
@@ -40,6 +41,8 @@ function Orders() {
 
     const [page, setPage] = useState(getPage());
 
+    const [notification, setNotification] = useState({ type: '', text: '' });
+
     useEffect(() => {
         const token = localStorage.getItem("token");
         getOrders(search, page || 1, token)
@@ -50,6 +53,7 @@ function Orders() {
             })
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message);
+                setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
             })
 
     }, [search, page])
@@ -83,7 +87,10 @@ function Orders() {
                 })
                 setBalances(balances);
             })
-            .catch(err => console.error(err.response ? err.response.data : err.message));
+            .catch(err => {
+                console.error(err.response ? err.response.data : err.message)
+                setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
+            });
     }, [])
 
     return (
@@ -130,6 +137,7 @@ function Orders() {
             </main>
             <ViewOrderModal data={viewOrder} />
             <NewOrderModal wallet={balances} onSubmit={onOrderSubmit} />
+            <Toast type={notification.type} text={notification.text} />
         </React.Fragment>
     );
 }

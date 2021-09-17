@@ -10,6 +10,7 @@ import NewOrderModal from '../../components/NewOrder/NewOrderModal';
 import CandleChart from './CandleChart';
 import SelectSymbol from '../../components/SelectSymbol/SelectSymbol';
 import Footer from '../../components/Footer/Footer';
+import Toast from '../../components/Toast/Toast';
 
 function Dashboard() {
 
@@ -24,6 +25,8 @@ function Dashboard() {
   const [wallet, setWallet] = useState({});
 
   const [chartSymbol, setChartSymbol] = useState('BTCUSDT');
+
+  const [notification, setNotification] = useState({ type: '', text: '' });
 
   const { lastJsonMessage } = useWebSocket(process.env.REACT_APP_WS_URL, {
     onOpen: () => {
@@ -44,6 +47,7 @@ function Dashboard() {
     queryParams: { 'token': localStorage.getItem("token") },
     onError: (event) => {
       console.error(event);
+      setNotification({ type: 'error', text: event });
     },
     shouldReconnect: (closeEvent) => true,
     reconnectInterval: 3000
@@ -91,6 +95,7 @@ function Dashboard() {
         <Footer />
       </main>
       <NewOrderModal wallet={wallet} onSubmit={onSubmitOrder} />
+      <Toast type={notification.type} text={notification.text} />
     </React.Fragment>
   );
 }

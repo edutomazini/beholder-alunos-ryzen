@@ -7,22 +7,19 @@ let WSS, beholder, exchange;
 
 function startMiniTickerMonitor(broadcastLabel, logs) {
     if (!exchange) return new Error('Exchange Monitor not initialized yet.');
-
-    exchange.miniTickerStream((markets) => {
+    exchange.miniTickerStream(async (markets) => {
         if (logs) console.log(markets);
 
         try {
-            Object.entries(markets).map(mkt => {
+            Object.entries(markets).map(async (mkt) => {
+
                 delete mkt[1].volume;
                 delete mkt[1].quoteVolume;
                 delete mkt[1].eventTime;
-
                 const converted = {};
-                Object.entries(mkt[1]).map(prop => {
-                    converted[prop[0]] = parseFloat(prop[1])
-                });
-
-                beholder.updateMemory(mkt[0], indexKeys.MINI_TICKER, null, converted);
+                Object.entries(mkt[1]).map(prop => converted[prop[0]] = parseFloat(prop[1]));
+                const results = beholder.updateMemory(mkt[0], indexKeys.MINI_TICKER, null, converted);
+                if (results) results.map(r => WSS.broadcast({ notification: r }));
             })
 
             if (broadcastLabel && WSS) WSS.broadcast({ [broadcastLabel]: markets });
@@ -36,7 +33,6 @@ function startMiniTickerMonitor(broadcastLabel, logs) {
 let book = [];
 function startBookMonitor(broadcastLabel, logs) {
     if (!exchange) return new Error('Exchange Monitor not initialized yet.');
-
     exchange.bookStream(async (order) => {
         if (logs) console.log(order);
 
@@ -55,8 +51,15 @@ function startBookMonitor(broadcastLabel, logs) {
 
             const converted = {};
             Object.entries(orderCopy).map(prop => converted[prop[0]] = parseFloat(prop[1]));
-            beholder.updateMemory(order.symbol, indexKeys.BOOK, null, converted);
 
+            const currentMemory = beholder.getMemory(order.symbol, indexKeys.BOOK);
+
+            const newMemory = {};
+            newMemory.previous = currentMemory ? currentMemory.current : converted;
+            newMemory.current = converted;
+
+            const results = beholder.updateMemory(order.symbol, indexKeys.BOOK, null, newMemory);
+            if (results) results.map(r => WSS.broadcast({ notification: r }));
         } catch (err) {
             if (logs) console.error(err);
         }
@@ -68,8 +71,8 @@ async function loadWallet() {
     if (!exchange) return new Error('Exchange Monitor not initialized yet.');
     const info = await exchange.balance();
     const wallet = Object.entries(info).map(async (item) => {
-
-        beholder.updateMemory(item[0], indexKeys.WALLET, null, parseFloat(item[1].available));
+        const results = beholder.updateMemory(item[0], indexKeys.WALLET, null, parseFloat(item[1].available));
+        if (results) results.map(r => WSS.broadcast({ notification: r }));
 
         return {
             symbol: item[0],
@@ -78,6 +81,41 @@ async function loadWallet() {
         }
     })
     return wallet;
+}
+
+function getLightOrder(updatedOrder) {
+    const orderCopy = { ...updatedOrder };
+    delete orderCopy.id;
+    delete orderCopy.symbol;
+    delete orderCopy.automationId;
+    delete orderCopy.orderId;
+    delete orderCopy.clientOrderId;
+    delete orderCopy.transactTime;
+    delete orderCopy.isMaker;
+    delete orderCopy.commission;
+    delete orderCopy.obs;
+    delete orderCopy.Automation;
+    delete orderCopy.createdAt;
+    delete orderCopy.updatedAt;
+    orderCopy.limitPrice = parseFloat(orderCopy.limitPrice);
+    orderCopy.stopPrice = parseFloat(orderCopy.stopPrice);
+    orderCopy.avgPrice = parseFloat(orderCopy.avgPrice);
+    orderCopy.net = parseFloat(orderCopy.net);
+    orderCopy.quantity = parseFloat(orderCopy.quantity);
+    orderCopy.icebergQty = parseFloat(orderCopy.icebergQty);
+    return orderCopy;
+}
+
+function notifyOrderUpdate(order) {
+    let type = '';
+    switch (order.status) {
+        case 'FILLED': type = 'success'; break;
+        case 'REJECTED':
+        case 'CANCELED':
+        case 'EXPIRED': type = 'error'; break;
+        default: type = 'info'; break;
+    }
+    WSS.broadcast({ notification: { text: `Order #${order.orderId} was updated as ${order.status}`, type } });
 }
 
 function processExecutionData(executionData, broadcastLabel) {
@@ -98,25 +136,27 @@ function processExecutionData(executionData, broadcastLabel) {
         const quoteAmount = parseFloat(executionData.Z);
         order.avgPrice = quoteAmount / parseFloat(executionData.z);
         order.commission = executionData.n;
-
         const isQuoteCommission = executionData.N && order.symbol.endsWith(executionData.N);
         order.net = isQuoteCommission ? quoteAmount - parseFloat(order.commission) : quoteAmount;
     }
 
     if (order.status === orderStatus.REJECTED) order.obs = executionData.r;
 
-    setTimeout(() => {
-        ordersRepository.updateOrderByOrderId(order.orderId, order.clientOrderId, order)
-            .then(order => {
-                if (order) {
+    setTimeout(async () => {
+        try {
+            const updatedOrder = await ordersRepository.updateOrderByOrderId(order.orderId, order.clientOrderId, order);
+            if (updatedOrder) {
 
-                    beholder.updateMemory(order.symbol, indexKeys.LAST_ORDER, null, order);
+                notifyOrderUpdate(order);
 
-                    if (broadcastLabel && WSS)
-                        WSS.broadcast({ [broadcastLabel]: order });
-                }
-            })
-            .catch(err => console.error(err));
+                const orderCopy = getLightOrder(updatedOrder.get({ plain: true }));
+                const results = beholder.updateMemory(orderCopy.symbol, indexKeys.LAST_ORDER, null, orderCopy);
+                if (results) results.map(r => WSS.broadcast({ notification: r }));
+                if (broadcastLabel) WSS.broadcast({ [broadcastLabel]: order });
+            }
+        } catch (err) {
+            console.error(err);
+        }
     }, 3000)
 }
 
@@ -181,11 +221,13 @@ function startChartMonitor(symbol, interval, indexes, broadcastLabel, logs) {
 
         if (logs) console.log(lastCandle);
 
-        beholder.updateMemory(symbol, indexKeys.LAST_CANDLE, interval, lastCandle);
-
         try {
+            let totalResults = beholder.updateMemory(symbol, indexKeys.LAST_CANDLE, interval, lastCandle);
+            totalResults = totalResults.flat();
 
-            if (broadcastLabel && WSS) WSS.broadcast({ [broadcastLabel]: lastCandle });
+            if (totalResults) totalResults.filter(r => r).map(r => WSS.broadcast({ notification: r }));
+
+            if (broadcastLabel && WSS) WSS.broadcast({ [broadcastLabel]: [lastCandle, last2Candle, last3Candle] });
             results = await processChartData(symbol, indexes, interval, ohlc, logs);
 
             if (results) {
@@ -214,9 +256,9 @@ function stopChartMonitor(symbol, interval, indexes, logs) {
 function stopTickerMonitor(symbol, logs) {
     if (!symbol) return new Error(`Can't stop a Ticker Monitor without a symbol.`);
     if (!exchange) return new Error('Exchange Monitor not initialized yet.');
-    
+
     exchange.terminateTickerStream(symbol);
-    
+
     if (logs) console.log(`Ticker Monitor ${symbol} stopped!`);
 
     beholder.deleteMemory(symbol, indexKeys.TICKER);
@@ -251,7 +293,7 @@ function getLightTicker(data) {
     return data;
 }
 
-function startTickerMonitor(symbol, broadcastLabel, logs) {
+async function startTickerMonitor(symbol, broadcastLabel, logs) {
     if (!symbol) return new Error(`Can't start a Ticker Monitor without a symbol.`);
     if (!exchange) return new Error('Exchange Monitor not initialized yet.');
 
@@ -266,9 +308,10 @@ function startTickerMonitor(symbol, broadcastLabel, logs) {
             newMemory.previous = currentMemory ? currentMemory.current : ticker;
             newMemory.current = ticker;
 
-            beholder.updateMemory(data.symbol, indexKeys.TICKER, null, newMemory);
+            const results = beholder.updateMemory(data.symbol, indexKeys.TICKER, null, newMemory);
+            if (results) results.map(r => WSS.broadcast({ notification: r }));
 
-            if(WSS && broadcastLabel) WSS.broadcast({ [broadcastLabel]: data });
+            if (WSS && broadcastLabel) WSS.broadcast({ [broadcastLabel]: data });
         }
         catch (err) {
             if (logs) console.error(err);

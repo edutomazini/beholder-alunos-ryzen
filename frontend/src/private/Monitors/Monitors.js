@@ -6,6 +6,7 @@ import MonitorRow from './MonitorRow';
 import { getMonitors, startMonitor, stopMonitor, deleteMonitor } from '../../services/MonitorsService';
 import Pagination from '../../components/Pagination/Pagination';
 import MonitorModal from './MonitorModal/MonitorModal';
+import Toast from '../../components/Toast/Toast';
 
 function Monitors() {
 
@@ -28,6 +29,8 @@ function Monitors() {
 
     const [count, setCount] = useState(0);
 
+    const [notification, setNotification] = useState({ type: '', text: '' });
+
     const DEFAULT_MONITOR = {
         type: "CANDLES",
         interval: "1m",
@@ -48,6 +51,7 @@ function Monitors() {
             })
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message);
+                setNotification({ type: 'error', text: err.response ? err.response.data : err.message});
             });
 
     }, [page])
@@ -64,6 +68,7 @@ function Monitors() {
             .then(monitor => { history.go(0) })
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message);
+                setNotification({ type: 'error', text: err.response ? err.response.data : err.message});
             });
     }
 
@@ -74,6 +79,7 @@ function Monitors() {
             .then(monitor => { history.go(0) })
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message)
+                setNotification({ type: 'error', text: err.response ? err.response.data : err.message});
             });
     }
 
@@ -83,7 +89,8 @@ function Monitors() {
         deleteMonitor(id, token)
             .then(monitor => { history.go(0) })
             .catch(err => {
-                console.error(err.response ? err.response.data : err.message)
+                console.error(err.response ? err.response.data : err.message);
+                setNotification({ type: 'error', text: err.response ? err.response.data : err.message});
             });
     }
 
@@ -137,6 +144,7 @@ function Monitors() {
                 <Footer />
             </main>
             <MonitorModal data={editMonitor} onSubmit={onMonitorSubmit} />
+            <Toast type={notification.type} text={notification.text} />
         </React.Fragment>
     );
 }
