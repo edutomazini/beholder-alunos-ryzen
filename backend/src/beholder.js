@@ -1,4 +1,5 @@
-const settingsRepository = require('./repositories/settingsRepository');
+const { getDefaultSettings } = require('./repositories/settingsRepository');
+const { actionTypes } = require('./repositories/actionsRepository');
 
 const MEMORY = {};
 
@@ -11,6 +12,7 @@ let BRAIN_INDEX = {};
 let LOCK_MEMORY = false;
 
 const LOGS = process.env.BEHOLDER_LOGS === 'true';
+const INTERVAL = parseInt(process.env.AUTOMATION_INTERVAL || 0);
 
 function init(automations) {
 
@@ -79,7 +81,7 @@ function findAutomations(indexKey) {
     return [...new Set(ids)].map(id => BRAIN[id]);
 }
 
-function invertConditions(conditions) {
+function invertCondition(conditions) {
     const conds = conditions.split(' && ');
     return conds.map(c => {
         if (c.indexOf('current') !== -1) {
@@ -93,7 +95,23 @@ function invertConditions(conditions) {
         .join(' && ');
 }
 
-function evalDecision(automation) {
+function doAction(settings, action, automation) {
+    try {
+        switch (action.type) {
+            case actionTypes.ALERT_EMAIL: return { type: 'success', text: 'Email sent!' };
+            case actionTypes.ALERT_SMS: return { type: 'success', text: 'SMS sent!' };
+            case actionTypes.ORDER: return { type: 'success', text: 'Order placed!' };
+        }
+    } catch (err) {
+        if (automation.logs) {
+            console.error(`${automation.name}:${action.type}`);
+            console.error(err);
+        }
+        return { text: `Error at ${automation.name}: ${err.message}`, type: 'error' };
+    }
+}
+
+async function evalDecision(automation) {
     if (!automation) return false;
 
     try {
@@ -101,39 +119,53 @@ function evalDecision(automation) {
         const isChecked = indexes.every(ix => MEMORY[ix] !== null && MEMORY[ix] !== undefined);
         if (!isChecked) return false;
 
-        const invertedConditions = invertConditions(automation.conditions);
-        const evalCondition = automation.conditions + (invertedConditions ? ' && ' + invertedConditions : '');
-
+        const invertedCondition = invertCondition(automation.conditions);
+        const evalCondition = automation.conditions + (invertedCondition ? ' && ' + invertedCondition : '');
+        
         if (LOGS) console.log(`Beholder trying to evaluate:\n${evalCondition}\n at ${automation.name}`);
 
         const isValid = evalCondition ? eval(evalCondition) : true;
         if (!isValid) return false;
-
-        if (LOGS || automation.logs)
-            console.log(`Beholder evaluated a condition at automation: ${automation.name} => ${automation.conditions}`);
 
         if (!automation.actions || !automation.actions.length) {
             if (LOGS || automation.logs) console.log(`No actions defined for automation ${automation.name}`);
             return false;
         }
 
-        //const settings = await settingsRepository.getDefaultSettings();
-        //para cada action da automation, executa a action com as settings
+        if ((LOGS || automation.logs))
+            console.log(`Beholder evaluated a condition at automation: ${automation.name} => ${automation.conditions}`);
 
-        console.log('EXECUTEI A AÇÃO');
-        return { type: 'success', text: 'Executei a ação!' };
+        const settings = await getDefaultSettings();
+
+        let results = automation.actions.map(async (action) => {
+            const result = await doAction(settings, action, automation);
+            if (automation.logs && result) console.log(`Result for action ${action.type} was ${JSON.stringify(result)}`);
+            return result;
+        })
+
+        results = await Promise.all(results);
+
+        if (automation.logs && results && results.length && results[0])
+            console.log(`Automation ${automation.name} finished execution at ${new Date()}`);
+
+        return results;
     } catch (err) {
         if (automation.logs) console.error(err);
         return { type: 'error', text: `Error at evalDecision for '${automation.name}': ${err}` };
     }
 }
 
-function updateMemory(symbol, index, interval, value, executeAutomations = true) {
+async function updateMemory(symbol, index, interval, value, executeAutomations = true) {
+    if (!value) return false;
+    if (value.get) value = value.get({ plain: true });
+
+    if (LOCK_MEMORY) return false;
+
     const indexKey = interval ? `${index}_${interval}` : index;
     const memoryKey = `${symbol}:${indexKey}`;
     MEMORY[memoryKey] = value;
 
-    if (LOGS) console.log(`Beholder Memory updated ${memoryKey} => ${JSON.stringify(value)}`);
+    if (LOGS) console.log(`Beholder memory updated: ${memoryKey} => ${JSON.stringify(value)}`);
 
     if (LOCK_BRAIN) {
         if (LOGS) console.log(`Beholder brain is locked, sorry!`);
@@ -142,17 +174,19 @@ function updateMemory(symbol, index, interval, value, executeAutomations = true)
 
     if (!executeAutomations) return false;
 
+    const automations = findAutomations(memoryKey);
+    if (!automations || !automations.length || LOCK_BRAIN) return false;
+
+    LOCK_BRAIN = true;
+    let results;
+
     try {
-        const automations = findAutomations(memoryKey);
-        if (!automations || !automations.length || LOCK_BRAIN) return false;
-
-        LOCK_BRAIN = true;
-
-        let results = automations.map((auto) => {
+        const promises = automations.map(async (auto) => {
             return evalDecision(auto);
-        }).flat();
+        });
 
-        results = results.filter(r => r);
+        results = await Promise.all(promises);
+        results = results.flat().filter(r => r);
 
         if (!results || !results.length)
             return false;
@@ -160,7 +194,13 @@ function updateMemory(symbol, index, interval, value, executeAutomations = true)
             return results;
     }
     finally {
-        LOCK_BRAIN = false;
+        if (results && results.length) {//se executou, segura a próxima
+            setTimeout(() => {
+                LOCK_BRAIN = false;
+            }, INTERVAL)
+        }
+        else
+            LOCK_BRAIN = false;
     }
 }
 

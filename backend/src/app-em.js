@@ -18,7 +18,7 @@ function startMiniTickerMonitor(broadcastLabel, logs) {
                 delete mkt[1].eventTime;
                 const converted = {};
                 Object.entries(mkt[1]).map(prop => converted[prop[0]] = parseFloat(prop[1]));
-                const results = beholder.updateMemory(mkt[0], indexKeys.MINI_TICKER, null, converted);
+                const results = await beholder.updateMemory(mkt[0], indexKeys.MINI_TICKER, null, converted);
                 if (results) results.map(r => WSS.broadcast({ notification: r }));
             })
 
@@ -58,7 +58,7 @@ function startBookMonitor(broadcastLabel, logs) {
             newMemory.previous = currentMemory ? currentMemory.current : converted;
             newMemory.current = converted;
 
-            const results = beholder.updateMemory(order.symbol, indexKeys.BOOK, null, newMemory);
+            const results = await beholder.updateMemory(order.symbol, indexKeys.BOOK, null, newMemory);
             if (results) results.map(r => WSS.broadcast({ notification: r }));
         } catch (err) {
             if (logs) console.error(err);
@@ -71,7 +71,7 @@ async function loadWallet() {
     if (!exchange) return new Error('Exchange Monitor not initialized yet.');
     const info = await exchange.balance();
     const wallet = Object.entries(info).map(async (item) => {
-        const results = beholder.updateMemory(item[0], indexKeys.WALLET, null, parseFloat(item[1].available));
+        const results = await beholder.updateMemory(item[0], indexKeys.WALLET, null, parseFloat(item[1].available));
         if (results) results.map(r => WSS.broadcast({ notification: r }));
 
         return {
@@ -150,7 +150,7 @@ function processExecutionData(executionData, broadcastLabel) {
                 notifyOrderUpdate(order);
 
                 const orderCopy = getLightOrder(updatedOrder.get({ plain: true }));
-                const results = beholder.updateMemory(orderCopy.symbol, indexKeys.LAST_ORDER, null, orderCopy);
+                const results = await beholder.updateMemory(orderCopy.symbol, indexKeys.LAST_ORDER, null, orderCopy);
                 if (results) results.map(r => WSS.broadcast({ notification: r }));
                 if (broadcastLabel) WSS.broadcast({ [broadcastLabel]: order });
             }
@@ -222,7 +222,7 @@ function startChartMonitor(symbol, interval, indexes, broadcastLabel, logs) {
         if (logs) console.log(lastCandle);
 
         try {
-            let totalResults = beholder.updateMemory(symbol, indexKeys.LAST_CANDLE, interval, lastCandle);
+            let totalResults = await beholder.updateMemory(symbol, indexKeys.LAST_CANDLE, interval, lastCandle);
             totalResults = totalResults.flat();
 
             if (totalResults) totalResults.filter(r => r).map(r => WSS.broadcast({ notification: r }));
@@ -308,7 +308,7 @@ async function startTickerMonitor(symbol, broadcastLabel, logs) {
             newMemory.previous = currentMemory ? currentMemory.current : ticker;
             newMemory.current = ticker;
 
-            const results = beholder.updateMemory(data.symbol, indexKeys.TICKER, null, newMemory);
+            const results = await beholder.updateMemory(data.symbol, indexKeys.TICKER, null, newMemory);
             if (results) results.map(r => WSS.broadcast({ notification: r }));
 
             if (WSS && broadcastLabel) WSS.broadcast({ [broadcastLabel]: data });
