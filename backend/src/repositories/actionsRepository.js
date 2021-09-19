@@ -19,8 +19,13 @@ function deleteActions(automationId, transaction) {
     })
 }
 
+function getByOrderTemplate(orderTemplateId) {
+    return actionModel.findAll({ where: { orderTemplateId } });
+}
+
 module.exports = {
     insertActions,
     deleteActions,
+    getByOrderTemplate,
     actionTypes
 }

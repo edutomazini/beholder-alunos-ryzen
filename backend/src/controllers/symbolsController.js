@@ -36,6 +36,7 @@ async function syncSymbols(req, res, next) {
     const symbols = (await exchange.exchangeInfo()).symbols.map(item => {
         const minNotionalFilter = item.filters.find(filter => filter.filterType === 'MIN_NOTIONAL');
         const minLotSizeFilter = item.filters.find(filter => filter.filterType === 'LOT_SIZE');
+        const priceFilter = item.filters.find(filter => filter.filterType === 'PRICE_FILTER');
 
         return {
             symbol: item.symbol,
@@ -45,6 +46,8 @@ async function syncSymbols(req, res, next) {
             quote: item.quoteAsset,
             minNotional: minNotionalFilter ? minNotionalFilter.minNotional : '1',
             minLotSize: minLotSizeFilter ? minLotSizeFilter.minQty : '1',
+            stepSize: minLotSizeFilter ? minLotSizeFilter.stepSize : '1',
+            tickSize: priceFilter ? priceFilter.tickSize : '1',
             isFavorite: favoriteSymbols.some(s => s === item.symbol)
         }
     });

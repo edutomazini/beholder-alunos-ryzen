@@ -1,5 +1,6 @@
 const orderModel = require('../models/orderModel');
 const Sequelize = require('sequelize');
+const automationModel = require('../models/automationModel');
 
 const orderStatus = {
     FILLED: 'FILLED',
@@ -29,16 +30,18 @@ function getOrders(symbol, page = 1) {
             options.where = { symbol }
     }
 
+    options.include = automationModel;
+
     return orderModel.findAndCountAll(options);
 }
 
 async function getOrderById(id) {
-    const order = await orderModel.findOne({ where: { id } });
+    const order = await orderModel.findOne({ where: { id }, include: automationModel });
     return order;
 }
 
 async function getOrder(orderId, clientOrderId) {
-    const order = await orderModel.findOne({ where: { orderId, clientOrderId } });
+    const order = await orderModel.findOne({ where: { orderId, clientOrderId }, include: automationModel });
     return order;
 }
 

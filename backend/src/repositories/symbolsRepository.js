@@ -50,6 +50,12 @@ async function updateSymbol(symbol, newSymbol) {
     if (newSymbol.quotePrecision && newSymbol.quotePrecision !== currentSymbol.quotePrecision)
         currentSymbol.quotePrecision = newSymbol.quotePrecision;
 
+    if (newSymbol.stepSize && newSymbol.stepSize !== currentSymbol.stepSize)
+        currentSymbol.stepSize = newSymbol.stepSize;
+
+    if (newSymbol.tickSize && newSymbol.tickSize !== currentSymbol.tickSize)
+        currentSymbol.tickSize = newSymbol.tickSize;
+
     if (newSymbol.isFavorite !== null && newSymbol.isFavorite !== undefined && newSymbol.isFavorite !== currentSymbol.isFavorite)
         currentSymbol.isFavorite = newSymbol.isFavorite;
 
