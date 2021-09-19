@@ -14,6 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@sendgrid/mail": "^7.4.6",
     "aes-js": "^3.1.2",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -26,6 +27,7 @@
     "mysql2": "^2.3.0",
     "node-binance-api": "^0.12.5",
     "sequelize": "^6.6.5",
-    "technicalindicators": "^3.1.0"
+    "technicalindicators": "^3.1.0",
+    "twilio": "^3.67.2"
   }
 }
