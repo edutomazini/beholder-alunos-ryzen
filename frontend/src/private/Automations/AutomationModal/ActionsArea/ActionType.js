@@ -14,7 +14,7 @@ function ActionType(props) {
     }, [props.type])
 
     return (
-        <select id="type" className="form-select" defaultValue={type} onChange={props.onChange}>
+        <select id="type" className="form-select" value={type} onChange={props.onChange}>
             <option value="ALERT_EMAIL">Alert via Email</option>
             <option value="ALERT_SMS">Alert via SMS</option>
             <option value="ORDER">Place Order</option>

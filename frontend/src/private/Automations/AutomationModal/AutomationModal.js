@@ -116,7 +116,7 @@ function AutomationModal(props) {
                                     <ConditionsArea symbol={automation.symbol} conditions={automation.conditions} indexes={indexes} onChange={onInputChange} />
                                 </div>
                                 <div className="tab-pane fade" id="actions" role="tabpanel" aria-labelledby="actions-tab">
-                                    <ActionsArea actions={automation.actions} onChange={onInputChange} />
+                                    <ActionsArea symbol={automation.symbol} actions={automation.actions} onChange={onInputChange} />
                                 </div>
                             </div>
                             <div className="row">
