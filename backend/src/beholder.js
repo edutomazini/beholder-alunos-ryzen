@@ -1,5 +1,8 @@
 const { getDefaultSettings } = require('./repositories/settingsRepository');
 const { actionTypes } = require('./repositories/actionsRepository');
+const orderTemplatesRepository = require('./repositories/orderTemplatesRepository');
+const symbolsRepository = require('./repositories/symbolsRepository');
+const { STOP_TYPES, insertOrder } = require('./repositories/ordersRepository');
 
 const MEMORY = {};
 
@@ -107,12 +110,16 @@ async function sendEmail(settings, automation) {
     return { text: `E-mail sent from automation '${automation.name}'`, type: 'success' };
 }
 
+async function placeOrder(settings, automation, action) {
+    return { type: 'success', text: 'Order placed successfully!' };
+}
+
 function doAction(settings, action, automation) {
     try {
         switch (action.type) {
             case actionTypes.ALERT_EMAIL: return sendEmail(settings, automation);
             case actionTypes.ALERT_SMS: return sendSms(settings, automation);
-            case actionTypes.ORDER: return { type: 'success', text: 'Order placed!' };
+            case actionTypes.ORDER: return placeOrder(settings, automation, action);
         }
     } catch (err) {
         if (automation.logs) {
@@ -133,7 +140,7 @@ async function evalDecision(automation) {
 
         const invertedCondition = invertCondition(automation.conditions);
         const evalCondition = automation.conditions + (invertedCondition ? ' && ' + invertedCondition : '');
-        
+
         if (LOGS) console.log(`Beholder trying to evaluate:\n${evalCondition}\n at ${automation.name}`);
 
         const isValid = evalCondition ? eval(evalCondition) : true;
