@@ -87,6 +87,18 @@ async function updateOrder(currentOrder, newOrder) {
     return currentOrder;
 }
 
+async function getLastFilledOrders() {
+    const idObjects = await orderModel.findAll({
+        where: { status: 'FILLED' },
+        group: 'symbol',
+        attributes: [Sequelize.fn('max', Sequelize.col('id'))],
+        raw: true
+    });
+    const ids = idObjects.map(o => Object.values(o)).flat();
+
+    return orderModel.findAll({ where: { id: ids } });
+}
+
 const STOP_TYPES = ["STOP_LOSS", "STOP_LOSS_LIMIT", "TAKE_PROFIT", "TAKE_PROFIT_LIMIT"];
 
 module.exports = {
@@ -96,5 +108,6 @@ module.exports = {
     getOrder,
     getOrderById,
     updateOrderById,
+    getLastFilledOrders,
     updateOrderByOrderId
 }

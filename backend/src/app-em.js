@@ -83,8 +83,8 @@ async function loadWallet() {
     return wallet;
 }
 
-function getLightOrder(updatedOrder) {
-    const orderCopy = { ...updatedOrder };
+function getLightOrder(order) {
+    const orderCopy = { ...order };
     delete orderCopy.id;
     delete orderCopy.symbol;
     delete orderCopy.automationId;
@@ -344,6 +344,12 @@ async function init(settings, wssInstance, beholderInstance) {
             }
         }, 250)//Binance only permits 5 commands / second
     })
+
+    const lastOrders = await ordersRepository.getLastFilledOrders();
+    await Promise.all(lastOrders.map(async (order) => {
+        const orderCopy = getLightOrder(order.get({ plain: true }));
+        await beholder.updateMemory(order.symbol, indexKeys.LAST_ORDER, null, orderCopy, false);
+    }))
 
     console.log('App Exchange Monitor is running!');
 }

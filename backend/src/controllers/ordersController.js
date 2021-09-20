@@ -109,9 +109,15 @@ async function syncOrder(req, res, next) {
     res.json(order);
 }
 
+async function getLastOrders(req, res, next) {
+    const orders = await ordersRepository.getLastFilledOrders();
+    res.json(orders);
+}
+
 module.exports = {
     placeOrder,
     cancelOrder,
     getOrders,
-    syncOrder
+    syncOrder,
+    getLastOrders
 }
