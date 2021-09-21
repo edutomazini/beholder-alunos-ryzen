@@ -120,7 +120,7 @@ function ViewOrderModal(props) {
                                         order.automationId
                                             ? (
                                                 <div className="col-md-6 mb-3">
-                                                    <b>Automation:</b> {order.Automation.name}
+                                                    <b>Automation:</b> {order.automation.name}
                                                 </div>
                                             )
                                             : <React.Fragment></React.Fragment>

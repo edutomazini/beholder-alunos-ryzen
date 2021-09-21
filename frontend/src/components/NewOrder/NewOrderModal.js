@@ -114,7 +114,7 @@ function NewOrderModal(props) {
     }, [order.symbol])
 
     function getPriceClasses(orderType) {
-        return orderType === 'MARKET' ? "col-md-6 mb-3 d-none" : "col-md-6 mb-3";
+        return orderType === 'MARKET' || orderType === 'STOP_LOSS' || orderType === 'TAKE_PROFIT' ? "col-md-6 mb-3 d-none" : "col-md-6 mb-3";
     }
 
     function getIcebergClasses(orderType) {

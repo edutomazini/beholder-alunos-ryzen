@@ -84,18 +84,16 @@ function findAutomations(indexKey) {
     return [...new Set(ids)].map(id => BRAIN[id]);
 }
 
-function invertCondition(conditions) {
+function invertCondition(memoryKey, conditions) {
     const conds = conditions.split(' && ');
-    return conds.map(c => {
-        if (c.indexOf('current') !== -1) {
-            if (c.indexOf('>') != -1) return c.replace('>', '<').replace('current', 'previous');
-            if (c.indexOf('<') != -1) return c.replace('<', '>').replace('current', 'previous');
-            if (c.indexOf('!') != -1) return c.replace('!', '').replace('current', 'previous');
-            if (c.indexOf('==') != -1) return c.replace('==', '!==').replace('current', 'previous');
-        }
-    })
-        .filter(c => c)
-        .join(' && ');
+    const condToInvert = conds.find(c => c.indexOf(memoryKey) !== -1 && c.indexOf('current') !== -1);
+    if (!condToInvert) return false;
+
+    if (condToInvert.indexOf('>') != -1) return condToInvert.replace('>', '<').replace('current', 'previous');
+    if (condToInvert.indexOf('<') != -1) return condToInvert.replace('<', '>').replace('current', 'previous');
+    if (condToInvert.indexOf('!') != -1) return condToInvert.replace('!', '').replace('current', 'previous');
+    if (condToInvert.indexOf('==') != -1) return condToInvert.replace('==', '!==').replace('current', 'previous');
+    return false;
 }
 
 async function sendSms(settings, automation) {
@@ -299,7 +297,7 @@ function doAction(settings, action, automation) {
     }
 }
 
-async function evalDecision(automation) {
+async function evalDecision(memoryKey, automation) {
     if (!automation) return false;
 
     try {
@@ -307,7 +305,7 @@ async function evalDecision(automation) {
         const isChecked = indexes.every(ix => MEMORY[ix] !== null && MEMORY[ix] !== undefined);
         if (!isChecked) return false;
 
-        const invertedCondition = invertCondition(automation.conditions);
+        const invertedCondition = invertCondition(memoryKey, automation.conditions);
         const evalCondition = automation.conditions + (invertedCondition ? ' && ' + invertedCondition : '');
 
         if (LOGS) console.log(`Beholder trying to evaluate:\n${evalCondition}\n at ${automation.name}`);
@@ -370,7 +368,7 @@ async function updateMemory(symbol, index, interval, value, executeAutomations =
 
     try {
         const promises = automations.map(async (auto) => {
-            return evalDecision(auto);
+            return evalDecision(memoryKey, auto);
         });
 
         results = await Promise.all(promises);
@@ -463,7 +461,7 @@ function getMemoryIndexes() {
         const propSplit = prop[0].split(':');
         return {
             symbol: propSplit[0],
-            variable: propSplit[1],
+            variable: propSplit[1].replace('.current', ''),
             eval: getEval(prop[0]),
             example: prop[1]
         }

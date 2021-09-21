@@ -1,5 +1,6 @@
 const { getAutomations } = require('../repositories/automationsRepository');
 const beholder = require('../beholder');
+const indexes = require('../utils/indexes');
 
 function getMemory(req, res, next) {
     const { symbol, index, interval } = req.params;

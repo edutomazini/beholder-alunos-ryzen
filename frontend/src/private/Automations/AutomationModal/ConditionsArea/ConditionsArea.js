@@ -42,6 +42,7 @@ function ConditionsArea(props) {
         return [
             ...new Set(indexesStr.replaceAll("MEMORY['", "")
                 .replaceAll("']", "")
+                .replaceAll(".current", "")
                 .split(','))
         ].join(',');
     }
@@ -65,6 +66,7 @@ function ConditionsArea(props) {
             const text = item.replaceAll("MEMORY['", "")
                 .replaceAll("']", "")
                 .replaceAll("==", "=")
+                .replaceAll(".current", "")
                 .replaceAll(props.symbol + ':', '')
                 .trim();
 
