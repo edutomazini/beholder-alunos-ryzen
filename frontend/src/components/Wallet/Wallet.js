@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getBalance } from '../../../services/ExchangeService';
+import { getBalance } from '../../services/ExchangeService';
 
 /**
  * props:
@@ -68,11 +68,15 @@ function Wallet(props) {
                             {
                                 balances && balances.length
                                     ? balances.map(item => (
-                                        <tr key={`wallet${item.symbol}`}>
-                                            <td className="text-gray-900">{item.symbol}</td>
-                                            <td className="text-gray-900">{item.available.substring(0, 10)}</td>
-                                            <td className="text-gray-900">{item.onOrder.substring(0, 10)}</td>
-                                        </tr>
+                                        !parseFloat(item.available) && !parseFloat(item.onOrder)
+                                            ? <React.Fragment></React.Fragment>
+                                            : (
+                                                <tr key={`wallet${item.symbol}`}>
+                                                    <td className="text-gray-900">{item.symbol}</td>
+                                                    <td className="text-gray-900">{item.available.substring(0, 10)}</td>
+                                                    <td className="text-gray-900">{item.onOrder.substring(0, 10)}</td>
+                                                </tr>
+                                            )
                                     ))
                                     : <React.Fragment></React.Fragment>
                             }

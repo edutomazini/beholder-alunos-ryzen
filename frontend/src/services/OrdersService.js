@@ -39,3 +39,26 @@ export async function placeOrder(order, token) {
     const response = await axios.post(ORDERS_URL, postOrder, { headers });
     return response.data;
 }
+
+function thirtyDaysAgo() {
+    const date = new Date();
+    date.setDate(date.getDate() - 30);
+    date.setHours(0, 0, 0, 0);
+    return date.getTime();
+}
+
+function getToday() {
+    const date = new Date();
+    date.setHours(23, 59, 59, 999);
+    return date.getTime();
+}
+
+export async function getOrdersReport(symbol, startDate, endDate, token) {
+    startDate = startDate ? startDate.getTime() : thirtyDaysAgo();
+    endDate = endDate ? endDate.getTime() : getToday();
+
+    const reportUrl = `${ORDERS_URL}reports/${symbol}?startDate=${startDate}&endDate=${endDate}`;
+    const headers = { 'authorization': token };
+    const response = await axios.get(reportUrl, { headers });
+    return response.data;
+}
