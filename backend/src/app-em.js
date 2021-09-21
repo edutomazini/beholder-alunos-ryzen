@@ -222,12 +222,14 @@ function startChartMonitor(symbol, interval, indexes, broadcastLabel, logs) {
         if (logs) console.log(lastCandle);
 
         try {
-            let totalResults = await beholder.updateMemory(symbol, indexKeys.LAST_CANDLE, interval, lastCandle);
-            totalResults = totalResults.flat();
+            let results = await beholder.updateMemory(symbol, indexKeys.LAST_CANDLE, interval, lastCandle);
+            
+            if (results && Array.isArray(results)) {
+                results = results.flat();
+                results.filter(r => r).map(r => WSS.broadcast({ notification: r }));
+            }
 
-            if (totalResults) totalResults.filter(r => r).map(r => WSS.broadcast({ notification: r }));
-
-            if (broadcastLabel && WSS) WSS.broadcast({ [broadcastLabel]: [lastCandle, last2Candle, last3Candle] });
+            if (broadcastLabel && WSS) WSS.broadcast({ [broadcastLabel]: lastCandle });
             results = await processChartData(symbol, indexes, interval, ohlc, logs);
 
             if (results) {

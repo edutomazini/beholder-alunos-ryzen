@@ -99,6 +99,23 @@ async function getLastFilledOrders() {
     return orderModel.findAll({ where: { id: ids } });
 }
 
+function getReportOrders(quoteAsset, startDate, endDate) {
+    startDate = startDate ? startDate : 0;
+    endDate = endDate ? endDate : Date.now();
+    return orderModel.findAll({
+        where: {
+            symbol: { [Sequelize.Op.like]: `%${quoteAsset}` },
+            transactTime: { [Sequelize.Op.between]: [startDate, endDate] },
+            status: 'FILLED',
+            net: { [Sequelize.Op.gt]: 0 }
+        },
+        order: [['transactTime', 'ASC']],
+        include: automationModel,
+        raw: true,
+        distinct: true
+    });
+}
+
 const STOP_TYPES = ["STOP_LOSS", "STOP_LOSS_LIMIT", "TAKE_PROFIT", "TAKE_PROFIT_LIMIT"];
 
 const LIMIT_TYPES = ["LIMIT", "STOP_LOSS_LIMIT", "TAKE_PROFIT_LIMIT"];
@@ -113,5 +130,6 @@ module.exports = {
     getOrderById,
     updateOrderById,
     getLastFilledOrders,
-    updateOrderByOrderId
+    updateOrderByOrderId,
+    getReportOrders
 }
