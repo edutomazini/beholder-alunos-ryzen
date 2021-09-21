@@ -1,8 +1,8 @@
 const { getDefaultSettings } = require('./repositories/settingsRepository');
 const { actionTypes } = require('./repositories/actionsRepository');
 const orderTemplatesRepository = require('./repositories/orderTemplatesRepository');
-const symbolsRepository = require('./repositories/symbolsRepository');
-const { STOP_TYPES, insertOrder } = require('./repositories/ordersRepository');
+const { getSymbol } = require('./repositories/symbolsRepository');
+const { STOP_TYPES, LIMIT_TYPES, insertOrder } = require('./repositories/ordersRepository');
 
 const MEMORY = {};
 
@@ -110,8 +110,177 @@ async function sendEmail(settings, automation) {
     return { text: `E-mail sent from automation '${automation.name}'`, type: 'success' };
 }
 
+function calcPrice(orderTemplate, symbol, isStopPrice) {
+    const tickSize = parseFloat(symbol.tickSize);
+    let newPrice, factor;
+
+    if (LIMIT_TYPES.includes(orderTemplate.type)) {
+        try {
+            if (!isStopPrice) {
+                if (parseFloat(orderTemplate.limitPrice)) return orderTemplate.limitPrice;
+                newPrice = eval(getEval(orderTemplate.limitPrice)) * orderTemplate.limitPriceMultiplier;
+            }
+            else {
+                if (parseFloat(orderTemplate.stopPrice)) return orderTemplate.stopPrice;
+                newPrice = eval(getEval(orderTemplate.stopPrice)) * orderTemplate.stopPriceMultiplier;
+            }
+        }
+        catch (err) {
+            if (isStopPrice)
+                throw new Error(`Error trying to calc Stop Price with params: ${orderTemplate.stopPrice} x ${orderTemplate.stopPriceMultiplier}. Error: ${err.message}`);
+            else
+                throw new Error(`Error trying to calc Limit Price with params: ${orderTemplate.limitPrice} x ${orderTemplate.limitPriceMultiplier}. Error: ${err.message}`);
+        }
+    }
+    else {
+        const memory = MEMORY[`${orderTemplate.symbol}:BOOK`];
+        if (!memory)
+            throw new Error(`Error trying to get market price. OTID: ${orderTemplate.id}, ${isStopPrice}. No Book.`);
+
+        newPrice = orderTemplate.side === 'BUY' ? memory.current.bestAsk : memory.current.bestBid;
+        newPrice = isStopPrice ? newPrice * orderTemplate.stopPriceMultiplier : newPrice * orderTemplate.limitPriceMultiplier;
+    }
+
+    factor = Math.floor(newPrice / tickSize);
+    return (factor * tickSize).toFixed(symbol.quotePrecision);
+}
+
+function calcQty(orderTemplate, price, symbol, isIceberg) {
+    let asset;
+
+    if (orderTemplate.side === 'BUY') {
+        asset = parseFloat(MEMORY[`${symbol.quote}:WALLET`]);
+        if (!asset) throw new Error(`There is no ${symbol.quote} in your wallet to place a buy.`);
+    }
+    else {
+        asset = parseFloat(MEMORY[`${symbol.base}:WALLET`]);
+        if (!asset) throw new Error(`There is no ${symbol.base} in your wallet to place a sell.`);
+    }
+
+    let qty = isIceberg ? orderTemplate.icebergQty : orderTemplate.quantity;
+    qty = qty.replace(',', '.');
+
+    if (parseFloat(qty)) return qty;
+
+    const multiplier = isIceberg ? orderTemplate.icebergQtyMultiplier : orderTemplate.quantityMultiplier;
+    const stepSize = parseFloat(symbol.stepSize);
+
+    let newQty, factor;
+    if (orderTemplate.quantity === 'MAX_WALLET') {
+        if (orderTemplate.side === 'BUY')
+            newQty = (parseFloat(asset) / parseFloat(price)) * (multiplier > 1 ? 1 : multiplier);
+        else
+            newQty = parseFloat(asset) * (multiplier > 1 ? 1 : multiplier);
+    }
+    else if (orderTemplate.quantity === 'MIN_NOTIONAL') {
+        newQty = (parseFloat(symbol.minNotional) / parseFloat(price)) * (multiplier < 1 ? 1 : multiplier);
+    }
+    else if (orderTemplate.quantity === 'LAST_ORDER_QTY') {
+        const lastOrder = MEMORY[`${orderTemplate.symbol}:LAST_ORDER`];
+        if (!lastOrder)
+            throw new Error(`There is no last order to use as qty reference for ${orderTemplate.symbol}.`);
+
+        newQty = parseFloat(lastOrder.quantity) * multiplier;
+        if (orderTemplate.side === 'SELL' && newQty > asset) newQty = asset;
+    }
+
+    factor = Math.floor(newQty / stepSize);
+    return (factor * stepSize).toFixed(symbol.basePrecision);
+}
+
+function hasEnoughAssets(symbol, order, price) {
+    const qty = order.type === 'ICEBERG' ? parseFloat(order.options.icebergQty) : parseFloat(order.quantity);
+    if (order.side === 'BUY')
+        return parseFloat(MEMORY[`${symbol.quote}:WALLET`]) >= (price * qty);
+    else
+        return parseFloat(MEMORY[`${symbol.base}:WALLET`]) >= qty;
+}
+
 async function placeOrder(settings, automation, action) {
-    return { type: 'success', text: 'Order placed successfully!' };
+
+    if (!settings || !automation || !action)
+        throw new Error(`All parameters are required to place an order.`);
+
+    if (!action.orderTemplateId)
+        throw new Error(`There is no order template for '${automation.name}', action #${action.id}`);
+
+    const orderTemplate = await orderTemplatesRepository.getOrderTemplate(action.orderTemplateId);
+    const symbol = await getSymbol(orderTemplate.symbol);
+
+    const order = {
+        symbol: orderTemplate.symbol.toUpperCase(),
+        side: orderTemplate.side.toUpperCase(),
+        type: orderTemplate.type.toUpperCase()
+    }
+
+    const price = calcPrice(orderTemplate, symbol, false);
+
+    if (!isFinite(price) || !price)
+        throw new Error(`Error in calcPrice function, params: OTID ${orderTemplate.id}, $: ${price}, stop: false`);
+
+    if (LIMIT_TYPES.includes(order.type))
+        order.limitPrice = price;
+
+    const quantity = calcQty(orderTemplate, price, symbol, false);
+
+    if (!isFinite(quantity) || !quantity)
+        throw new Error(`Error in calcQty function, params: OTID ${orderTemplate.id}, $: ${price}, iceberg: false`);
+
+    order.quantity = quantity;
+
+    if (order.type === 'ICEBERG') {
+        const icebergQty = calcQty(orderTemplate, price, symbol, true);
+
+        if (!isFinite(icebergQty) || !icebergQty)
+            throw new Error(`Error in calcQty function, params: OTID ${orderTemplate.id}, $: ${price}, iceberg: true`);
+
+        order.options = { icebergQty };
+    }
+    else if (STOP_TYPES.includes(order.type)) {
+        const stopPrice = calcPrice(orderTemplate, symbol, true);
+
+        if (!isFinite(stopPrice) || !stopPrice)
+            throw new Error(`Error in calcPrice function, params: OTID ${orderTemplate.id}, $: ${stopPrice}, stop: true`);
+
+        order.options = { stopPrice, type: order.type };
+    }
+
+    if (!hasEnoughAssets(symbol, order, price))
+        throw new Error(`You wanna ${order.side} ${order.quantity} ${order.symbol} but you haven't enough assets.`);
+
+    let result;
+    const exchange = require('./utils/exchange')(settings);
+
+    try {
+        if (order.side === 'BUY')
+            result = await exchange.buy(order.symbol, order.quantity, order.limitPrice, order.options);
+        else
+            result = await exchange.sell(order.symbol, order.quantity, order.limitPrice, order.options);
+    }
+    catch (err) {
+        console.error(err.body ? err.body : err);
+        console.log(order);
+        return { type: 'error', text: `Order failed! ` + err.body ? err.body : err.message };
+    }
+
+    const savedOrder = await insertOrder({
+        automationId: automation.id,
+        symbol: order.symbol,
+        quantity: order.quantity,
+        type: order.type,
+        side: order.side,
+        limitPrice: LIMIT_TYPES.includes(order.type) ? order.limitPrice : null,
+        stopPrice: STOP_TYPES.includes(order.type) ? order.options.stopPrice : null,
+        icebergQty: order.type === 'ICEBERG' ? order.options.icebergQty : null,
+        orderId: result.orderId,
+        clientOrderId: result.clientOrderId,
+        transactTime: result.transactTime,
+        status: result.status
+    })
+
+    if (automation.logs) console.log(savedOrder.get({ plain: true }));
+
+    return { type: 'success', text: `Order #${result.orderId} placed with status ${result.status}` };
 }
 
 function doAction(settings, action, automation) {
@@ -317,5 +486,6 @@ module.exports = {
     getBrainIndexes,
     updateBrain,
     deleteBrain,
-    findAutomations
+    findAutomations,
+    placeOrder
 }

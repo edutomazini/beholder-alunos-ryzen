@@ -101,8 +101,12 @@ async function getLastFilledOrders() {
 
 const STOP_TYPES = ["STOP_LOSS", "STOP_LOSS_LIMIT", "TAKE_PROFIT", "TAKE_PROFIT_LIMIT"];
 
+const LIMIT_TYPES = ["LIMIT", "STOP_LOSS_LIMIT", "TAKE_PROFIT_LIMIT"];
+
 module.exports = {
     orderStatus,
+    STOP_TYPES,
+    LIMIT_TYPES,
     insertOrder,
     getOrders,
     getOrder,

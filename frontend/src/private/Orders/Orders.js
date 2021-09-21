@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory, useParams, useLocation } from 'react-router-dom';
 import Menu from '../../components/Menu/Menu';
+import Footer from '../../components/Footer/Footer';
 import SearchSymbol from '../../components/SearchSymbol/SearchSymbol';
 import NewOrderButton from '../../components/NewOrder/NewOrderButton';
 import NewOrderModal from '../../components/NewOrder/NewOrderModal';
@@ -8,8 +9,6 @@ import OrderRow from './OrderRow';
 import { getOrders } from '../../services/OrdersService';
 import Pagination from '../../components/Pagination/Pagination';
 import ViewOrderModal from './ViewOrderModal';
-import { getBalance } from '../../services/ExchangeService';
-import Footer from '../../components/Footer/Footer';
 import Toast from '../../components/Toast/Toast';
 
 function Orders() {
@@ -35,13 +34,13 @@ function Orders() {
 
     const [orders, setOrders] = useState([]);
 
+    const [notification, setNotification] = useState([]);
+
     const [count, setCount] = useState(0);
 
     const [viewOrder, setViewOrder] = useState({});
 
     const [page, setPage] = useState(getPage());
-
-    const [notification, setNotification] = useState({ type: '', text: '' });
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -72,27 +71,6 @@ function Orders() {
         history.go(0);
     }
 
-    const [balances, setBalances] = useState([]);
-
-    useEffect(() => {
-        const token = localStorage.getItem('token');
-        getBalance(token)
-            .then(info => {
-                const balances = Object.entries(info).map(item => {
-                    return {
-                        symbol: item[0],
-                        available: item[1].available,
-                        onOrder: item[1].onOrder
-                    }
-                })
-                setBalances(balances);
-            })
-            .catch(err => {
-                console.error(err.response ? err.response.data : err.message)
-                setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
-            });
-    }, [])
-
     return (
         <React.Fragment>
             <Menu />
@@ -114,20 +92,19 @@ function Orders() {
                     <table className="table table-hover">
                         <thead>
                             <tr>
-                                <th className="border-gray-200">Symbol</th>
+                                <th className="border-gray-200">Order</th>
                                 <th className="border-gray-200">Date</th>
-                                <th className="border-gray-200">Side</th>
                                 <th className="border-gray-200">Qty</th>
                                 <th className="border-gray-200">Net</th>
                                 <th className="border-gray-200">Status</th>
-                                <th className="border-gray-200">Details</th>
+                                <th className="border-gray-200">View</th>
                             </tr>
                         </thead>
                         <tbody>
                             {
                                 orders && orders.length
-                                    ? orders.map(order => (<OrderRow key={order.clientOrderId} data={order} onClick={onViewClick} />))
-                                    : <React.Fragment></React.Fragment>
+                                ? orders.map(order => (<OrderRow key={order.clientOrderId} data={order} onClick={onViewClick} />))
+                                : <React.Fragment></React.Fragment>
                             }
                         </tbody>
                     </table>
@@ -136,7 +113,7 @@ function Orders() {
                 <Footer />
             </main>
             <ViewOrderModal data={viewOrder} />
-            <NewOrderModal wallet={balances} onSubmit={onOrderSubmit} />
+            <NewOrderModal onSubmit={onOrderSubmit} />
             <Toast type={notification.type} text={notification.text} />
         </React.Fragment>
     );

@@ -9,7 +9,7 @@ const beholder = require('./beholder');
 (async () => {
     console.log('Getting the default settings...');
     const settings = await settingsRepository.getDefaultSettings()
-    if(!settings) throw new Error(`There is no settings.`);
+    if (!settings) throw new Error(`There is no settings.`);
 
     console.log('Initializing the Beholder Brain...');
 
@@ -24,5 +24,14 @@ const beholder = require('./beholder');
     const wss = appWs(server);
 
     appEm.init(settings, wss, beholder);
+
+    setTimeout(async () => {
+        try {
+            const result = await beholder.placeOrder(settings, automations[0], automations[0].actions[0]);
+            console.log(result);
+        } catch (err) {
+            console.error(err);
+        }
+    }, 5000)
 
 })();
