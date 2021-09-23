@@ -1,17 +1,17 @@
 import React, { useRef, useState, useEffect } from 'react';
-import SelectSymbol from '../../components/SelectSymbol/SelectSymbol';
-import SymbolPrice from './SymbolPrice';
-import WalletSummary from './WalletSummary';
+import SelectSymbol from '../SelectSymbol/SelectSymbol';
+import SymbolPrice from '../SymbolPrice/SymbolPrice';
+import WalletSummary from '../WalletSummary/WalletSummary';
 import SelectSide from './SelectSide';
 import OrderType from './OrderType';
 import QuantityInput from './QuantityInput';
 import { getSymbol } from '../../services/SymbolsService';
 import { STOP_TYPES } from '../../services/ExchangeService';
 import { placeOrder } from '../../services/OrdersService';
+import { getMemoryIndex } from '../../services/BeholderService';
 
 /**
  * props:
- * - wallet
  * - onSubmit
  */
 function NewOrderModal(props) {
@@ -63,90 +63,110 @@ function NewOrderModal(props) {
             })
     }
 
-    function onInputChange(event) {
-        setOrder(prevState => ({ ...prevState, [event.target.id]: event.target.value }));
-    }
-
-    useEffect(() => {
-        setError('');
-        btnSend.current.disabled = false;
-
-        const quantity = parseFloat(order.quantity);
-
-        if (quantity && quantity < parseFloat(symbol.minLotSize)) {
-            btnSend.current.disabled = true;
-            return setError('Min Lot Size ' + symbol.minLotSize);
+        function onInputChange(event) {
+            setOrder(prevState => ({ ...prevState, [event.target.id]: event.target.value }));
         }
 
-        if (order.type === 'ICEBERG') {
-            const icebergQty = parseFloat(order.icebergQty);
-            if (icebergQty && icebergQty < parseFloat(symbol.minLotSize)) {
-                btnSend.current.disabled = true;
-                return setError('Min Lot Size (I) ' + symbol.minLotSize);
-            }
-        }
-
-        if (!quantity) return;
-
-        const price = parseFloat(order.price);
-        if (!price) return;
-
-        const total = quantity * price;
-        inputTotal.current.value = `${total}`.substring(0, 8);
-
-        const minNotional = parseFloat(symbol.minNotional);
-        if (total < minNotional) {
-            btnSend.current.disabled = true;
-            return setError('Min Notional: ' + symbol.minNotional);
-        }
-
-    }, [order.price, order.quantity, order.icebergQty])
-
-    useEffect(() => {
-        if (!order.symbol) return;
-        const token = localStorage.getItem('token');
-        getSymbol(order.symbol, token)
-            .then(symbol => setSymbol(symbol))
-            .catch(err => {
-                console.error(err.response ? err.response.data : err.message);
-                return setError(err.response ? err.response.data : err.message);
-            })
-    }, [order.symbol])
-
-    function getPriceClasses(orderType) {
-        return orderType === 'MARKET' || orderType === 'STOP_LOSS' || orderType === 'TAKE_PROFIT' ? "col-md-6 mb-3 d-none" : "col-md-6 mb-3";
-    }
-
-    function getIcebergClasses(orderType) {
-        return orderType === 'ICEBERG' ? "col-md-6 mb-3" : "col-md-6 mb-3 d-none";
-    }
-
-    function getStopPriceClasses(orderType) {
-        return STOP_TYPES.indexOf(orderType) !== -1 ? "col-md-6 mb-3" : "col-md-6 mb-3 d-none";
-    }
-
-    function onPriceChange(book) {
-        if (order.type !== 'MARKET' || !btnSend.current) return;
-
-        const quantity = parseFloat(order.quantity);
-        if (quantity) {
-
-            btnSend.current.disabled = false;
+        useEffect(() => {
             setError('');
+            btnSend.current.disabled = false;
 
-            if (order.side === 'BUY')
-                inputTotal.current.value = `${quantity * parseFloat(book.ask)}`.substring(0, 8);
-            else
-                inputTotal.current.value = `${quantity * parseFloat(book.bid)}`.substring(0, 8);
+            const quantity = parseFloat(order.quantity);
 
-            if (parseFloat(inputTotal.current.value) < parseFloat(symbol.minNotional)) {
+            if (quantity && quantity < parseFloat(symbol.minLotSize)) {
+                btnSend.current.disabled = true;
+                return setError('Min Lot Size ' + symbol.minLotSize);
+            }
+
+            if (order.type === 'ICEBERG') {
+                const icebergQty = parseFloat(order.icebergQty);
+                if (icebergQty && icebergQty < parseFloat(symbol.minLotSize)) {
+                    btnSend.current.disabled = true;
+                    return setError('Min Lot Size (I) ' + symbol.minLotSize);
+                }
+            }
+
+            if (!quantity) return;
+
+            const price = parseFloat(order.price);
+            if (!price) return;
+
+            const total = quantity * price;
+            inputTotal.current.value = `${total}`.substring(0, 8);
+
+            const minNotional = parseFloat(symbol.minNotional);
+            if (total < minNotional) {
                 btnSend.current.disabled = true;
                 return setError('Min Notional: ' + symbol.minNotional);
             }
+
+        }, [order.price, order.quantity, order.icebergQty])
+
+        useEffect(() => {
+            if (!order.symbol) return;
+            const token = localStorage.getItem('token');
+            getSymbol(order.symbol, token)
+                .then(symbol => setSymbol(symbol))
+                .catch(err => {
+                    console.error(err.response ? err.response.data : err.message);
+                    return setError(err.response ? err.response.data : err.message);
+                })
+        }, [order.symbol])
+
+        function getPriceClasses(orderType) {
+            return orderType === 'MARKET' || orderType === 'STOP_LOSS' || orderType === 'TAKE_PROFIT' ? "col-md-6 mb-3 d-none" : "col-md-6 mb-3";
         }
 
-        setOrder(prevState => ({ ...prevState, price: parseFloat(book.bid) }));
+        function getIcebergClasses(orderType) {
+            return orderType === 'ICEBERG' ? "col-md-6 mb-3" : "col-md-6 mb-3 d-none";
+        }
+
+        function getStopPriceClasses(orderType) {
+            return STOP_TYPES.indexOf(orderType) !== -1 ? "col-md-6 mb-3" : "col-md-6 mb-3 d-none";
+        }
+
+        function onPriceChange(book) {
+            if (order.type !== 'MARKET' || !btnSend.current) return;
+
+            const quantity = parseFloat(order.quantity);
+            if (quantity) {
+
+                btnSend.current.disabled = false;
+                setError('');
+
+                if (order.side === 'BUY')
+                    inputTotal.current.value = `${quantity * parseFloat(book.ask)}`.substring(0, 8);
+                else
+                    inputTotal.current.value = `${quantity * parseFloat(book.bid)}`.substring(0, 8);
+
+                if (parseFloat(inputTotal.current.value) < parseFloat(symbol.minNotional)) {
+                    btnSend.current.disabled = true;
+                    return setError('Min Notional: ' + symbol.minNotional);
+                }
+            }
+
+            setOrder(prevState => ({ ...prevState, price: parseFloat(book.bid) }));
+        }
+
+    const [wallet, setWallet] = useState({ base: { symbol: '', qty: 0 }, quote: { symbol: '', qty: 0 } });
+
+    async function loadWallet(symbol) {
+        const token = localStorage.getItem('token');
+
+        try {
+            const baseQty = await getMemoryIndex(symbol.base, 'WALLET', null, token);
+            const quoteQty = await getMemoryIndex(symbol.quote, 'WALLET', null, token);
+            setWallet({ base: { qty: baseQty, symbol: symbol.base }, quote: { qty: quoteQty, symbol: symbol.quote } });
+        } catch (err) {
+            console.log(err => err.response ? err.response.data : err.message);
+            setError(err.message);
+        }
     }
+
+    useEffect(() => {
+        if (!symbol || !symbol.base) return;
+        loadWallet(symbol);
+    }, [symbol])
 
     function onSymbolChange(event) {
         setOrder({ ...DEFAULT_ORDER, symbol: event.target.value });
@@ -180,7 +200,7 @@ function NewOrderModal(props) {
                             <div className="row">
                                 <label>You have:</label>
                             </div>
-                            <WalletSummary wallet={props.wallet} symbol={symbol} />
+                            <WalletSummary wallet={wallet} />
                             <div className="row">
                                 <div className="col-md-6 mb-3">
                                     <SelectSide side={order.side} onChange={onInputChange} />
@@ -197,12 +217,12 @@ function NewOrderModal(props) {
                                     </div>
                                 </div>
                                 <div className="col-md-6 mb-3">
-                                    <QuantityInput id="quantity" text="Quantity:" symbol={symbol} side={order.side} wallet={props.wallet} price={order.price} onChange={onInputChange} />
+                                    <QuantityInput id="quantity" text="Quantity:" side={order.side} symbol={symbol} wallet={wallet} price={order.price} onChange={onInputChange} />
                                 </div>
                             </div>
                             <div className="row">
                                 <div className={getIcebergClasses(order.type)}>
-                                    <QuantityInput id="icebergQty" text="Iceberg Qty:" side={order.side} symbol={symbol} wallet={props.wallet} price={order.price} onChange={onInputChange} />
+                                    <QuantityInput id="icebergQty" text="Iceberg Qty:" side={order.side} symbol={symbol} wallet={wallet} price={order.price} onChange={onInputChange} />
                                 </div>
                                 <div className={getStopPriceClasses(order.type)}>
                                     <div className="form-group">

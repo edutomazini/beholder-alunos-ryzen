@@ -26,6 +26,16 @@ export async function saveAutomation(id, newAutomation, token) {
     return response.data;
 }
 
+export async function saveGrid(id, newAutomation, levels, quantity, token) {
+    const headers = { 'authorization': token };
+    let response;
+    if (id)
+        response = await axios.patch(`${AUTOMATIONS_URL}${id}?levels=${levels}&quantity=${quantity}`, newAutomation, { headers });
+    else
+        response = await axios.post(`${AUTOMATIONS_URL}?levels=${levels}&quantity=${quantity}`, newAutomation, { headers });
+    return response.data;
+}
+
 export async function deleteAutomation(id, token) {
     const headers = { 'authorization': token };
     const response = await axios.delete(`${AUTOMATIONS_URL}${id}`, { headers });

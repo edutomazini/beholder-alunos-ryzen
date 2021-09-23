@@ -10,7 +10,6 @@ import { getOrders } from '../../services/OrdersService';
 import Pagination from '../../components/Pagination/Pagination';
 import ViewOrderModal from './ViewOrderModal';
 import Toast from '../../components/Toast/Toast';
-import { getBalance } from '../../services/ExchangeService';
 
 function Orders() {
 
@@ -72,24 +71,6 @@ function Orders() {
         history.go(0);
     }
 
-    const [balances, setBalances] = useState([]);
-
-    useEffect(() => {
-        const token = localStorage.getItem('token');
-        getBalance(token)
-            .then(info => {
-                const balances = Object.entries(info).map(item => {
-                    return {
-                        symbol: item[0],
-                        available: item[1].available,
-                        onOrder: item[1].onOrder
-                    }
-                })
-                setBalances(balances);
-            })
-            .catch(err => console.error(err.response ? err.response.data : err.message));
-    }, [])
-
     return (
         <React.Fragment>
             <Menu />
@@ -132,7 +113,7 @@ function Orders() {
                 <Footer />
             </main>
             <ViewOrderModal data={viewOrder} />
-            <NewOrderModal wallet={balances} onSubmit={onOrderSubmit} />
+            <NewOrderModal onSubmit={onOrderSubmit} />
             <Toast type={notification.type} text={notification.text} />
         </React.Fragment>
     );
