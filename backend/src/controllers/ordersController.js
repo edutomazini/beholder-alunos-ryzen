@@ -133,6 +133,12 @@ function thirtyDaysAgo() {
     return date.getTime();
 }
 
+function getStartToday() {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    return date.getTime();
+}
+
 function getToday() {
     const date = new Date();
     date.setHours(23, 59, 59, 999);
@@ -140,6 +146,94 @@ function getToday() {
 }
 
 async function getOrdersReport(req, res, next) {
+    if (req.query.date)
+        return getDayTradeReport(req, res, next);
+    else
+        return getMonthReport(req, res, next);
+}
+
+const EMPTY_REPORT = {
+    orders: 0,
+    buyVolume: 0,
+    sellVolume: 0,
+    wallet: 0,
+    profit: 0,
+    profitPerc: 0,
+    subs: [],
+    series: [],
+    automations: []
+}
+
+function groupByAutomations(orders){
+    const automationsObj = {};
+    orders.forEach(o => {
+        const automationId = o.automationId ?? 'M';
+        if (!automationsObj[automationId])
+            automationsObj[automationId] = { name: o.automationId ? o['automation.name'] : 'Others', executions: 1, net: 0 };
+        else
+            automationsObj[automationId].executions++;
+
+        if (o.side === 'BUY')
+            automationsObj[automationId].net -= parseFloat(o.net);
+        else
+            automationsObj[automationId].net += parseFloat(o.net);
+    })
+
+    return Object.entries(automationsObj).map(prop => prop[1]).sort((a, b) => b.net - a.net);
+}
+
+async function getDayTradeReport(req, res, next) {
+    const quote = req.params.quote;
+
+    let startDate = req.query.date ? parseInt(req.query.date) : getStartToday();
+    let endDate = startDate + (23 * 60 * 60 * 1000) + (59 * 60 * 1000) + (59 * 1000) + 999;
+
+    //permitir apenas 24h
+    if ((endDate - startDate) > (1 * 24 * 60 * 60 * 1000)) startDate = getStartToday();
+
+    const orders = await ordersRepository.getReportOrders(quote, startDate, endDate);
+    if (!orders || !orders.length) return res.json({...EMPTY_REPORT, quote, startDate, endDate});
+
+    const subs = [];
+    const series = [];
+    for (let i = 0; i < 24; i++) {
+        const newDate = new Date(startDate);
+        newDate.setHours(i);
+        subs.push(`${i}h`);
+
+        const lastMoment = new Date(newDate.getTime())
+        lastMoment.setMinutes(59, 59, 999);
+
+        const partialBuy = calcVolume(orders, 'BUY', newDate.getTime(), lastMoment.getTime());
+        const partialSell = calcVolume(orders, 'SELL', newDate.getTime(), lastMoment.getTime());
+        series.push(partialSell - partialBuy);
+    }
+
+    const buyVolume = calcVolume(orders, 'BUY');
+    const sellVolume = calcVolume(orders, 'SELL');
+    const profit = sellVolume - buyVolume;
+
+    const wallet = beholder.getMemory(quote, 'WALLET');
+    const profitPerc = (profit * 100) / (parseFloat(wallet) - profit);
+    const automations = groupByAutomations(orders);
+
+    res.json({
+        quote,
+        orders: orders.length,
+        buyVolume,
+        sellVolume,
+        wallet,
+        profit,
+        profitPerc,
+        startDate,
+        endDate,
+        subs,
+        series,
+        automations
+    })
+}
+
+async function getMonthReport(req, res, next) {
 
     const quote = req.params.quote;
 
@@ -150,20 +244,7 @@ async function getOrdersReport(req, res, next) {
     if ((endDate - startDate) > (31 * 24 * 60 * 60 * 1000)) startDate = thirtyDaysAgo();
 
     const orders = await ordersRepository.getReportOrders(quote, startDate, endDate);
-    if (!orders || !orders.length) return res.json({
-        quote,
-        orders: 0,
-        buyVolume: 0,
-        sellVolume: 0,
-        wallet: 0,
-        profit: 0,
-        profitPerc: 0,
-        startDate,
-        endDate,
-        subs: [],
-        series: [],
-        automations: []
-    });
+    if (!orders || !orders.length) return res.json({...EMPTY_REPORT, quote, startDate, endDate});
 
     const daysInRange = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
 
@@ -188,23 +269,7 @@ async function getOrdersReport(req, res, next) {
 
     const wallet = beholder.getMemory(quote, 'WALLET');
     const profitPerc = (profit * 100) / (parseFloat(wallet) - profit);
-
-    //automations
-    const automationsObj = {};
-    orders.forEach(o => {
-        const automationId = o.automationId ?? 'M';
-        if (!automationsObj[automationId])
-            automationsObj[automationId] = { name: o.automationId ? o['automation.name'] : 'Manual', executions: 1, net: 0 };
-        else
-            automationsObj[automationId].executions++;
-
-        if (o.side === 'BUY')
-            automationsObj[automationId].net -= parseFloat(o.net);
-        else
-            automationsObj[automationId].net += parseFloat(o.net);
-    })
-
-    const automations = Object.entries(automationsObj).map(prop => prop[1]).sort((a, b) => b.net - a.net);
+    const automations = groupByAutomations(orders);
 
     res.json({
         quote,

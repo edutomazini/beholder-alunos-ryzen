@@ -47,6 +47,12 @@ function thirtyDaysAgo() {
     return date.getTime();
 }
 
+function getStartToday() {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    return date.getTime();
+}
+
 function getToday() {
     const date = new Date();
     date.setHours(23, 59, 59, 999);
@@ -58,6 +64,15 @@ export async function getOrdersReport(symbol, startDate, endDate, token) {
     endDate = endDate ? endDate.getTime() : getToday();
 
     const reportUrl = `${ORDERS_URL}reports/${symbol}?startDate=${startDate}&endDate=${endDate}`;
+    const headers = { 'authorization': token };
+    const response = await axios.get(reportUrl, { headers });
+    return response.data;
+}
+
+export async function getDayTradeReport(symbol, date, token) {
+    date = date ? date.getTime() : getStartToday();
+
+    const reportUrl = `${ORDERS_URL}reports/${symbol}?date=${date}`;
     const headers = { 'authorization': token };
     const response = await axios.get(reportUrl, { headers });
     return response.data;

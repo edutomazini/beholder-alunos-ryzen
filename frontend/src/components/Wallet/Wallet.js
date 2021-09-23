@@ -9,6 +9,7 @@ import { getBalance } from '../../services/ExchangeService';
 function Wallet(props) {
 
     const [balances, setBalances] = useState([]);
+    const [usd, setUsd] = useState(0);
 
     function getBalanceCall() {
         const token = localStorage.getItem("token");
@@ -32,6 +33,7 @@ function Wallet(props) {
                     props.onUpdate(balances);
 
                 setBalances(balances);
+                setUsd(info.usdEstimate);
             })
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message)
@@ -39,8 +41,11 @@ function Wallet(props) {
     }
 
     useEffect(() => {
-        if (props.data && Object.entries(props.data).length)
+        if (props.data && Object.entries(props.data).length) {
             setBalances(props.data);
+            const usd = props.data.find(s => s.symbol === 'usdEstimate');
+            setUsd(usd);
+        }
         else
             getBalanceCall();
     }, [props.data])
@@ -52,6 +57,13 @@ function Wallet(props) {
                     <div className="row">
                         <div className="col">
                             <h2 className="fs-5 fw-bold mb-0">Wallet</h2>
+                        </div>
+                        <div className="col">
+                            {
+                                usd
+                                    ? "~USD " + usd
+                                    : <React.Fragment></React.Fragment>
+                            }
                         </div>
                     </div>
                 </div>
