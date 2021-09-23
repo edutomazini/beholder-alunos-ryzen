@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize');
 const database = require('../db');
 const ActionModel = require('./actionModel');
+const GridModel = require('./gridModel');
 
 const AutomationModel = database.define('automation', {
     id: {
@@ -45,6 +46,10 @@ const AutomationModel = database.define('automation', {
 })
 
 AutomationModel.hasMany(ActionModel, {
+    foreignKey: 'automationId'
+});
+
+AutomationModel.hasMany(GridModel, {
     foreignKey: 'automationId'
 });
 

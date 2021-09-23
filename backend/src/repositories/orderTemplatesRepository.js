@@ -73,10 +73,19 @@ async function updateOrderTemplate(id, newOrderTemplate) {
     return currentOrderTemplate;
 }
 
+function deleteOrderTemplatesByGridName(gridName, transaction) {
+    const likeName = gridName.split('#')[0];
+    return orderTemplateModel.destroy({
+        where: { name: { [Sequelize.Op.like]: `${likeName}#%` } },
+        transaction
+    })
+}
+
 module.exports = {
     getOrderTemplate,
     getOrderTemplates,
     insertOrderTemplate,
     updateOrderTemplate,
     deleteOrderTemplate,
+    deleteOrderTemplatesByGridName
 }

@@ -3,7 +3,8 @@ const actionModel = require('../models/actionModel');
 const actionTypes = {
     ALERT_EMAIL: 'ALERT_EMAIL',
     ALERT_SMS: 'ALERT_SMS',
-    ORDER: 'ORDER'
+    ORDER: 'ORDER',
+    GRID: 'GRID'
 }
 
 function insertActions(actions, transaction) {
