@@ -99,6 +99,15 @@ async function getLastFilledOrders() {
     return orderModel.findAll({ where: { id: ids } });
 }
 
+async function removeAutomationFromOrders(automationId, transaction) {
+    return orderModel.update({
+        automationId: null
+    }, {
+        where: { automationId },
+        transaction
+    })
+}
+
 function getReportOrders(quoteAsset, startDate, endDate) {
     startDate = startDate ? startDate : 0;
     endDate = endDate ? endDate : Date.now();
@@ -131,5 +140,6 @@ module.exports = {
     updateOrderById,
     getLastFilledOrders,
     updateOrderByOrderId,
-    getReportOrders
+    getReportOrders,
+    removeAutomationFromOrders
 }

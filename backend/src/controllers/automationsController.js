@@ -2,7 +2,7 @@ const automationsRepository = require('../repositories/automationsRepository');
 const actionsRepository = require('../repositories/actionsRepository');
 const gridsRepository = require('../repositories/gridsRepository');
 const orderTemplatesRepository = require('../repositories/orderTemplatesRepository');
-const symbolsRepository = require('../repositories/symbolsRepository');
+const ordersRepository = require('../repositories/ordersRepository');
 const beholder = require('../beholder');
 const db = require('../db');
 
@@ -53,87 +53,6 @@ async function getAutomations(req, res, next) {
     res.json(result);
 }
 
-async function generateGrids(automation, levels, quantity, transaction) {
-
-    await gridsRepository.deleteGrids(automation.id, transaction);
-    await orderTemplatesRepository.deleteOrderTemplatesByGridName(automation.name, transaction);
-
-    const symbol = await symbolsRepository.getSymbol(automation.symbol);
-    const tickSize = parseFloat(symbol.tickSize);
-
-    const conditionSplit = automation.conditions.split(' && ');
-    const lowerLimit = parseFloat(conditionSplit[0].split('>')[1]);
-    const upperLimit = parseFloat(conditionSplit[1].split('<')[1]);
-    levels = parseInt(levels);
-
-    const priceLevel = (upperLimit - lowerLimit) / levels;
-    const grids = [];
-
-    const buyOrderTemplate = await orderTemplatesRepository.insertOrderTemplate({
-        name: automation.name + ' BUY',
-        symbol: automation.symbol,
-        type: 'MARKET',
-        side: 'BUY',
-        limitPrice: null,
-        limitPriceMultiplier: 1,
-        stopPrice: null,
-        stopPriceMultiplier: 1,
-        quantity,
-        quantityMultiplier: 1,
-        icebergQty: null,
-        icebergQtyMultiplier: 1
-    }, transaction)
-
-    const sellOrderTemplate = await orderTemplatesRepository.insertOrderTemplate({
-        name: automation.name + ' SELL',
-        symbol: automation.symbol,
-        type: 'MARKET',
-        side: 'SELL',
-        limitPrice: null,
-        limitPriceMultiplier: 1,
-        stopPrice: null,
-        stopPriceMultiplier: 1,
-        quantity,
-        quantityMultiplier: 1,
-        icebergQty: null,
-        icebergQtyMultiplier: 1
-    }, transaction)
-
-    const currentPrice = parseFloat(beholder.getMemory(automation.symbol, 'BOOK', null).current.bestAsk);
-    const differences = [];
-
-    for (let i = 1; i <= levels; i++) {
-        const priceFactor = Math.floor((lowerLimit + (priceLevel * i)) / tickSize);
-        const targetPrice = priceFactor * tickSize;
-        const targetPriceStr = targetPrice.toFixed(symbol.quotePrecision);
-        differences.push(Math.abs(currentPrice - targetPrice));
-
-        if (targetPrice < currentPrice) { //se está abaixo da cotação, compra
-            const previousLevel = targetPrice - priceLevel;
-            const previousLevelStr = previousLevel.toFixed(symbol.quotePrecision);
-            grids.push({
-                automationId: automation.id,
-                conditions: `MEMORY['${automation.symbol}:BOOK'].current.bestAsk<${targetPriceStr} && MEMORY['${automation.symbol}:BOOK'].previous.bestAsk>=${targetPriceStr} && MEMORY['${automation.symbol}:BOOK'].current.bestAsk>${previousLevelStr}`,
-                orderTemplateId: buyOrderTemplate.id
-            })
-        }
-        else {//se está acima da cotação, vende
-            const nextLevel = targetPrice + priceLevel;
-            const nextLevelStr = nextLevel.toFixed(symbol.quotePrecision);
-            grids.push({
-                automationId: automation.id,
-                conditions: `MEMORY['${automation.symbol}:BOOK'].current.bestBid>${targetPriceStr} && MEMORY['${automation.symbol}:BOOK'].previous.bestBid<=${targetPriceStr} && MEMORY['${automation.symbol}:BOOK'].current.bestBid<${nextLevelStr}`,
-                orderTemplateId: sellOrderTemplate.id
-            })
-        }
-    }
-
-    const nearestGrid = differences.findIndex(d => d === Math.min(...differences));
-    grids.splice(nearestGrid, 1);
-
-    return gridsRepository.insertGrids(grids, transaction);
-}
-
 async function insertAutomation(req, res, next) {
     const newAutomation = req.body;
     const { quantity, levels } = req.query;
@@ -167,7 +86,7 @@ async function insertAutomation(req, res, next) {
 
         //inserting grids
         if (isGrid)
-            grids = await generateGrids(savedAutomation, levels, quantity, transaction);
+            grids = await beholder.generateGrids(savedAutomation, levels, quantity, transaction);
 
         await transaction.commit();
     } catch (err) {
@@ -215,7 +134,7 @@ async function updateAutomation(req, res, next) {
         updatedAutomation = await automationsRepository.updateAutomation(id, newAutomation);
         
         if (isGrid)
-            await generateGrids(updatedAutomation, levels, quantity, transaction);
+            await beholder.generateGrids(updatedAutomation, levels, quantity, transaction);
         else {
             await actionsRepository.deleteActions(id, transaction);
             actions = await actionsRepository.insertActions(actions, transaction);
@@ -251,6 +170,8 @@ async function deleteAutomation(req, res, next) {
     const transaction = await db.transaction();
 
     try {
+        await ordersRepository.removeAutomationFromOrders(id, transaction);
+
         if (currentAutomation.actions[0].type === actionsRepository.actionTypes.GRID) {
             await gridsRepository.deleteGrids(id, transaction);
             await orderTemplatesRepository.deleteOrderTemplatesByGridName(currentAutomation.name, transaction);
