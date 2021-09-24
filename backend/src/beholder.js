@@ -54,13 +54,35 @@ function deleteBrainIndex(indexes, automationId) {
 function updateBrain(automation) {
     if (!automation.isActive || !automation.conditions) return;
 
-    //otimizações opcionais
+    const actions = automation.actions ? automation.actions.map(a => {
+        a = a.toJSON ? a.toJSON() : a;
+        delete a.createdAt;
+        delete a.updatedAt;
+        //delete a.orderTemplate;
+        return a;
+    }) : [];
+
+    const grids = automation.grids ? automation.grids.map(g => {
+        g = g.toJSON ? g.toJSON() : g;
+        delete g.createdAt;
+        delete g.updatedAt;
+        delete g.automationId;
+        if (g.orderTemplate) {
+            delete g.orderTemplate.createdAt;
+            delete g.orderTemplate.updatedAt;
+            delete g.orderTemplate.name;
+        }
+        return g;
+    }) : [];
+
     if (automation.toJSON)
         automation = automation.toJSON();
 
     delete automation.createdAt;
     delete automation.updatedAt;
-    //fim das otimizações opcionais
+
+    automation.actions = actions;
+    automation.grids = grids;
 
     BRAIN[automation.id] = automation;
     automation.indexes.split(',').map(ix => updateBrainIndex(ix, automation.id));

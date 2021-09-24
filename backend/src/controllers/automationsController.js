@@ -108,7 +108,7 @@ async function generateGrids(automation, levels, quantity, transaction) {
         const targetPriceStr = targetPrice.toFixed(symbol.quotePrecision);
         differences.push(Math.abs(currentPrice - targetPrice));
 
-        if(targetPrice < currentPrice){ //se está abaixo da cotação, compra
+        if (targetPrice < currentPrice) { //se está abaixo da cotação, compra
             const previousLevel = targetPrice - priceLevel;
             const previousLevelStr = previousLevel.toFixed(symbol.quotePrecision);
             grids.push({
@@ -190,11 +190,17 @@ async function updateAutomation(req, res, next) {
     const id = req.params.id;
     const newAutomation = req.body;
 
+    const { quantity, levels } = req.query;
+
     if (!validateConditions(newAutomation.conditions))
         return res.status(400).json('Invalid conditions!');
 
     if (!newAutomation.actions || !newAutomation.actions.length)
         return res.status(400).json('Invalid actions!');
+
+    const isGrid = newAutomation.actions[0].type === actionsRepository.actionTypes.GRID;
+    if (isGrid && (!quantity || !levels))
+        return res.status(400).json('Invalid grid params!');
 
     let actions = newAutomation.actions.map(a => {
         a.automationId = id;
@@ -207,8 +213,13 @@ async function updateAutomation(req, res, next) {
 
     try {
         updatedAutomation = await automationsRepository.updateAutomation(id, newAutomation);
-        await actionsRepository.deleteActions(id, transaction);
-        actions = await actionsRepository.insertActions(actions, transaction);
+        
+        if (isGrid)
+            await generateGrids(updatedAutomation, levels, quantity, transaction);
+        else {
+            await actionsRepository.deleteActions(id, transaction);
+            actions = await actionsRepository.insertActions(actions, transaction);
+        }
 
         await transaction.commit();
     } catch (err) {
@@ -240,6 +251,11 @@ async function deleteAutomation(req, res, next) {
     const transaction = await db.transaction();
 
     try {
+        if (currentAutomation.actions[0].type === actionsRepository.actionTypes.GRID) {
+            await gridsRepository.deleteGrids(id, transaction);
+            await orderTemplatesRepository.deleteOrderTemplatesByGridName(currentAutomation.name, transaction);
+        }
+
         await actionsRepository.deleteActions(id, transaction);
         await automationsRepository.deleteAutomation(id, transaction);
         await transaction.commit();
