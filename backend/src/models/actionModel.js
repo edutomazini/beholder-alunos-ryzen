@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize');
 const database = require('../db');
 const OrderTemplateModel = require('./orderTemplateModel');
+const WithdrawTemplateModel = require('./withdrawTemplateModel');
 
 const ActionModel = database.define('action', {
     id: {
@@ -14,6 +15,7 @@ const ActionModel = database.define('action', {
         allowNull: false,
     },
     orderTemplateId: Sequelize.INTEGER,
+    withdrawTemplateId: Sequelize.INTEGER,
     type: {
         type: Sequelize.STRING,
         allowNull: false
@@ -24,6 +26,10 @@ const ActionModel = database.define('action', {
 
 ActionModel.belongsTo(OrderTemplateModel, {
     foreignKey: 'orderTemplateId'
+});
+
+ActionModel.belongsTo(WithdrawTemplateModel, {
+    foreignKey: 'withdrawTemplateId'
 });
 
 module.exports = ActionModel;

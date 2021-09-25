@@ -6,7 +6,7 @@ module.exports = {
     await queryInterface.changeColumn('orders', 'automationId', {
       type: Sequelize.INTEGER,
       references: {
-        model: "Automations",
+        model: "automations",
         key: "id"
       }
     });
@@ -22,7 +22,7 @@ module.exports = {
     await queryInterface.addColumn('actions', 'orderTemplateId', {
       type: Sequelize.INTEGER,
       references: {
-        model: "OrderTemplates",
+        model: "orderTemplates",
         key: "id"
       }
     })

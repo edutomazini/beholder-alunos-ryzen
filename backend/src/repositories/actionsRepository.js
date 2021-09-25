@@ -4,7 +4,8 @@ const actionTypes = {
     ALERT_EMAIL: 'ALERT_EMAIL',
     ALERT_SMS: 'ALERT_SMS',
     ORDER: 'ORDER',
-    GRID: 'GRID'
+    GRID: 'GRID',
+    WITHDRAW: 'WITHDRAW'
 }
 
 function insertActions(actions, transaction) {
