@@ -7,6 +7,7 @@ import WithdrawTemplateRow from './WithdrawTemplateRow';
 import Pagination from '../../components/Pagination/Pagination';
 import WithdrawTemplateModal, { DEFAULT_WITHDRAW_TEMPLATE } from './WithdrawTemplateModal/WithdrawTemplateModal';
 import Toast from '../../components/Toast/Toast';
+import { getWithdrawTemplates, deleteWithdrawTemplate, saveWithdrawTemplate } from '../../services/WithdrawTemplatesService';
 
 function WithdrawTemplates() {
 
@@ -25,8 +26,6 @@ function WithdrawTemplates() {
         })
     }, [history])
 
-    const { symbol } = useParams();
-
     const [withdrawTemplates, setWithdrawTemplates] = useState([]);
 
     const [notification, setNotification] = useState([]);
@@ -39,7 +38,16 @@ function WithdrawTemplates() {
 
     useEffect(() => {
         const token = localStorage.getItem("token");
-        
+        getWithdrawTemplates('', page || 1, token)
+            .then(result => {
+                setWithdrawTemplates(result.rows ? result.rows : []);
+                setCount(result.count);
+                setEditWithdrawTemplate(result.rows && result.rows.length > 0 ? result.rows[0] : {});
+            })
+            .catch(err => {
+                console.error(err.response ? err.response.data : err.message);
+                setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
+            })
 
     }, [page])
 
@@ -53,7 +61,16 @@ function WithdrawTemplates() {
     function onDeleteClick(event) {
         const id = event.target.id.replace('delete', '');
         const token = localStorage.getItem('token');
-       
+        deleteWithdrawTemplate(id, token)
+            .then(result => history.go(0))
+            .catch(err => {
+                console.error(err.response ? err.response.data : err.message);
+                setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
+            })
+    }
+
+    function onRunClick(event) {
+        console.log('click');
     }
 
     function onWithdrawTemplateSubmit(template) {
@@ -82,18 +99,17 @@ function WithdrawTemplates() {
                     <table className="table table-hover">
                         <thead>
                             <tr>
-                                <th className="border-gray-200">Symbol</th>
+                                <th className="border-gray-200">Coin</th>
                                 <th className="border-gray-200">Name</th>
-                                <th className="border-gray-200">Side</th>
-                                <th className="border-gray-200">Type</th>
+                                <th className="border-gray-200">Amount</th>
                                 <th className="border-gray-200">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {
                                 withdrawTemplates && withdrawTemplates.length
-                                ? withdrawTemplates.map(ot => (<WithdrawTemplateRow key={ot.id} data={ot} onEditClick={onEditClick} onDeleteClick={onDeleteClick} />))
-                                : <React.Fragment></React.Fragment>
+                                    ? withdrawTemplates.map(ot => (<WithdrawTemplateRow key={ot.id} data={ot} onEditClick={onEditClick} onDeleteClick={onDeleteClick} onRunClick={onRunClick} />))
+                                    : <React.Fragment></React.Fragment>
                             }
                         </tbody>
                     </table>

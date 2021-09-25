@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import SelectCoin from '../../../components/SelectCoin/SelectCoin';
 
 export const DEFAULT_WITHDRAW_TEMPLATE = {
     name: ''
@@ -46,7 +47,14 @@ function WithdrawTemplateModal(props) {
                     </div>
                     <div className="modal-body">
                         <div className="form-group">
-                            
+                            <div className="row">
+                                <div className="col-md-6 mb-3">
+                                    <div className="form-group">
+                                        <label htmlFor="coin">Coin:</label>
+                                        <SelectCoin coin={withdrawTemplate.coin} onChange={onInputChange} />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div className="modal-footer">
