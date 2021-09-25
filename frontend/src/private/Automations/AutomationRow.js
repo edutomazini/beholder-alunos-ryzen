@@ -10,10 +10,14 @@ import React from 'react';
 function AutomationRow(props) {
 
     function getActiveClass(automation) {
+        if (automation.schedule) return automation.isActive ? "text-info" : "text-danger";
         return automation.isActive ? "text-success" : "text-danger";
     }
 
     function getActiveText(automation) {
+        if (automation.schedule)
+            return automation.isActive ? "SCHEDULED" : "STOPPED";
+        else
             return automation.isActive ? "RUNNING" : "STOPPED";
     }
 

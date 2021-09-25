@@ -71,7 +71,7 @@ function Automations() {
         stopAutomation(id, token)
             .then(automation => { history.go(0) })
             .catch(err => {
-                console.error(err.response ? err.response.data : err.message);
+                console.error(err.response ? err.response.data : err.message)
                 setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
             });
     }
@@ -82,7 +82,7 @@ function Automations() {
         startAutomation(id, token)
             .then(automation => { history.go(0) })
             .catch(err => {
-                console.error(err.response ? err.response.data : err.message);
+                console.error(err.response ? err.response.data : err.message)
                 setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
             });
     }
@@ -93,7 +93,7 @@ function Automations() {
         deleteAutomation(id, token)
             .then(automation => { history.go(0) })
             .catch(err => {
-                console.error(err.response ? err.response.data : err.message);
+                console.error(err.response ? err.response.data : err.message)
                 setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
             });
     }
@@ -103,7 +103,10 @@ function Automations() {
     }
 
     function onNewAutomationClick(event) {
-        setEditAutomation(DEFAULT_AUTOMATION);
+        if (event.target.id === 'linkSchedule')
+            setEditAutomation({ ...DEFAULT_AUTOMATION, schedule: `${new Date()}` });
+        else
+            setEditAutomation(DEFAULT_AUTOMATION);
     }
 
     return (

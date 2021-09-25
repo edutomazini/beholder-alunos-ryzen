@@ -18,6 +18,7 @@ function NewAutomationButton(props) {
             <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                 <li><a id="linkRegular" className="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalAutomation" onClick={props.onClick}>Regular</a></li>
                 <li><a id="linkGrid" className="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalGrid" onClick={props.onClick}>Grid</a></li>
+                <li><a id="linkSchedule" className="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalAutomation" onClick={props.onClick}>Schedule</a></li>
             </ul>
         </React.Fragment>
     )

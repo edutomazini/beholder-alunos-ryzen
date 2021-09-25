@@ -6,6 +6,7 @@ import ConditionsArea from './ConditionsArea/ConditionsArea';
 import { getIndexes } from '../../../services/BeholderService';
 import '../Automations.css';
 import ActionsArea from './ActionsArea/ActionsArea';
+import ScheduleArea from './ScheduleArea/ScheduleArea';
 
 /**
  * props:
@@ -19,6 +20,7 @@ function AutomationModal(props) {
 
     const DEFAULT_AUTOMATION = {
         conditions: '',
+        schedule: '',
         actions: []
     }
 
@@ -78,7 +80,7 @@ function AutomationModal(props) {
             <div className="modal-dialog modal-dialog-centered" role="document">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <p className="modal-title" id="modalTitleNotify">{props.data.id ? 'Edit ' : 'New '}Automation</p>
+                        <p className="modal-title" id="modalTitleNotify">{props.data.id ? 'Edit ' : 'New '}{props.data.schedule ? 'Scheduled ' : ''}Automation</p>
                         <button ref={btnClose} type="button" className="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
                     </div>
                     <div className="modal-body">
@@ -99,6 +101,11 @@ function AutomationModal(props) {
                                     </div>
                                 </div>
                             </div>
+                            {
+                                automation.schedule
+                                    ? <ScheduleArea schedule={automation.schedule} onChange={onInputChange} />
+                                    : <React.Fragment></React.Fragment>
+                            }
                             <ul className="nav nav-tabs" id="tabs" role="tablist">
                                 <li className="nav-item" role="presentation">
                                     <button className="nav-link active" id="conditions-tab" data-bs-toggle="tab" data-bs-target="#conditions" type="button" role="tab" aria-controls="home" aria-selected="true">

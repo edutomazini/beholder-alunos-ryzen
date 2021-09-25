@@ -26,6 +26,7 @@
     "morgan": "^1.10.0",
     "mysql2": "^2.3.0",
     "node-binance-api": "^0.12.5",
+    "node-schedule": "^2.0.0",
     "sequelize": "^6.6.5",
     "technicalindicators": "^3.1.0",
     "twilio": "^3.67.2"

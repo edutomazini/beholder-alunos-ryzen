@@ -20,7 +20,8 @@ module.exports = (settings) => {
         return binance.exchangeInfo();
     }
 
-    function balance() {
+    async function balance() {
+        await binance.useServerTime();
         return binance.balance();
     }
 

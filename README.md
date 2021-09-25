@@ -1,2 +1,2 @@
-# beholder-alunos
-A multicoin traderbot for Binance.
+# Beholder 2.0
+A multicoin traderbot for Binance. Evolved.

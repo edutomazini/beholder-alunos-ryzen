@@ -23,6 +23,9 @@ async function updateAutomation(id, newAutomation) {
     if (newAutomation.conditions && newAutomation.conditions !== currentAutomation.conditions)
         currentAutomation.conditions = newAutomation.conditions;
 
+    if (newAutomation.schedule !== currentAutomation.schedule)
+        currentAutomation.schedule = newAutomation.schedule;
+
     if (newAutomation.isActive !== null && newAutomation.isActive !== undefined
         && newAutomation.isActive !== currentAutomation.isActive)
         currentAutomation.isActive = newAutomation.isActive;

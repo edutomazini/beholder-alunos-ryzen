@@ -30,7 +30,7 @@ function init(automations) {
         BRAIN_INDEX = {};
 
         automations.map(auto => {
-            if (auto.isActive)
+            if (auto.isActive && !auto.schedule)
                 updateBrain(auto)
         });
     } finally {
@@ -450,7 +450,7 @@ async function evalDecision(memoryKey, automation) {
         const isChecked = indexes.every(ix => MEMORY[ix] !== null && MEMORY[ix] !== undefined);
         if (!isChecked) return false;
 
-        const invertedCondition = automation.name.startsWith('GRID') ? '' : invertCondition(memoryKey, automation.conditions);
+        const invertedCondition = automation.name.startsWith('GRID') || automation.schedule ? '' : invertCondition(memoryKey, automation.conditions);
         const evalCondition = automation.conditions + (invertedCondition ? ' && ' + invertedCondition : '');
 
         if (LOGS) console.log(`Beholder trying to evaluate:\n${evalCondition}\n at ${automation.name}`);
@@ -662,5 +662,6 @@ module.exports = {
     findAutomations,
     placeOrder,
     tryUSDConversion,
-    generateGrids
+    generateGrids,
+    evalDecision
 }
