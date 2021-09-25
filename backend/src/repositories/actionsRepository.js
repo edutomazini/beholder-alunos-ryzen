@@ -25,9 +25,14 @@ function getByOrderTemplate(orderTemplateId) {
     return actionModel.findAll({ where: { orderTemplateId } });
 }
 
+function getByWithdrawTemplate(withdrawTemplateId) {
+    return actionModel.findAll({ where: { withdrawTemplateId } });
+}
+
 module.exports = {
     insertActions,
     deleteActions,
     getByOrderTemplate,
+    getByWithdrawTemplate,
     actionTypes
 }
