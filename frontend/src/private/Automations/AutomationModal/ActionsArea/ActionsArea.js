@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import ActionBadge from './ActionBadge';
 import ActionType from './ActionType';
 import { getOrderTemplates } from '../../../../services/OrderTemplatesService';
+import { getWithdrawTemplates } from '../../../../services/WithdrawTemplatesService';
+import { getSymbol } from '../../../../services/SymbolsService';
 
 /**
  * props:
@@ -15,20 +17,36 @@ function ActionsArea(props) {
         type: 'ALERT_EMAIL',
         orderTemplateId: null,
         orderTemplateName: '',
+        withdrawTemplateId: null,
+        withdrawTemplateName: '',
     }
 
     const [newAction, setNewAction] = useState(DEFAULT_ACTION);
     const [actions, setActions] = useState([]);
     const [orderTemplates, setOrderTemplates] = useState([]);
+    const [withdrawTemplates, setWithdrawTemplates] = useState([]);
 
     function onInputChange(event) {
         if (event.target.id === 'orderTemplateId') {
             const orderTemplateId = parseInt(event.target.value);
             const orderTemplate = orderTemplates.find(ot => ot.id === orderTemplateId);
+            if(!orderTemplate) return;
+
             setNewAction(prevState => ({
                 ...prevState,
                 orderTemplateName: orderTemplate.name,
                 orderTemplateId
+            }));
+        }
+        else if (event.target.id === 'withdrawTemplateId') {
+            const withdrawTemplateId = parseInt(event.target.value);
+            const withdrawTemplate = withdrawTemplates.find(ot => ot.id === withdrawTemplateId);
+            if(!withdrawTemplate) return;
+
+            setNewAction(prevState => ({
+                ...prevState,
+                withdrawTemplateName: withdrawTemplate.name,
+                withdrawTemplateId: withdrawTemplateId
             }));
         }
         else
@@ -46,6 +64,11 @@ function ActionsArea(props) {
             .then(result => setOrderTemplates(result.rows))
             .catch(err => console.error(err.response ? err.response.data : err.message));
 
+        getSymbol(props.symbol, token)
+            .then(symbol => getWithdrawTemplates(symbol.base, 1, token))
+            .then(result => setWithdrawTemplates(result.rows))
+            .catch(err => console.error(err.response ? err.response.data : err.message));
+
     }, [props.symbol])
 
     useEffect(() => {
@@ -60,7 +83,16 @@ function ActionsArea(props) {
 
             const alreadyExists = actions.some(a => a.id === newAction.id);
             if (alreadyExists) return;
-        } else {
+        }
+        else if (newAction.type === 'WITHDRAW') {
+            if (!newAction.withdrawTemplateId) return;
+            newAction.id = 'wt' + newAction.withdrawTemplateId;
+
+            const alreadyExists = actions.some(a => a.id === newAction.id);
+            if (alreadyExists) return;
+        }
+        else {
+            newAction.id = newAction.type;//temp id
             const alreadyExists = actions.some(a => a.type === newAction.type);
             if (alreadyExists) return;
         }
@@ -89,6 +121,17 @@ function ActionsArea(props) {
                                     <option value="0">Select one...</option>
                                     {
                                         orderTemplates.map(ot => (<option key={ot.id} value={ot.id}>{ot.name}</option>))
+                                    }
+                                </select>
+                                : <React.Fragment></React.Fragment>
+                        }
+                        {
+                            newAction.type === 'WITHDRAW' && withdrawTemplates
+                                ?
+                                <select id="withdrawTemplateId" className="form-select" onChange={onInputChange}>
+                                    <option value="0">Select one...</option>
+                                    {
+                                        withdrawTemplates.map(wt => (<option key={wt.id} value={wt.id}>{wt.name}</option>))
                                     }
                                 </select>
                                 : <React.Fragment></React.Fragment>

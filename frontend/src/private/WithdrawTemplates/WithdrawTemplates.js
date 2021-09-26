@@ -12,6 +12,11 @@ import { doWithdraw } from '../../services/ExchangeService';
 
 function WithdrawTemplates() {
 
+    useEffect(() => {
+        if (window.location.href.indexOf('localhost') !== -1)
+            setNotification({ type: 'info', text: 'These features only work in production.' });
+    }, [])
+
     const defaultLocation = useLocation();
 
     function getPage(location) {

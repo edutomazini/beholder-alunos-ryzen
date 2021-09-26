@@ -18,6 +18,7 @@ function ActionType(props) {
             <option value="ALERT_EMAIL">Alert via Email</option>
             <option value="ALERT_SMS">Alert via SMS</option>
             <option value="ORDER">Place Order</option>
+            <option value="WITHDRAW">Withdraw Crypto</option>
         </select>
     )
 }

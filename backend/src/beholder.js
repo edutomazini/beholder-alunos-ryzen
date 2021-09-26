@@ -2,6 +2,7 @@ const { getDefaultSettings } = require('./repositories/settingsRepository');
 const { actionTypes } = require('./repositories/actionsRepository');
 const orderTemplatesRepository = require('./repositories/orderTemplatesRepository');
 const automationsRepository = require('./repositories/automationsRepository');
+const withdrawTemplatesRepository = require('./repositories/withdrawTemplatesRepository');
 const gridsRepository = require('./repositories/gridsRepository');
 const { getSymbol } = require('./repositories/symbolsRepository');
 const { STOP_TYPES, LIMIT_TYPES, insertOrder } = require('./repositories/ordersRepository');
@@ -425,12 +426,51 @@ async function generateGrids(automation, levels, quantity, transaction) {
     return gridsRepository.insertGrids(grids, transaction);
 }
 
+async function withdrawCrypto(settings, automation, action) {
+    if (!settings || !automation || !action)
+        throw new Error(`All parameters are required to place an order.`);
+
+    if (!action.withdrawTemplateId)
+        throw new Error(`There is no withdraw template for '${automation.name}', action #${action.id}`);
+
+    const withdrawTemplate = await withdrawTemplatesRepository.getWithdrawTemplate(action.withdrawTemplateId);
+
+    let amount = parseFloat(withdrawTemplate.amount);
+    if (!amount) {
+        if (withdrawTemplate.amount === 'MAX_WALLET') {
+            const available = MEMORY[`${withdrawTemplate.coin}:WALLET`];
+            if (!available) throw new Error(`No available funds for this coin.`);
+
+            amount = available * (withdrawTemplate.amountMultiplier > 1 ? 1 : withdrawTemplate.amountMultiplier);
+        }
+        else if (withdrawTemplate.amount === 'LAST_ORDER_QTY') {
+            const keys = searchMemory(new RegExp(`^((${withdrawTemplate.coin}.+|.+${withdrawTemplate.coin}):LAST_ORDER)$`));
+            if (!keys || !keys.length) throw new Error(`No last order for this coin.`);
+
+            amount = keys[keys.length - 1].value.quantity * withdrawTemplate.amountMultiplier;
+        }
+    }
+
+    const exchange = require('./utils/exchange')(settings);
+
+    try {
+        const result = await exchange.withdraw(withdrawTemplate.coin, amount, withdrawTemplate.address, withdrawTemplate.network, withdrawTemplate.addressTag);
+
+        if (automation.logs) console.log(`WITHDRAW`, withdrawTemplate);
+
+        return { type: 'success', text: `Withdraw #${result.id} realized successfully for ${withdrawTemplate.coin}` };
+    } catch (err) {
+        throw new Error(err.response ? JSON.stringify(err.response.data) : err.message);
+    }
+}
+
 function doAction(settings, action, automation) {
     try {
         switch (action.type) {
             case actionTypes.ALERT_EMAIL: return sendEmail(settings, automation);
             case actionTypes.ALERT_SMS: return sendSms(settings, automation);
             case actionTypes.ORDER: return placeOrder(settings, automation, action);
+            case actionTypes.WITHDRAW: return withdrawCrypto(settings, automation, action);
             case actionTypes.GRID: return gridEval(settings, automation);
         }
     } catch (err) {
