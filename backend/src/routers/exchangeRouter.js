@@ -4,4 +4,8 @@ const exchangeController = require('../controllers/exchangeController');
 
 router.get('/balance', exchangeController.getBalance);
 
+router.get('/coins', exchangeController.getCoins);
+
+router.post('/withdraw/:id', exchangeController.doWithdraw);
+
 module.exports = router;

@@ -16,6 +16,7 @@
   "dependencies": {
     "@sendgrid/mail": "^7.4.6",
     "aes-js": "^3.1.2",
+    "axios": "^0.21.4",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",

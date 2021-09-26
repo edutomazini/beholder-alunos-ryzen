@@ -28,8 +28,8 @@ function getSettings(id) {
 }
 
 async function getDefaultSettings() {
-    const settings = await settingsModel.findOne();
-    return getSettingsDecrypted(settings.id)
+    const settings = await settingsModel.findOne({ where: { id: process.env.DEFAULT_SETTINGS_ID || 1 } });
+    return getSettingsDecrypted(settings.id);
 }
 
 async function updateSettings(id, newSettings) {
@@ -38,7 +38,7 @@ async function updateSettings(id, newSettings) {
     if (newSettings.email && newSettings.email !== currentSettings.email)
         currentSettings.email = newSettings.email;
 
-        if (newSettings.phone && newSettings.phone !== currentSettings.phone)
+    if (newSettings.phone && newSettings.phone !== currentSettings.phone)
         currentSettings.phone = newSettings.phone;
 
     if (newSettings.password)

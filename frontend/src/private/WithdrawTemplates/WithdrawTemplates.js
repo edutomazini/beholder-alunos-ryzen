@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory, useParams, useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import Menu from '../../components/Menu/Menu';
 import Footer from '../../components/Footer/Footer';
 import NewWithdrawTemplateButton from './NewWithdrawTemplateButton';
@@ -7,7 +7,8 @@ import WithdrawTemplateRow from './WithdrawTemplateRow';
 import Pagination from '../../components/Pagination/Pagination';
 import WithdrawTemplateModal, { DEFAULT_WITHDRAW_TEMPLATE } from './WithdrawTemplateModal/WithdrawTemplateModal';
 import Toast from '../../components/Toast/Toast';
-import { getWithdrawTemplates, deleteWithdrawTemplate, saveWithdrawTemplate } from '../../services/WithdrawTemplatesService';
+import { getWithdrawTemplates, deleteWithdrawTemplate } from '../../services/WithdrawTemplatesService';
+import { doWithdraw } from '../../services/ExchangeService';
 
 function WithdrawTemplates() {
 
@@ -70,7 +71,14 @@ function WithdrawTemplates() {
     }
 
     function onRunClick(event) {
-        console.log('click');
+        const id = event.target.id.replace('run', '');
+        const token = localStorage.getItem('token');
+        doWithdraw(id, token)
+            .then(result => setNotification({ type: 'success', text: `Withdrawal #${result.id} successful!` }))
+            .catch(err => {
+                console.error(err.response ? err.response.data : err.message);
+                setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
+            })
     }
 
     function onWithdrawTemplateSubmit(template) {

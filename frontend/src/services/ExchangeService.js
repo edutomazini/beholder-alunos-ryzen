@@ -12,3 +12,14 @@ export async function getBalance(token) {
     return response.data;
 }
 
+export async function getCoins(token) {
+    const headers = { 'authorization': token };
+    const response = await axios.get(EXCHANGE_URL + 'coins', { headers });
+    return response.data;
+}
+
+export async function doWithdraw(withdrawTemplateId, token) {
+    const headers = { 'authorization': token };
+    const response = await axios.post(`${EXCHANGE_URL}withdraw/${withdrawTemplateId}`, null, { headers });
+    return response.data;
+}
