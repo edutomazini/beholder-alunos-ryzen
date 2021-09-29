@@ -9,6 +9,7 @@ import Automations from './private/Automations/Automations';
 import OrderTemplates from './private/OrderTemplates/OrderTemplates';
 import WithdrawTemplates from './private/WithdrawTemplates/WithdrawTemplates';
 import Reports from './private/Reports/Reports';
+import Symbols from './private/Symbols/Symbols';
 
 function Routes() {
 
@@ -44,6 +45,9 @@ function Routes() {
             </PrivateRoute>
             <PrivateRoute path="/reports">
                 <Reports />
+            </PrivateRoute>
+            <PrivateRoute path="/symbols">
+                <Symbols />
             </PrivateRoute>
             <PrivateRoute path="/orderTemplates/:symbol?">
                 <OrderTemplates />

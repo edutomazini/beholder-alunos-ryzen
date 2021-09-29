@@ -31,7 +31,7 @@ async function syncSymbols(req, res, next) {
     const favoriteSymbols = (await symbolsRepository.getSymbols()).filter(s => s.isFavorite).map(s => s.symbol);
 
     const settingsRepository = require('../repositories/settingsRepository');
-    const settings = await settingsRepository.getSetingsDecrypted(res.locals.token.id);
+    const settings = await settingsRepository.getSettingsDecrypted(res.locals.token.id);
     const exchange = require('../utils/exchange')(settings);
     const symbols = (await exchange.exchangeInfo()).symbols.map(item => {
         const minNotionalFilter = item.filters.find(filter => filter.filterType === 'MIN_NOTIONAL');

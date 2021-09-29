@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Menu from '../../components/Menu/Menu';
 import Footer from '../../components/Footer/Footer';
-import Symbols from './Symbols';
 import Toast from '../../components/Toast/Toast';
 
 import { getSettings, updateSettings } from '../../services/SettingsService';
@@ -201,7 +200,6 @@ function Settings() {
                         </div>
                     </div>
                 </div>
-                <Symbols />
                 <Footer />
             </main>
             <Toast text={notification.text} type={notification.type} />
