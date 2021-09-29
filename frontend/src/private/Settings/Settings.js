@@ -76,7 +76,7 @@ function Settings() {
                             <div className="row">
                                 <div className="col-md-6 mb-3">
                                     <div>
-                                        <label htmlFor="newPassword">New Password</label>
+                                        <label htmlFor="password">New Password</label>
                                         <input className="form-control" id="password" type="password" placeholder="Enter your new password" onChange={onInputChange} />
                                     </div>
                                 </div>
@@ -128,6 +128,20 @@ function Settings() {
                                     <div className="form-group">
                                         <label htmlFor="twilioToken">Twilio Token</label>
                                         <input className="form-control" id="twilioToken" type="password" placeholder="Enter the Twilio Token" defaultValue={settings.twilioToken} onChange={onInputChange} />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="col-md-6 mb-3">
+                                    <div className="form-group">
+                                        <label htmlFor="telegramBot">Telegram Bot Token</label>
+                                        <input className="form-control" id="telegramBot" type="password" placeholder="Enter the Telegram Bot Token" defaultValue={settings.telegramBot} onChange={onInputChange} />
+                                    </div>
+                                </div>
+                                <div className="col-md-6 mb-3">
+                                    <div className="form-group">
+                                        <label htmlFor="telegramChat">Telegram Chat ID</label>
+                                        <input className="form-control" id="telegramChat" type="text" placeholder="Enter the Telegram Chat ID" defaultValue={settings.telegramChat} onChange={onInputChange} />
                                     </div>
                                 </div>
                             </div>

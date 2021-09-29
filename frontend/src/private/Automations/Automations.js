@@ -104,7 +104,7 @@ function Automations() {
 
     function onNewAutomationClick(event) {
         if (event.target.id === 'linkSchedule')
-            setEditAutomation({ ...DEFAULT_AUTOMATION, schedule: `${new Date()}` });
+            setEditAutomation({ ...DEFAULT_AUTOMATION, schedule: new Date().toISOString() });
         else
             setEditAutomation(DEFAULT_AUTOMATION);
     }

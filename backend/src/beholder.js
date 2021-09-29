@@ -326,6 +326,7 @@ async function gridEval(settings, automation) {
         if (!book) return { type: 'error', text: `No book info for ${automation.symbol}` };
 
         const result = await placeOrder(settings, automation, automation.actions[0]);
+        if (automation.logs) await require('./utils/telegram')(settings, result.text);
         if (result.type === 'error') return result;
 
         const transaction = await db.transaction();
@@ -464,11 +465,18 @@ async function withdrawCrypto(settings, automation, action) {
     }
 }
 
+async function sendTelegram(settings, automation) {
+    await require('./utils/telegram')(settings, automation.name + ' has fired!');
+    if (automation.logs) console.log(`Telegram sent!`);
+    return { text: `Telegram sent from automation '${automation.name}'`, type: 'success' };
+}
+
 function doAction(settings, action, automation) {
     try {
         switch (action.type) {
             case actionTypes.ALERT_EMAIL: return sendEmail(settings, automation);
             case actionTypes.ALERT_SMS: return sendSms(settings, automation);
+            case actionTypes.ALERT_TELEGRAM: return sendTelegram(settings, automation);
             case actionTypes.ORDER: return placeOrder(settings, automation, action);
             case actionTypes.WITHDRAW: return withdrawCrypto(settings, automation, action);
             case actionTypes.GRID: return gridEval(settings, automation);

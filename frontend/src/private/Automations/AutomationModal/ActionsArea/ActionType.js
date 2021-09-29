@@ -17,6 +17,7 @@ function ActionType(props) {
         <select id="type" className="form-select" value={type} onChange={props.onChange}>
             <option value="ALERT_EMAIL">Alert via Email</option>
             <option value="ALERT_SMS">Alert via SMS</option>
+            <option value="ALERT_TELEGRAM">Alert via Telegram</option>
             <option value="ORDER">Place Order</option>
             <option value="WITHDRAW">Withdraw Crypto</option>
         </select>
