@@ -12,6 +12,7 @@ function SymbolPrice(props) {
     const [symbol, setSymbol] = useState('BTCUSDT');
 
     useEffect(() => {
+        if (!props.symbol) return;
         setSymbol(props.symbol);
     }, [props.symbol])
 

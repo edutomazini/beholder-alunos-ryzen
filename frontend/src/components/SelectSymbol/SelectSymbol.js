@@ -26,7 +26,7 @@ function SelectSymbol(props) {
 
     useEffect(() => {
         selectRef.current.value = props.symbol || 'BTCUSDT';
-        buttonRef.current.value = selectRef.current.disabled = props.disabled;
+        buttonRef.current.disabled = selectRef.current.disabled = props.disabled;
     }, [props.symbol])
 
     useEffect(() => {
@@ -39,8 +39,8 @@ function SelectSymbol(props) {
 
                 if (symbolNames.length) {
                     setSymbols(symbolNames);
-                    selectRef.current.value = props.symbol || symbolNames[0];
-                    props.onChange({ target: { id: 'symbol', value: selectRef.current.value } });
+                    selectRef.current.value = symbolNames[0];
+                    props.onChange({ target: { id: 'symbol', value: symbolNames[0] } });
                 }
                 else
                     setSymbols(["NO SYMBOLS"]);
