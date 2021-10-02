@@ -71,10 +71,6 @@ function AutomationModal(props) {
             })
     }, [automation.symbol])
 
-    function onSymbolChange(event) {
-        setAutomation({ ...DEFAULT_AUTOMATION, symbol: event.target.value });
-    }
-
     return (
         <div className="modal fade" id="modalAutomation" tabIndex="-1" role="dialog" aria-labelledby="modalTitleNotify" aria-hidden="true">
             <div className="modal-dialog modal-dialog-centered" role="document">
@@ -89,7 +85,7 @@ function AutomationModal(props) {
                                 <div className="col-md-6 mb-3">
                                     <div className="form-group">
                                         <label htmlFor="symbol">Symbol:</label>
-                                        <SelectSymbol onChange={onSymbolChange} symbol={automation.symbol} onlyFavorites={false} disabled={automation.id > 0} />
+                                        <SelectSymbol onChange={onInputChange} symbol={automation.symbol} onlyFavorites={false} disabled={automation.id > 0} />
                                     </div>
                                 </div>
                             </div>
