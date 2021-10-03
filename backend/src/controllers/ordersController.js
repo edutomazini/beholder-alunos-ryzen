@@ -1,6 +1,7 @@
 const settingsRepository = require('../repositories/settingsRepository');
 const ordersRepository = require('../repositories/ordersRepository');
 const beholder = require('../beholder');
+const logger = require('../utils/logger');
 
 async function getOrders(req, res, next) {
     const symbol = req.params.symbol && req.params.symbol.toUpperCase();
@@ -90,7 +91,7 @@ async function syncOrder(req, res, next) {
         binanceTrade = await exchange.orderTrade(order.symbol, order.orderId);
     }
     catch (err) {
-        console.error(err);
+        logger('system', err);
         return res.sendStatus(404);
     }
 

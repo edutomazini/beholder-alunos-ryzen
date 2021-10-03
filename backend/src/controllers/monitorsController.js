@@ -5,11 +5,11 @@ const { monitorTypes } = require('../repositories/monitorsRepository');
 function startStreamMonitor(monitor) {
     switch (monitor.type) {
         case monitorTypes.CANDLES: {
-            appEm.startChartMonitor(monitor.symbol, monitor.interval, monitor.indexes ? monitor.indexes.split(',') : [], monitor.broadcastLabel, monitor.logs);
+            appEm.startChartMonitor(monitor.id, monitor.symbol, monitor.interval, monitor.indexes ? monitor.indexes.split(',') : [], monitor.broadcastLabel, monitor.logs);
             break;
         }
         case monitorTypes.TICKER: {
-            appEm.startTickerMonitor(monitor.symbol, monitor.broadcastLabel, monitor.logs);
+            appEm.startTickerMonitor(monitor.id, monitor.symbol, monitor.broadcastLabel, monitor.logs);
             break;
         }
     }
@@ -18,11 +18,11 @@ function startStreamMonitor(monitor) {
 function stopStreamMonitor(monitor) {
     switch (monitor.type) {
         case monitorTypes.CANDLES: {
-            appEm.stopChartMonitor(monitor.symbol, monitor.interval, monitor.indexes ? monitor.indexes.split(',') : [], monitor.logs);
+            appEm.stopChartMonitor(monitor.id, monitor.symbol, monitor.interval, monitor.indexes ? monitor.indexes.split(',') : [], monitor.logs);
             break;
         }
         case monitorTypes.TICKER: {
-            appEm.stopTickerMonitor(monitor.symbol, monitor.logs);
+            appEm.stopTickerMonitor(monitor.id, monitor.symbol, monitor.logs);
             break;
         }
     }

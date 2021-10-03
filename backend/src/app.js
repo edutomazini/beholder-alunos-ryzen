@@ -2,7 +2,6 @@ const express = require('express');
 require('express-async-errors');
 
 const cors = require('cors');
-const morgan = require('morgan');
 const helmet = require('helmet');
 const authMiddleware = require('./middlewares/authMiddleware');
 const errorMiddleware = require('./middlewares/errorMiddleware');
@@ -16,12 +15,16 @@ const automationsRouter = require('./routers/automationsRouter');
 const orderTemplatesRouter = require('./routers/orderTemplatesRouter');
 const withdrawTemplatesRouter = require('./routers/withdrawTemplatesRouter');
 const beholderRouter = require('./routers/beholderRouter');
+const logsRouter = require('./routers/logsRouter');
 
 const authController = require('./controllers/authController');
 
 const app = express();
 
-app.use(morgan('dev'));
+if (process.env.NODE_ENV !== 'production') {
+    const morgan = require('morgan');
+    app.use(morgan('dev'));
+}
 
 app.use(cors({ origin: process.env.CORS_ORIGIN }));
 
@@ -48,6 +51,8 @@ app.use('/ordertemplates', authMiddleware, orderTemplatesRouter);
 app.use('/withdrawtemplates', authMiddleware, withdrawTemplatesRouter);
 
 app.use('/beholder', authMiddleware, beholderRouter);
+
+app.use('/logs', authMiddleware, logsRouter);
 
 app.post('/logout', authController.doLogout);
 

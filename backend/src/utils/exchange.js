@@ -1,6 +1,7 @@
 const Binance = require('node-binance-api');
 const LOGS = process.env.BINANCE_LOGS === 'true';
 const SAPI_URL = process.env.BINANCE_SAPI_URL;
+const logger = require('./logger');
 
 module.exports = (settings) => {
 
@@ -134,20 +135,20 @@ module.exports = (settings) => {
             const ohlc = binance.ohlc(chart);
             callback(ohlc);
         });
-        if (LOGS) console.log(`Chart Stream connected at ${streamUrl}`);
+        if (LOGS) logger('system', `Chart Stream connected at ${streamUrl}`);
     }
 
     function terminateChartStream(symbol, interval) {
         //btcusdt@kline_1m
         binance.websockets.terminate(`${symbol.toLowerCase()}@kline_${interval}`);
-        console.log(`Chart Stream ${symbol.toLowerCase()}@kline_${interval} terminated!`);
+        logger('system', `Chart Stream ${symbol.toLowerCase()}@kline_${interval} terminated!`);
     }
 
     function userDataStream(balanceCallback, executionCallback, listStatusCallback) {
         binance.websockets.userData(
             balance => balanceCallback(balance),
             executionData => executionCallback(executionData),
-            subscribedData => console.log(`userDataStream:subscribeEvent: ${JSON.stringify(subscribedData)}`),
+            subscribedData => logger('system', `userDataStream:subscribeEvent: ${JSON.stringify(subscribedData)}`),
             listStatusData => listStatusCallback(listStatusData));
     }
 
@@ -155,12 +156,12 @@ module.exports = (settings) => {
         const streamUrl = binance.websockets.prevDay(symbol, (data, converted) => {
             callback(converted);
         })
-        if (LOGS) console.log(`Ticker Stream connected at ${streamUrl}`);
+        if (LOGS) logger('system', `Ticker Stream connected at ${streamUrl}`);
     }
 
     function terminateTickerStream(symbol) {
         binance.websockets.terminate(`${symbol.toLowerCase()}@ticker`);
-        console.log(`Ticker Stream disconnected at ${symbol.toLowerCase()}@ticker`);
+        logger('system', `Ticker Stream disconnected at ${symbol.toLowerCase()}@ticker`);
     }
 
     return {

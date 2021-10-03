@@ -5,6 +5,8 @@ import MonitorIndex from './MonitorIndex';
 import SwitchInput from '../../../components/SwitchInput/SwitchInput';
 import { saveMonitor } from '../../../services/MonitorsService';
 import SelectInterval from './SelectInterval';
+import LogButton from '../../../components/Logs/LogButton';
+import LogView from '../../../components/Logs/LogView';
 
 /**
  * props:
@@ -42,6 +44,11 @@ function MonitorModal(props) {
         setMonitor(props.data);
     }, [props.data.id])
 
+    const [showLogs, setShowLogs] = useState(false);
+    function onLogClick(event) {
+        setShowLogs(!showLogs);
+    }
+
     return (
         <div className="modal fade" id="modalMonitor" tabIndex="-1" role="dialog" aria-labelledby="modalTitleNotify" aria-hidden="true">
             <div className="modal-dialog modal-dialog-centered" role="document">
@@ -69,48 +76,57 @@ function MonitorModal(props) {
                                         : <React.Fragment></React.Fragment>
                                 }
                             </div>
-                            <div className="row">
-                                <div className="col-md-6 mb-3">
-                                    <div className="form-group mb-4">
-                                        <label htmlFor="symbol">Broadcast Label: <span data-bs-toggle="tooltip" data-bs-placement="top" title="Label to broadcast the info via WebSockets" className="badge bg-warning py-1">?</span></label>
-                                        <input type="text" id="broadcastLabel" className="form-control" onChange={onInputChange} defaultValue={monitor.broadcastLabel} placeholder="none" />
-                                    </div>
-                                </div>
-                                {
-                                    monitor.type === 'CANDLES'
-                                        ? <div className="col-md-6 mb-3">
-                                            <div className="form-group mb-4">
-                                                <SelectInterval onChange={onInputChange} interval={monitor.interval} />
-                                            </div>
-                                        </div>
-                                        : <React.Fragment></React.Fragment>
-                                }
-                            </div>
                             {
-                                monitor.type === 'CANDLES'
-                                    ? <MonitorIndex onChange={onInputChange} indexes={monitor.indexes} />
-                                    : <React.Fragment></React.Fragment>
+                                showLogs
+                                    ? <LogView file={"M:" + monitor.id} />
+                                    : (
+                                        <React.Fragment>
+                                            <div className="row">
+                                                <div className="col-md-6 mb-3">
+                                                    <div className="form-group mb-4">
+                                                        <label htmlFor="symbol">Broadcast Label: <span data-bs-toggle="tooltip" data-bs-placement="top" title="Label to broadcast the info via WebSockets" className="badge bg-warning py-1">?</span></label>
+                                                        <input type="text" id="broadcastLabel" className="form-control" onChange={onInputChange} defaultValue={monitor.broadcastLabel} placeholder="none" />
+                                                    </div>
+                                                </div>
+                                                {
+                                                    monitor.type === 'CANDLES'
+                                                        ? <div className="col-md-6 mb-3">
+                                                            <div className="form-group mb-4">
+                                                                <SelectInterval onChange={onInputChange} interval={monitor.interval} />
+                                                            </div>
+                                                        </div>
+                                                        : <React.Fragment></React.Fragment>
+                                                }
+                                            </div>
+                                            {
+                                                monitor.type === 'CANDLES'
+                                                    ? <MonitorIndex onChange={onInputChange} indexes={monitor.indexes} />
+                                                    : <React.Fragment></React.Fragment>
+                                            }
+                                            <div className="row">
+                                                <div className="col-md-6 mb-3">
+                                                    <div className="form-group">
+                                                        <SwitchInput id="isActive" text="Is Active?" onChange={onInputChange} isChecked={monitor.isActive} />
+                                                    </div>
+                                                </div>
+                                                <div className="col-md-6 mb-3">
+                                                    <div className="form-group">
+                                                        <SwitchInput id="logs" text="Enable Logs?" onChange={onInputChange} isChecked={monitor.logs} />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </React.Fragment>
+                                    )
                             }
-                            <div className="row">
-                                <div className="col-md-6 mb-3">
-                                    <div className="form-group">
-                                        <SwitchInput id="isActive" text="Is Active?" onChange={onInputChange} isChecked={monitor.isActive} />
-                                    </div>
-                                </div>
-                                <div className="col-md-6 mb-3">
-                                    <div className="form-group">
-                                        <SwitchInput id="logs" text="Enable Logs?" onChange={onInputChange} isChecked={monitor.logs} />
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
-                    <div className="modal-footer"> 
+                    <div className="modal-footer">
                         {
                             error
                                 ? <div className="alert alert-danger mt-1 col-9 py-1">{error}</div>
                                 : <React.Fragment></React.Fragment>
                         }
+                        <LogButton id={monitor.id} onClick={onLogClick} />
                         <button ref={btnSave} type="button" className="btn btn-sm btn-primary" onClick={onSubmit}>Save</button>
                     </div>
                 </div>

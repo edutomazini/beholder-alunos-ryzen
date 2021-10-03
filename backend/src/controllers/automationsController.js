@@ -6,6 +6,7 @@ const ordersRepository = require('../repositories/ordersRepository');
 const beholder = require('../beholder');
 const agenda = require('../agenda');
 const db = require('../db');
+const logger = require('../utils/logger');
 
 function validateConditions(conditions) {
     return /^(MEMORY\[\'.+?\'\](\..+)?[><=!]+([0-9\.]+|(\'.+?\')|true|false|MEMORY\[\'.+?\'\](\..+)?)( && )?)+$/ig.test(conditions);
@@ -25,7 +26,7 @@ async function startAutomation(req, res, next) {
 
     await automation.save();
 
-    if (automation.logs) console.log(`Automation ${automation.name} has started!`);
+    if (automation.logs) logger('A:' + automation.id, `Automation ${automation.name} has started!`);
 
     res.json(automation);
 }
@@ -43,7 +44,7 @@ async function stopAutomation(req, res, next) {
     automation.isActive = false;
     await automation.save();
 
-    if (automation.logs) console.log(`Automation ${automation.name} has stopped!`);
+    if (automation.logs) logger('A:' + automation.id, `Automation ${automation.name} has stopped!`);
 
     res.json(automation);
 }
@@ -98,7 +99,7 @@ async function insertAutomation(req, res, next) {
         await transaction.commit();
     } catch (err) {
         await transaction.rollback();
-        console.error(err);
+        logger('system', err);
         return res.status(500).json(err.message);
     }
 
@@ -156,6 +157,7 @@ async function updateAutomation(req, res, next) {
         await transaction.commit();
     } catch (err) {
         await transaction.rollback();
+        logger('system', err);
         return res.status(500).json(err.message);
     }
 
@@ -206,6 +208,7 @@ async function deleteAutomation(req, res, next) {
         await transaction.commit();
     } catch (err) {
         await transaction.rollback();
+        logger('system', err);
         return res.status(500).json(err.message);
     }
 

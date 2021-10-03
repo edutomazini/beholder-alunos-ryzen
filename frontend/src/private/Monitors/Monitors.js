@@ -7,6 +7,10 @@ import { getMonitors, startMonitor, stopMonitor, deleteMonitor } from '../../ser
 import Pagination from '../../components/Pagination/Pagination';
 import MonitorModal from './MonitorModal/MonitorModal';
 import Toast from '../../components/Toast/Toast';
+import LogModal from '../../components/Logs/LogModal';
+import NewMonitorButton from './NewMonitorButton';
+import BeholderButton from './Beholder/BeholderButton';
+import BeholderModal from './Beholder/BeholderModal';
 
 function Monitors() {
 
@@ -51,13 +55,18 @@ function Monitors() {
             })
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message);
-                setNotification({ type: 'error', text: err.response ? err.response.data : err.message});
+                setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
             });
 
     }, [page])
 
     function onEditClick(event) {
         const id = event.target.id.replace('edit', '');
+        setEditMonitor(monitors.find(m => m.id == id));
+    }
+
+    function onLogsClick(event) {
+        const id = event.target.id.replace('logs', '');
         setEditMonitor(monitors.find(m => m.id == id));
     }
 
@@ -68,7 +77,7 @@ function Monitors() {
             .then(monitor => { history.go(0) })
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message);
-                setNotification({ type: 'error', text: err.response ? err.response.data : err.message});
+                setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
             });
     }
 
@@ -79,7 +88,7 @@ function Monitors() {
             .then(monitor => { history.go(0) })
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message)
-                setNotification({ type: 'error', text: err.response ? err.response.data : err.message});
+                setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
             });
     }
 
@@ -90,7 +99,7 @@ function Monitors() {
             .then(monitor => { history.go(0) })
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message);
-                setNotification({ type: 'error', text: err.response ? err.response.data : err.message});
+                setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
             });
     }
 
@@ -112,12 +121,8 @@ function Monitors() {
                     </div>
                     <div className="btn-toolbar mb-2 mb-md-0">
                         <div className="d-inline-flex align-items-center">
-                            <button id="btnNewMonitor" className="btn btn-primary animate-up-2" data-bs-toggle="modal" data-bs-target="#modalMonitor" onClick={onNewMonitorClick}>
-                                <svg className="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path fillRule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z" clipRule="evenodd" />
-                                </svg>
-                                New Monitor
-                            </button>
+                            <BeholderButton />
+                            <NewMonitorButton onClick={onNewMonitorClick} />
                         </div>
                     </div>
                 </div>
@@ -134,8 +139,8 @@ function Monitors() {
                         <tbody>
                             {
                                 monitors && monitors.length
-                                ? monitors.map(monitor => (<MonitorRow key={monitor.id} data={monitor} onEditClick={onEditClick} onStartClick={onStartClick} onStopClick={onStopClick} onDeleteClick={onDeleteClick} />))
-                                : <React.Fragment></React.Fragment>
+                                    ? monitors.map(monitor => (<MonitorRow key={monitor.id} data={monitor} onEditClick={onEditClick} onStartClick={onStartClick} onStopClick={onStopClick} onDeleteClick={onDeleteClick} onLogsClick={onLogsClick} />))
+                                    : <React.Fragment></React.Fragment>
                             }
                         </tbody>
                     </table>
@@ -144,6 +149,8 @@ function Monitors() {
                 <Footer />
             </main>
             <MonitorModal data={editMonitor} onSubmit={onMonitorSubmit} />
+            <LogModal file={editMonitor.id > 0 ? "M:" + editMonitor.id : ""} />
+            <BeholderModal />
             <Toast type={notification.type} text={notification.text} />
         </React.Fragment>
     );

@@ -1,5 +1,6 @@
 const authController = require('../controllers/authController');
 const jwt = require('jsonwebtoken');
+const logger = require('../utils/logger');
 
 module.exports = (req, res, next) => {
     const token = req.headers['authorization'];
@@ -14,9 +15,9 @@ module.exports = (req, res, next) => {
             }
         } catch (err) {
             if (err instanceof jwt.TokenExpiredError)
-                console.error(err.message);
+                logger('system', err.message);
             else
-                console.error(token, err);
+                logger('system', err);
         }
     }
     res.status(401).json('Unauthorized');

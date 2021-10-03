@@ -8,6 +8,9 @@ import WalletSummary from '../../../components/WalletSummary/WalletSummary';
 import { getMemoryIndex } from '../../../services/BeholderService';
 import GridTable from './GridTable';
 import '../Automations.css';
+import LogButton from '../../../components/Logs/LogButton';
+import LogView from '../../../components/Logs/LogView';
+import GridButton from './GridButton';
 
 /**
  * props:
@@ -179,7 +182,15 @@ function GridModal(props) {
 
     const [gridView, setGridView] = useState(false)
     function onViewGridsClick(event) {
+        if (!gridView) setShowLogs(false);
         setGridView(!gridView);
+
+    }
+
+    const [showLogs, setShowLogs] = useState(false);
+    function onLogClick(event) {
+        if (!showLogs) setGridView(false);
+        setShowLogs(!showLogs);
     }
 
     return (
@@ -208,63 +219,82 @@ function GridModal(props) {
                                 </div>
                             </div>
                         </div>
-                        <div className={gridView ? "d-none" : "form-group"}>
-                            <WalletSummary wallet={wallet} />
-                            <div className="row">
-                                <div className="col-md-6 mb-3">
+                        {
+                            !gridView && !showLogs
+                                ? (
+                                    <React.Fragment>
+                                        <div className="form-group">
+                                            <WalletSummary wallet={wallet} />
+                                            <div className="row">
+                                                <div className="col-md-6 mb-3">
+                                                    <div className="form-group">
+                                                        <label htmlFor="lowerLimit">Lower Limit:</label>
+                                                        <input className="form-control" id="lowerLimit" type="number" placeholder="0" defaultValue={grid.lowerLimit || ''} onChange={onGridChange} />
+                                                    </div>
+                                                </div>
+                                                <div className="col-md-6 mb-3">
+                                                    <div className="form-group">
+                                                        <label htmlFor="upperLimit">Upper Limit:</label>
+                                                        <input className="form-control" id="upperLimit" type="number" placeholder="0" defaultValue={grid.upperLimit || ''} onChange={onGridChange} />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="row">
+                                                <div className="col-md-6 mb-3">
+                                                    <div className="form-group">
+                                                        <label htmlFor="levels">Levels:</label>
+                                                        <input className="form-control" id="levels" type="number" placeholder="3" defaultValue={grid.levels || ''} onChange={onGridChange} />
+                                                    </div>
+                                                </div>
+                                                <div className="col-md-6 mb-3">
+                                                    <div className="form-group">
+                                                        <label htmlFor="quantity">Quantity:</label>
+                                                        <input className="form-control" id="quantity" type="text" list="gridQtyList" placeholder={symbol.minLotSize} defaultValue={grid.quantity || ''} onChange={onGridChange} />
+                                                        <datalist id="gridQtyList">
+                                                            <option>Min. Notional</option>
+                                                        </datalist>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="row">
+                                                <div className="col-md-6 mb-3">
+                                                    <div className="form-group">
+                                                        <label htmlFor="total">Reference Price:</label>
+                                                        <input ref={inputTotal} className="form-control" id="total" type="number" placeholder="0" disabled />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="row">
+                                                <div className="col-md-6">
+                                                    <div className="form-group">
+                                                        <SwitchInput id="isActive" text="Is Active?" onChange={onAutomationChange} isChecked={automation.isActive} />
+                                                    </div>
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <div className="form-group">
+                                                        <SwitchInput id="logs" text="Enable Logs?" onChange={onAutomationChange} isChecked={automation.logs} />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </React.Fragment>
+                                )
+                                : <React.Fragment></React.Fragment>
+                        }
+                        {
+                            gridView && !showLogs
+                                ? (
                                     <div className="form-group">
-                                        <label htmlFor="lowerLimit">Lower Limit:</label>
-                                        <input className="form-control" id="lowerLimit" type="number" placeholder="0" defaultValue={grid.lowerLimit || ''} onChange={onGridChange} />
+                                        <GridTable data={automation.grids} />
                                     </div>
-                                </div>
-                                <div className="col-md-6 mb-3">
-                                    <div className="form-group">
-                                        <label htmlFor="upperLimit">Upper Limit:</label>
-                                        <input className="form-control" id="upperLimit" type="number" placeholder="0" defaultValue={grid.upperLimit || ''} onChange={onGridChange} />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="row">
-                                <div className="col-md-6 mb-3">
-                                    <div className="form-group">
-                                        <label htmlFor="levels">Levels:</label>
-                                        <input className="form-control" id="levels" type="number" placeholder="3" defaultValue={grid.levels || ''} onChange={onGridChange} />
-                                    </div>
-                                </div>
-                                <div className="col-md-6 mb-3">
-                                    <div className="form-group">
-                                        <label htmlFor="quantity">Quantity:</label>
-                                        <input className="form-control" id="quantity" type="text" list="gridQtyList" placeholder={symbol.minLotSize} defaultValue={grid.quantity || ''} onChange={onGridChange} />
-                                        <datalist id="gridQtyList">
-                                            <option>Min. Notional</option>
-                                        </datalist>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="row">
-                                <div className="col-md-6 mb-3">
-                                    <div className="form-group">
-                                        <label htmlFor="total">Reference Price:</label>
-                                        <input ref={inputTotal} className="form-control" id="total" type="number" placeholder="0" disabled />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="row">
-                                <div className="col-md-6">
-                                    <div className="form-group">
-                                        <SwitchInput id="isActive" text="Is Active?" onChange={onAutomationChange} isChecked={automation.isActive} />
-                                    </div>
-                                </div>
-                                <div className="col-md-6">
-                                    <div className="form-group">
-                                        <SwitchInput id="logs" text="Enable Logs?" onChange={onAutomationChange} isChecked={automation.logs} />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className={gridView ? "form-group" : "d-none"}>
-                            <GridTable data={automation.grids} />
-                        </div>
+                                )
+                                : <React.Fragment></React.Fragment>
+                        }
+                        {
+                            showLogs
+                                ? <LogView file={"A:" + automation.id} />
+                                : <React.Fragment></React.Fragment>
+                        }
                     </div>
                     <div className="modal-footer">
                         {
@@ -272,26 +302,8 @@ function GridModal(props) {
                                 ? <div className="alert alert-danger mt-1 py-1 col-9">{error}</div>
                                 : <React.Fragment></React.Fragment>
                         }
-                        {
-                            automation.id
-                                ?
-                                <button type="button" className="btn btn-sm btn-secondary" onClick={onViewGridsClick}>
-                                    {
-                                        gridView
-                                            ? (
-                                                <svg className="icon icon-xs" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                    <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" /><path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
-                                                </svg>
-                                            )
-                                            : (
-                                                <svg className="icon icon-xs" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                                                </svg>
-                                            )
-                                    }
-                                </button>
-                                : <React.Fragment></React.Fragment>
-                        }
+                        <GridButton id={automation.id} onClick={onViewGridsClick} />
+                        <LogButton id={automation.id} onClick={onLogClick} />
                         <button ref={btnSave} type="button" className="btn btn-sm btn-primary" onClick={onSubmit}>Save</button>
                     </div>
                 </div>

@@ -7,6 +7,7 @@ const gridsRepository = require('./repositories/gridsRepository');
 const { getSymbol } = require('./repositories/symbolsRepository');
 const { STOP_TYPES, LIMIT_TYPES, insertOrder } = require('./repositories/ordersRepository');
 const db = require('./db');
+const logger = require('./utils/logger');
 
 const MEMORY = {};
 
@@ -37,7 +38,7 @@ function init(automations) {
     } finally {
         LOCK_BRAIN = false;
         LOCK_MEMORY = false;
-        console.log('Beholder Brain has started!');
+        logger('beholder', 'Beholder Brain has started!');
     }
 }
 
@@ -97,7 +98,7 @@ function deleteBrain(automation) {
         LOCK_BRAIN = true;
         delete BRAIN[automation.id];
         deleteBrainIndex(automation.indexes.split(','), automation.id);
-        if (automation.logs) console.log(`Automation removed from BRAIN #${automation.id}`);
+        if (automation.logs) logger('A:' + automation.id, `Automation removed from BRAIN #${automation.id}`);
     }
     finally {
         LOCK_BRAIN = false;
@@ -124,13 +125,13 @@ function invertCondition(memoryKey, conditions) {
 
 async function sendSms(settings, automation) {
     await require('./utils/sms')(settings, automation.name + ' has fired!');
-    if (automation.logs) console.log(`SMS sent!`);
+    if (automation.logs) logger('A:' + automation.id, `SMS sent!`);
     return { text: `SMS sent from automation '${automation.name}'`, type: 'success' };
 }
 
 async function sendEmail(settings, automation) {
     await require('./utils/email')(settings, automation.name + ' has fired!');
-    if (automation.logs) console.log(`E-mail sent!`);
+    if (automation.logs) logger('A:' + automation.id, `E-mail sent!`);
     return { text: `E-mail sent from automation '${automation.name}'`, type: 'success' };
 }
 
@@ -282,8 +283,8 @@ async function placeOrder(settings, automation, action) {
             result = await exchange.sell(order.symbol, order.quantity, order.limitPrice, order.options);
     }
     catch (err) {
-        console.error(err.body ? err.body : err);
-        console.log(order);
+        logger('A:' + automation.id, err.body ? err.body : err);
+        logger('A:' + automation.id, order);
         return { type: 'error', text: `Order failed! ` + err.body ? err.body : err.message };
     }
 
@@ -302,7 +303,7 @@ async function placeOrder(settings, automation, action) {
         status: result.status
     })
 
-    if (automation.logs) console.log(savedOrder.get({ plain: true }));
+    if (automation.logs) logger('A:' + automation.id, savedOrder.get({ plain: true }));
 
     return { type: 'success', text: `Order #${result.orderId} placed with status ${result.status}` };
 }
@@ -311,14 +312,14 @@ async function gridEval(settings, automation) {
     automation.grids = automation.grids.sort((a, b) => a.id - b.id);
 
     if (LOGS)
-        console.log(`Beholder is in the GRID zone at ${automation.name}`);
+        logger('A:' + automation.id, `Beholder is in the GRID zone at ${automation.name}`);
 
     for (let i = 0; i < automation.grids.length; i++) {
         const grid = automation.grids[i];
         if (!eval(grid.conditions)) continue;
 
         if (automation.logs)
-            console.log(`Beholder evaluated a condition at ${automation.name} => ${grid.conditions}`);
+            logger('A:' + automation.id, `Beholder evaluated a condition at ${automation.name} => ${grid.conditions}`);
 
         automation.actions[0].orderTemplateId = grid.orderTemplateId;
 
@@ -336,7 +337,7 @@ async function gridEval(settings, automation) {
             await transaction.commit();
         } catch (err) {
             await transaction.rollback();
-            console.error(err);
+            logger('A:' + automation.id, err);
             return { type: 'error', text: `Beholder can't generate grids for ${automation.name}. ERR: ${err.message}` };
         }
 
@@ -457,7 +458,7 @@ async function withdrawCrypto(settings, automation, action) {
     try {
         const result = await exchange.withdraw(withdrawTemplate.coin, amount, withdrawTemplate.address, withdrawTemplate.network, withdrawTemplate.addressTag);
 
-        if (automation.logs) console.log(`WITHDRAW`, withdrawTemplate);
+        if (automation.logs) logger('A:' + automation.id, `WITHDRAW`, withdrawTemplate);
 
         return { type: 'success', text: `Withdraw #${result.id} realized successfully for ${withdrawTemplate.coin}` };
     } catch (err) {
@@ -467,7 +468,7 @@ async function withdrawCrypto(settings, automation, action) {
 
 async function sendTelegram(settings, automation) {
     await require('./utils/telegram')(settings, automation.name + ' has fired!');
-    if (automation.logs) console.log(`Telegram sent!`);
+    if (automation.logs) logger('A:' + automation.id, `Telegram sent!`);
     return { text: `Telegram sent from automation '${automation.name}'`, type: 'success' };
 }
 
@@ -483,8 +484,8 @@ function doAction(settings, action, automation) {
         }
     } catch (err) {
         if (automation.logs) {
-            console.error(`${automation.name}:${action.type}`);
-            console.error(err);
+            logger('A:' + automation.id, `${automation.name}:${action.type}`);
+            logger('A:' + automation.id, err);
         }
         return { text: `Error at ${automation.name}: ${err.message}`, type: 'error' };
     }
@@ -501,35 +502,35 @@ async function evalDecision(memoryKey, automation) {
         const invertedCondition = automation.name.startsWith('GRID') || automation.schedule ? '' : invertCondition(memoryKey, automation.conditions);
         const evalCondition = automation.conditions + (invertedCondition ? ' && ' + invertedCondition : '');
 
-        if (LOGS) console.log(`Beholder trying to evaluate:\n${evalCondition}\n at ${automation.name}`);
+        if (LOGS) logger('A:' + automation.id, `Beholder trying to evaluate:\n${evalCondition}\n at ${automation.name}`);
 
         const isValid = evalCondition ? eval(evalCondition) : true;
         if (!isValid) return false;
 
         if (!automation.actions || !automation.actions.length) {
-            if (LOGS || automation.logs) console.log(`No actions defined for automation ${automation.name}`);
+            if (LOGS || automation.logs) logger('A:' + automation.id, `No actions defined for automation ${automation.name}`);
             return false;
         }
 
         if ((LOGS || automation.logs) && automation.actions[0].type !== 'GRID')
-            console.log(`Beholder evaluated a condition at automation: ${automation.name} => ${automation.conditions}`);
+            logger('A:' + automation.id, `Beholder evaluated a condition at automation: ${automation.name} => ${automation.conditions}`);
 
         const settings = await getDefaultSettings();
         //TODO: implementar sincronismo aqui, para poder fazer compra seguida de venda
         let results = automation.actions.map(async (action) => {
             const result = await doAction(settings, action, automation);
-            if (automation.logs && result) console.log(`Result for action ${action.type} was ${JSON.stringify(result)}`);
+            if (automation.logs && result) logger('A:' + automation.id, `Result for action ${action.type} was ${JSON.stringify(result)}`);
             return result;
         })
 
         results = await Promise.all(results);
 
         if (automation.logs && results && results.length && results[0])
-            console.log(`Automation ${automation.name} finished execution at ${new Date()}`);
+            logger('A:' + automation.id, `Automation ${automation.name} finished execution at ${new Date()}`);
 
         return results;
     } catch (err) {
-        if (automation.logs) console.error(err);
+        if (automation.logs) logger('A:' + automation.id, err);
         return { type: 'error', text: `Error at evalDecision for '${automation.name}': ${err}` };
     }
 }
@@ -544,10 +545,10 @@ async function updateMemory(symbol, index, interval, value, executeAutomations =
     const memoryKey = `${symbol}:${indexKey}`;
     MEMORY[memoryKey] = value;
 
-    if (LOGS) console.log(`Beholder memory updated: ${memoryKey} => ${JSON.stringify(value)}`);
+    if (LOGS) logger('beholder', `Beholder memory updated: ${memoryKey} => ${JSON.stringify(value)}`);
 
     if (LOCK_BRAIN) {
-        if (LOGS) console.log(`Beholder brain is locked, sorry!`);
+        if (LOGS) logger('beholder', `Beholder brain is locked, sorry!`);
         return false;
     }
 
@@ -592,7 +593,7 @@ function deleteMemory(symbol, index, interval) {
         LOCK_MEMORY = true;
         delete MEMORY[memoryKey];
 
-        if (LOGS) console.log(`Beholder memory delete: ${memoryKey}!`);
+        if (LOGS) logger('beholder', `Beholder memory delete: ${memoryKey}!`);
     } finally {
         LOCK_MEMORY = false;
     }

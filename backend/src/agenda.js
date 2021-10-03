@@ -1,6 +1,7 @@
 const nodeSchedule = require('node-schedule');
 const beholder = require('./beholder');
 const automationsRepository = require('./repositories/automationsRepository');
+const logger = require('./utils/logger');
 
 let AGENDA = {};
 
@@ -12,7 +13,7 @@ function init(automations) {
         if (auto.isActive && auto.schedule)
             addSchedule(auto.get({ plain: true }));
     });
-    if (LOGS) console.log('Beholder Agenda has started!');
+    if (LOGS) logger('system', 'Beholder Agenda has started!');
 }
 
 function verifyCron(schedule) {
@@ -24,7 +25,7 @@ async function runSchedule(id) {
         const automation = await automationsRepository.getAutomation(id);
         let result = await beholder.evalDecision('', automation);
         result = result.filter(r => r);
-        if (LOGS || automation.logs) console.log(`The Scheduled Automation #${id} has fired at ${new Date()}!\n${JSON.stringify(result)}`);
+        if (LOGS || automation.logs) logger('A:' + id, `The Scheduled Automation #${id} has fired at ${new Date()}!\n${JSON.stringify(result)}`);
     } catch (err) {
         console.error(err);
     }
@@ -45,14 +46,14 @@ function addSchedule(automation) {
         });
     }
 
-    if (LOGS || automation.logs) console.log(`The Scheduled Automation #${automation.id} (${automation.schedule}) was added to agenda at ${new Date()}!`);
+    if (LOGS || automation.logs) logger('A:' + automation.id, `The Scheduled Automation #${automation.id} (${automation.schedule}) was added to agenda at ${new Date()}!`);
 }
 
 function cancelSchedule(id) {
     if (!AGENDA[id]) return;
     AGENDA[id].cancel();
     delete AGENDA[id];
-    if (LOGS) console.log(`The Schedule Automation #${id} was deleted from agenda at ${new Date()}!`);
+    if (LOGS) logger('A:' + id, `The Schedule Automation #${id} was deleted from agenda at ${new Date()}!`);
 }
 
 function getAgenda() {

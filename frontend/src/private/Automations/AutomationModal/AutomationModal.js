@@ -7,6 +7,8 @@ import { getIndexes } from '../../../services/BeholderService';
 import '../Automations.css';
 import ActionsArea from './ActionsArea/ActionsArea';
 import ScheduleArea from './ScheduleArea/ScheduleArea';
+import LogButton from '../../../components/Logs/LogButton';
+import LogView from '../../../components/Logs/LogView';
 
 /**
  * props:
@@ -71,6 +73,11 @@ function AutomationModal(props) {
             })
     }, [automation.symbol])
 
+    const [showLogs, setShowLogs] = useState(false);
+    function onLogClick(event) {
+        setShowLogs(!showLogs);
+    }
+
     return (
         <div className="modal fade" id="modalAutomation" tabIndex="-1" role="dialog" aria-labelledby="modalTitleNotify" aria-hidden="true">
             <div className="modal-dialog modal-dialog-centered" role="document">
@@ -98,42 +105,51 @@ function AutomationModal(props) {
                                 </div>
                             </div>
                             {
-                                automation.schedule
+                                !showLogs && automation.schedule
                                     ? <ScheduleArea schedule={automation.schedule} onChange={onInputChange} />
                                     : <React.Fragment></React.Fragment>
                             }
-                            <ul className="nav nav-tabs" id="tabs" role="tablist">
-                                <li className="nav-item" role="presentation">
-                                    <button className="nav-link active" id="conditions-tab" data-bs-toggle="tab" data-bs-target="#conditions" type="button" role="tab" aria-controls="home" aria-selected="true">
-                                        Conditions
-                                    </button>
-                                </li>
-                                <li className="nav-item" role="presentation">
-                                    <button className="nav-link" id="actions-tab" data-bs-toggle="tab" data-bs-target="#actions" type="button" role="tab" aria-controls="actions" aria-selected="false">
-                                        Actions
-                                    </button>
-                                </li>
-                            </ul>
-                            <div className="tab-content px-3 mb-3" id="tabContent">
-                                <div className="tab-pane fade show active pt-3" id="conditions" role="tabpanel" aria-labelledby="conditions-tab">
-                                    <ConditionsArea symbol={automation.symbol} conditions={automation.conditions} indexes={indexes} onChange={onInputChange} />
-                                </div>
-                                <div className="tab-pane fade" id="actions" role="tabpanel" aria-labelledby="actions-tab">
-                                    <ActionsArea symbol={automation.symbol} actions={automation.actions} onChange={onInputChange} />
-                                </div>
-                            </div>
-                            <div className="row">
-                                <div className="col-md-6">
-                                    <div className="form-group">
-                                        <SwitchInput id="isActive" text="Is Active?" onChange={onInputChange} isChecked={automation.isActive} />
-                                    </div>
-                                </div>
-                                <div className="col-md-6">
-                                    <div className="form-group">
-                                        <SwitchInput id="logs" text="Enable Logs?" onChange={onInputChange} isChecked={automation.logs} />
-                                    </div>
-                                </div>
-                            </div>
+                            {
+                                !showLogs
+                                    ? (
+                                        <React.Fragment>
+                                            <ul className="nav nav-tabs" id="tabs" role="tablist">
+                                                <li className="nav-item" role="presentation">
+                                                    <button className="nav-link active" id="conditions-tab" data-bs-toggle="tab" data-bs-target="#conditions" type="button" role="tab" aria-controls="home" aria-selected="true">
+                                                        Conditions
+                                                    </button>
+                                                </li>
+                                                <li className="nav-item" role="presentation">
+                                                    <button className="nav-link" id="actions-tab" data-bs-toggle="tab" data-bs-target="#actions" type="button" role="tab" aria-controls="actions" aria-selected="false">
+                                                        Actions
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                            <div className="tab-content px-3 mb-3" id="tabContent">
+                                                <div className="tab-pane fade show active pt-3" id="conditions" role="tabpanel" aria-labelledby="conditions-tab">
+                                                    <ConditionsArea symbol={automation.symbol} conditions={automation.conditions} indexes={indexes} onChange={onInputChange} />
+                                                </div>
+                                                <div className="tab-pane fade" id="actions" role="tabpanel" aria-labelledby="actions-tab">
+                                                    <ActionsArea symbol={automation.symbol} actions={automation.actions} onChange={onInputChange} />
+                                                </div>
+                                            </div>
+                                            <div className="row">
+                                                <div className="col-md-6">
+                                                    <div className="form-group">
+                                                        <SwitchInput id="isActive" text="Is Active?" onChange={onInputChange} isChecked={automation.isActive} />
+                                                    </div>
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <div className="form-group">
+                                                        <SwitchInput id="logs" text="Enable Logs?" onChange={onInputChange} isChecked={automation.logs} />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </React.Fragment>
+                                    )
+                                    : <LogView file={"A:" + automation.id} />
+                            }
+
                         </div>
                     </div>
                     <div className="modal-footer">
@@ -142,6 +158,7 @@ function AutomationModal(props) {
                                 ? <div className="alert alert-danger mt-1 col-9 py-1">{error}</div>
                                 : <React.Fragment></React.Fragment>
                         }
+                        <LogButton id={automation.id} onClick={onLogClick} />
                         <button ref={btnSave} type="button" className="btn btn-sm btn-primary" onClick={onSubmit}>Save</button>
                     </div>
                 </div>

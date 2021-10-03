@@ -6,23 +6,24 @@ const appEm = require('./app-em');
 const appWs = require('./app-ws');
 const beholder = require('./beholder');
 const agenda = require('./agenda');
+const logger = require('./utils/logger');
 
 (async () => {
-    console.log('Getting the default settings...');
+    logger('system', 'Getting the default settings...');
     const settings = await settingsRepository.getDefaultSettings()
     if (!settings) throw new Error(`There is no settings.`);
 
-    console.log('Initializing the Beholder Brain...');
+    logger('system', 'Initializing the Beholder Brain...');
 
     const automations = await automationsRepository.getActiveAutomations();
     beholder.init(automations);
 
-    console.log(`Starting the Beholder Agenda...`);
+    logger('system', `Starting the Beholder Agenda...`);
     agenda.init(automations);
 
-    console.log(`Starting the server apps...`);
+    logger('system', `Starting the server apps...`);
     const server = app.listen(process.env.PORT, () => {
-        console.log('App is running at ' + process.env.PORT);
+        logger('system', 'App is running at ' + process.env.PORT);
     })
 
     const wss = appWs(server);
