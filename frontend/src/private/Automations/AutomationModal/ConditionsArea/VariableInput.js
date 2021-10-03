@@ -30,8 +30,9 @@ function VariableInput(props) {
     }
 
     function onAddClick(event) {
+        const value = typeof index.example === 'string' ? `'${variable}'` : variable;
         const condition = {
-            eval: `${index.eval}${operator}${variable}`,
+            eval: `${index.eval}${operator}${value}`,
             text: getExpressionText()
         }
         props.onAddClick({ target: { id: 'condition', value: condition } });
