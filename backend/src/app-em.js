@@ -151,7 +151,7 @@ function processExecutionData(monitorId, executionData, broadcastLabel) {
                 notifyOrderUpdate(order);
 
                 const orderCopy = getLightOrder(updatedOrder.get({ plain: true }));
-                const results = await beholder.updateMemory(orderCopy.symbol, indexKeys.LAST_ORDER, null, orderCopy);
+                const results = await beholder.updateMemory(order.symbol, indexKeys.LAST_ORDER, null, orderCopy);
                 if (results) results.map(r => WSS.broadcast({ notification: r }));
                 if (broadcastLabel) WSS.broadcast({ [broadcastLabel]: order });
             }
@@ -161,6 +161,17 @@ function processExecutionData(monitorId, executionData, broadcastLabel) {
     }, 3000)
 }
 
+function processBalanceData(monitorId, broadcastLabel, logs, data) {
+    if (logs) logger('M:' + monitorId, data);
+
+    try {
+        const wallet = loadWallet();
+        if (broadcastLabel && WSS) WSS.broadcast({ [broadcastLabel]: wallet });
+    } catch (err) {
+        if (logs) logger('M:' + monitorId, err);
+    }
+}
+
 function startUserDataMonitor(monitorId, broadcastLabel, logs) {
     const [balanceBroadcast, executionBroadcast] = broadcastLabel ? broadcastLabel.split(',') : [null, null];
 
@@ -168,18 +179,10 @@ function startUserDataMonitor(monitorId, broadcastLabel, logs) {
 
     if (!exchange) return new Error('Exchange Monitor not initialized yet.');
     exchange.userDataStream(
-        balanceData => {
-            if (logs) logger('M:' + monitorId, balanceData);
-
-            try {
-                const wallet = loadWallet();
-                if (broadcastLabel && WSS) WSS.broadcast({ [balanceBroadcast]: wallet });
-            } catch (err) {
-                if (logs) logger('M:' + monitorId, err);
-            }
-        },
+        balanceData => processBalanceData(monitorId, balanceBroadcast, logs, balanceData),
         executionData => {
-            if (logs) logger('M:' + monitorId, executionData);
+            if (executionData.x === orderStatus.FILLED)
+                processBalanceData(monitorId, balanceBroadcast, logs, executionData);
             processExecutionData(monitorId, executionData, executionBroadcast);
         }
     )
