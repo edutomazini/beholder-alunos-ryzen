@@ -181,7 +181,7 @@ function startUserDataMonitor(monitorId, broadcastLabel, logs) {
     exchange.userDataStream(
         balanceData => processBalanceData(monitorId, balanceBroadcast, logs, balanceData),
         executionData => {
-            if (executionData.x === orderStatus.FILLED)
+            if (executionData.X === orderStatus.FILLED)
                 processBalanceData(monitorId, balanceBroadcast, logs, executionData);
             processExecutionData(monitorId, executionData, executionBroadcast);
         }
