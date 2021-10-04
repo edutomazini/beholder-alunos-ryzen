@@ -112,7 +112,7 @@ function Orders() {
                 </div>
                 <Footer />
             </main>
-            <ViewOrderModal data={viewOrder} />
+            <ViewOrderModal data={viewOrder} onCancel={onOrderSubmit} />
             <NewOrderModal onSubmit={onOrderSubmit} />
             <Toast type={notification.type} text={notification.text} />
         </React.Fragment>
