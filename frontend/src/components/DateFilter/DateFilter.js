@@ -18,6 +18,18 @@ function DateFilter(props) {
     const endDateRef = useRef('');
 
     useEffect(() => {
+        new window.Datepicker(document.getElementById("startDate"), {
+            buttonClass: 'btn',
+            format: 'dd/mm/yyyy'
+        });
+
+        new window.Datepicker(document.getElementById("endDate"), {
+            buttonClass: 'btn',
+            format: 'dd/mm/yyyy'
+        });
+    }, [])
+
+    useEffect(() => {
         startDateRef.current.value = props.startDate ? props.startDate : getDate(Date.now() - (30 * 24 * 60 * 60 * 1000));
         endDateRef.current.value = props.endDate ? props.endDate : getDate();
     }, [props.startDate, props.endDate])
