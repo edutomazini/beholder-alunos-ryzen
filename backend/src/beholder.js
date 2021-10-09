@@ -411,7 +411,10 @@ async function generateGrids(automation, levels, quantity, transaction) {
             icebergQtyMultiplier: 1
         }, transaction)
 
-    const currentPrice = parseFloat(MEMORY[`${automation.symbol}:BOOK`].current.bestAsk);
+    const book = MEMORY[`${automation.symbol}:BOOK`];
+    if (!book) throw new Error(`There is no book info for ${automation.symbol}`);
+    
+    const currentPrice = parseFloat(book.current.bestAsk);
     const differences = [];
 
     for (let i = 1; i <= levels; i++) {

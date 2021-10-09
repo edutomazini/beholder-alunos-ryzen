@@ -39,7 +39,7 @@ function GridModal(props) {
     const [grid, setGrid] = useState(DEFAULT_GRID);
 
     useEffect(() => {
-        if (!props.data || !props.data.grids) return;
+        if (!props.data || !props.data.grids || !props.data.length) return;
         setAutomation(props.data);
 
         if (!props.data.id) return setGrid(DEFAULT_GRID);
@@ -63,7 +63,14 @@ function GridModal(props) {
         setError('');
         const token = localStorage.getItem('token');
         getSymbol(automation.symbol, token)
-            .then(result => setSymbol(result))
+            .then(symbol => {
+                setSymbol(symbol);
+
+                if (grid.quantity === 'Min. Notional')
+                    inputTotal.current.value = `${symbol.minNotional}`;
+                else
+                    inputTotal.current.value = `${grid.quantity * grid.lowerLimit}`.substring(0, 10);
+            })
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message);
                 setError(err.response ? err.response.data : err.message);
@@ -117,24 +124,6 @@ function GridModal(props) {
         setError('');
         const token = localStorage.getItem('token');
 
-        const { current } = await getMemoryIndex(symbol.symbol, 'BOOK', null, token);
-        if (current) {
-            const minNotional = parseFloat(symbol.minNotional);
-            const minLotSize = parseFloat(symbol.minLotSize);
-            const qty = parseFloat(grid.quantity);
-
-            if (qty >= 0) {
-                if (qty < minLotSize)
-                    return setError('Min. Lot Size: ' + symbol.minLotSize);
-
-                const ask = parseFloat(current.bestAsk);
-                const bid = parseFloat(current.bestBid);
-                if (qty * bid < minNotional
-                    || qty * ask < minNotional)
-                    return setError('Min. Notional: ' + symbol.minNotional);
-            }
-        }
-
         automation.name = `GRID ${automation.symbol} #${grid.levels}`;
         automation.actions = [{ type: 'GRID' }];
         automation.indexes = `${automation.symbol}:BOOK`;
@@ -158,35 +147,35 @@ function GridModal(props) {
     }
 
     function onGridChange(event) {
-        const value = event.target.value === 'Min. Notional' ? 'MIN_NOTIONAL' : parseFloat(event.target.value);
+        const value = event.target.value === 'Min. Notional' ? 'MIN_NOTIONAL' : parseFloat(event.target.value.replace(',', '.'));
+        grid[event.target.id] = value;
+
         setGrid(prevState => ({ ...prevState, [event.target.id]: value }));
-        if (event.target.id === 'quantity') {
-            if (value < parseFloat(symbol.minLotSize)) {
-                setError('Min. Lot Size: ' + symbol.minLotSize);
+
+        if (event.target.id === 'quantity' && value < parseFloat(symbol.minLotSize)) {
+            setError('Min. Lot Size: ' + symbol.minLotSize);
+            btnSave.current.disabled = true;
+            return;
+        }
+        else if (event.target.id === 'quantity' || event.target.id === 'lowerLimit') {
+            const notional = grid.lowerLimit * grid.quantity;
+            inputTotal.current.value = `${notional}`.substring(0, 10);
+
+            if (notional < parseFloat(symbol.minNotional)) {
+                setError('Min. Notional: ' + symbol.minNotional);
                 btnSave.current.disabled = true;
-            }
-            else {
-                btnSave.current.disabled = false;
-                setError('');
+                return;
             }
         }
-    }
 
-    function onPriceChange(book) {
-        if (!grid.quantity || !book || !book.ask || !inputTotal.current) return;
-
-        const qty = parseFloat(grid.quantity);
-        const ask = parseFloat(book.ask);
-        if (!ask) return;
-
-        inputTotal.current.value = `${ask * qty}`.substring(0, 10);
+        btnSave.current.disabled = false;
+        setError('');
     }
 
     const [gridView, setGridView] = useState(false)
     function onViewGridsClick(event) {
         if (!gridView) setShowLogs(false);
         setGridView(!gridView);
-
     }
 
     const [showLogs, setShowLogs] = useState(false);
@@ -215,7 +204,7 @@ function GridModal(props) {
                                 <div className="col-md-6 mb-3">
                                     {
                                         isVisible
-                                            ? <SymbolPrice symbol={automation.symbol} onChange={onPriceChange} />
+                                            ? <SymbolPrice symbol={automation.symbol} />
                                             : <React.Fragment></React.Fragment>
                                     }
                                 </div>
@@ -261,7 +250,7 @@ function GridModal(props) {
                                             <div className="row">
                                                 <div className="col-md-6 mb-3">
                                                     <div className="form-group">
-                                                        <label htmlFor="total">Reference Price:</label>
+                                                        <label htmlFor="total">Notional Price:</label>
                                                         <input ref={inputTotal} className="form-control" id="total" type="number" placeholder="0" disabled />
                                                     </div>
                                                 </div>
