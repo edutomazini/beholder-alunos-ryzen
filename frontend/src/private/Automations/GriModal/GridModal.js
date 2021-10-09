@@ -140,7 +140,9 @@ function GridModal(props) {
         automation.indexes = `${automation.symbol}:BOOK`;
         automation.conditions = `MEMORY['${automation.symbol}:BOOK'].current.bestAsk>${grid.lowerLimit} && MEMORY['${automation.symbol}:BOOK'].current.bestBid<${grid.upperLimit}`;
 
-        saveGrid(automation.id, automation, grid.levels, grid.quantity, token)
+        const quantity = grid.quantity === 'Min. Notional' ? 'MIN_NOTIONAL' : grid.quantity;
+
+        saveGrid(automation.id, automation, grid.levels, quantity, token)
             .then(result => {
                 btnClose.current.click();
                 if (props.onSubmit) props.onSubmit(result);

@@ -249,7 +249,7 @@ async function placeOrder(settings, automation, action) {
     const quantity = calcQty(orderTemplate, price, symbol, false);
 
     if (!isFinite(quantity) || !quantity)
-        throw new Error(`Error in calcQty function, params: OTID ${orderTemplate.id}, $: ${price}, iceberg: false`);
+        throw new Error(`Error in calcQty function, params: OTID ${orderTemplate.id}, $: ${price}, qty: ${quantity} iceberg: false`);
 
     order.quantity = quantity;
 
@@ -257,7 +257,7 @@ async function placeOrder(settings, automation, action) {
         const icebergQty = calcQty(orderTemplate, price, symbol, true);
 
         if (!isFinite(icebergQty) || !icebergQty)
-            throw new Error(`Error in calcQty function, params: OTID ${orderTemplate.id}, $: ${price}, iceberg: true`);
+            throw new Error(`Error in calcQty function, params: OTID ${orderTemplate.id}, $: ${price}, qty: ${icebergQty}, iceberg: true`);
 
         order.options = { icebergQty };
     }
@@ -350,7 +350,6 @@ async function gridEval(settings, automation) {
 async function generateGrids(automation, levels, quantity, transaction) {
 
     await gridsRepository.deleteGrids(automation.id, transaction);
-    await orderTemplatesRepository.deleteOrderTemplatesByGridName(automation.name, transaction);
 
     const symbol = await getSymbol(automation.symbol);
     const tickSize = parseFloat(symbol.tickSize);
@@ -363,35 +362,54 @@ async function generateGrids(automation, levels, quantity, transaction) {
     const priceLevel = (upperLimit - lowerLimit) / levels;
     const grids = [];
 
-    const buyOrderTemplate = await orderTemplatesRepository.insertOrderTemplate({
-        name: automation.name + ' BUY',
-        symbol: automation.symbol,
-        type: 'MARKET',
-        side: 'BUY',
-        limitPrice: null,
-        limitPriceMultiplier: 1,
-        stopPrice: null,
-        stopPriceMultiplier: 1,
-        quantity,
-        quantityMultiplier: 1,
-        icebergQty: null,
-        icebergQtyMultiplier: 1
-    }, transaction)
+    let buyOrderTemplate, sellOrderTemplate;
+    const orderTemplates = await orderTemplatesRepository.getOrderTemplatesByGridName(automation.name);
 
-    const sellOrderTemplate = await orderTemplatesRepository.insertOrderTemplate({
-        name: automation.name + ' SELL',
-        symbol: automation.symbol,
-        type: 'MARKET',
-        side: 'SELL',
-        limitPrice: null,
-        limitPriceMultiplier: 1,
-        stopPrice: null,
-        stopPriceMultiplier: 1,
-        quantity,
-        quantityMultiplier: 1,
-        icebergQty: null,
-        icebergQtyMultiplier: 1
-    }, transaction)
+    if (orderTemplates && orderTemplates.length) {
+        buyOrderTemplate = orderTemplates.find(ot => ot.side === 'BUY');
+        if (buyOrderTemplate && buyOrderTemplate.quantity !== quantity) {
+            buyOrderTemplate.quantity = quantity;
+            await orderTemplatesRepository.updateOrderTemplate(buyOrderTemplate.id, buyOrderTemplate);
+        }
+
+        sellOrderTemplate = orderTemplates.find(ot => ot.side === 'SELL');
+        if (sellOrderTemplate && sellOrderTemplate.quantity !== quantity) {
+            sellOrderTemplate.quantity = quantity;
+            await orderTemplatesRepository.updateOrderTemplate(sellOrderTemplate.id, sellOrderTemplate);
+        }
+    }
+
+    if (!buyOrderTemplate)
+        buyOrderTemplate = await orderTemplatesRepository.insertOrderTemplate({
+            name: automation.name + ' BUY',
+            symbol: automation.symbol,
+            type: 'MARKET',
+            side: 'BUY',
+            limitPrice: null,
+            limitPriceMultiplier: 1,
+            stopPrice: null,
+            stopPriceMultiplier: 1,
+            quantity,
+            quantityMultiplier: 1,
+            icebergQty: null,
+            icebergQtyMultiplier: 1
+        }, transaction)
+
+    if (!sellOrderTemplate)
+        sellOrderTemplate = await orderTemplatesRepository.insertOrderTemplate({
+            name: automation.name + ' SELL',
+            symbol: automation.symbol,
+            type: 'MARKET',
+            side: 'SELL',
+            limitPrice: null,
+            limitPriceMultiplier: 1,
+            stopPrice: null,
+            stopPriceMultiplier: 1,
+            quantity,
+            quantityMultiplier: 1,
+            icebergQty: null,
+            icebergQtyMultiplier: 1
+        }, transaction)
 
     const currentPrice = parseFloat(MEMORY[`${automation.symbol}:BOOK`].current.bestAsk);
     const differences = [];

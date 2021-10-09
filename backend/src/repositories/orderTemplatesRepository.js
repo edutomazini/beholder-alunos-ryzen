@@ -81,11 +81,20 @@ function deleteOrderTemplatesByGridName(gridName, transaction) {
     })
 }
 
+
+function getOrderTemplatesByGridName(gridName) {
+    const likeName = gridName.split('#')[0];
+    return orderTemplateModel.findAll({
+        where: { name: { [Sequelize.Op.like]: `${likeName}#%` } }
+    })
+}
+
 module.exports = {
     getOrderTemplate,
     getOrderTemplates,
     insertOrderTemplate,
     updateOrderTemplate,
     deleteOrderTemplate,
-    deleteOrderTemplatesByGridName
+    deleteOrderTemplatesByGridName,
+    getOrderTemplatesByGridName
 }
