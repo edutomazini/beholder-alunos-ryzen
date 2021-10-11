@@ -11,7 +11,6 @@ module.exports = (settings) => {
         APIKEY: settings.accessKey,
         APISECRET: settings.secretKey,
         recvWindow: 60000,
-        useServerTime: true,
         urls: {
             base: settings.apiUrl.endsWith('/') ? settings.apiUrl : settings.apiUrl + '/',
             stream: settings.streamUrl.endsWith('/') ? settings.streamUrl : settings.streamUrl + '/'

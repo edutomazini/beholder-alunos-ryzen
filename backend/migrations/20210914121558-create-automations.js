@@ -40,7 +40,7 @@ module.exports = {
   });
 
     await queryInterface.addIndex('automations', ['name', 'symbol'], {
-      name: 'monitors_symbol_name_index',
+      name: 'automations_symbol_name_index',
       unique: true
     })
   },
