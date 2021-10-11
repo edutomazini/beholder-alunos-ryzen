@@ -161,21 +161,21 @@ function processExecutionData(monitorId, executionData, broadcastLabel) {
     }, 3000)
 }
 
-function processBalanceData(monitorId, broadcastLabel, logs, data) {
+async function processBalanceData(monitorId, broadcastLabel, logs, data) {
     if (logs) logger('M:' + monitorId, data);
 
     try {
-        const wallet = loadWallet();
+        const wallet = await loadWallet();
         if (broadcastLabel && WSS) WSS.broadcast({ [broadcastLabel]: wallet });
     } catch (err) {
         if (logs) logger('M:' + monitorId, err);
     }
 }
 
-function startUserDataMonitor(monitorId, broadcastLabel, logs) {
+async function startUserDataMonitor(monitorId, broadcastLabel, logs) {
     const [balanceBroadcast, executionBroadcast] = broadcastLabel ? broadcastLabel.split(',') : [null, null];
 
-    loadWallet();
+    await loadWallet();
 
     if (!exchange) return new Error('Exchange Monitor not initialized yet.');
     exchange.userDataStream(

@@ -55,6 +55,7 @@ function AutomationModal(props) {
 
     useEffect(() => {
         if (!automation || !automation.symbol) return;
+        
         const token = localStorage.getItem('token');
         getIndexes(token)
             .then(indexes => {

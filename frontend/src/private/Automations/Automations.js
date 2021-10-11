@@ -34,7 +34,7 @@ function Automations() {
     const [notification, setNotification] = useState({ type: '', text: '' });
 
     const DEFAULT_AUTOMATION = {
-        symbol: "BTCUSDT",
+        symbol: "",
         conditions: "",
         actions: [],
         name: '',
