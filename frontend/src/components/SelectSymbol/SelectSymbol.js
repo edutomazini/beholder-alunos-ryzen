@@ -37,6 +37,9 @@ function SelectSymbol(props) {
                     ? symbolObjects.filter(s => s.isFavorite).map(s => s.symbol)
                     : symbolObjects.map(s => s.symbol);
 
+                if (onlyFavorites && !symbolNames.length)
+                    setOnlyFavorites(false);
+
                 if (symbolNames.length) {
                     setSymbols(symbolNames);
                     selectRef.current.value = symbolNames[0];
