@@ -413,7 +413,7 @@ async function generateGrids(automation, levels, quantity, transaction) {
 
     const book = MEMORY[`${automation.symbol}:BOOK`];
     if (!book) throw new Error(`There is no book info for ${automation.symbol}`);
-    
+
     const currentPrice = parseFloat(book.current.bestAsk);
     const differences = [];
 
@@ -567,7 +567,7 @@ async function updateMemory(symbol, index, interval, value, executeAutomations =
     const memoryKey = `${symbol}:${indexKey}`;
     MEMORY[memoryKey] = value;
 
-    if (LOGS) logger('beholder', `Beholder memory updated: ${memoryKey} => ${JSON.stringify(value)}`);
+    if (LOGS) logger('beholder', `Beholder memory updated: ${memoryKey} => ${JSON.stringify(value)}, will exec autos? ${executeAutomations}`);
 
     if (LOCK_BRAIN) {
         if (LOGS) logger('beholder', `Beholder brain is locked, sorry!`);
@@ -577,7 +577,10 @@ async function updateMemory(symbol, index, interval, value, executeAutomations =
     if (!executeAutomations) return false;
 
     const automations = findAutomations(memoryKey);
-    if (!automations || !automations.length || LOCK_BRAIN) return false;
+    if (!automations || !automations.length || LOCK_BRAIN) {
+        if (LOGS) console.log(`Beholder has no automations for memoryKey: ${memoryKey}`);
+        return false;
+    }
 
     LOCK_BRAIN = true;
     let results;

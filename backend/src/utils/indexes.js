@@ -208,14 +208,19 @@ function execCalc(indexName, ohlc, ...params) {
     }
 }
 
-function insideCandle(ohlc, bars = 1) {
-    const last = ohlc.high.length - 1;
+function getInsideCandle(ohlc, last, bars) {
     let hasInsideCandle = ohlc.high[last] < ohlc.high[last - 1] && ohlc.low[last] > ohlc.low[last - 1];
     if (hasInsideCandle && bars > 1) {
         for (let i = 1; i < bars; i++)
             hasInsideCandle = hasInsideCandle && ohlc.high[last - i] < ohlc.high[last - i - 1] && ohlc.low[last - i] > ohlc.low[last - i - 1];
     }
     return hasInsideCandle;
+}
+
+function insideCandle(ohlc, bars = 1) {
+    const current = getInsideCandle(ohlc, ohlc.high.length - 1, bars);
+    const previous = getInsideCandle(ohlc, ohlc.high.length - 2, bars);
+    return { current, previous };
 }
 
 function abandonedBaby(ohlc) {
