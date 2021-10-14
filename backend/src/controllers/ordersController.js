@@ -12,7 +12,7 @@ async function getOrders(req, res, next) {
 
 async function placeOrder(req, res, next) {
     const id = res.locals.token.id;
-    const settings = await settingsRepository.getSetingsDecrypted(id);
+    const settings = await settingsRepository.getSettingsDecrypted(id);
     const exchange = require('../utils/exchange')(settings.get({ plain: true }));
 
     const { side, symbol, quantity, price, type, options, automationId } = req.body;
@@ -49,7 +49,7 @@ async function placeOrder(req, res, next) {
 
 async function cancelOrder(req, res, next) {
     const id = res.locals.token.id;
-    const settings = await settingsRepository.getSetingsDecrypted(id);
+    const settings = await settingsRepository.getSettingsDecrypted(id);
     const exchange = require('../utils/exchange')(settings);
 
     const { symbol, orderId } = req.params;
@@ -70,7 +70,7 @@ async function cancelOrder(req, res, next) {
 
 async function syncOrder(req, res, next) {
     const id = res.locals.token.id;
-    const settings = await settingsRepository.getSetingsDecrypted(id);
+    const settings = await settingsRepository.getSettingsDecrypted(id);
     const exchange = require('../utils/exchange')(settings);
 
     const beholderOrderId = req.params.id;
