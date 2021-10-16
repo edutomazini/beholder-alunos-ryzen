@@ -279,12 +279,12 @@ function getLightTicker(data) {
     delete data.firstTradeId;
     delete data.lastTradeId;
     delete data.numTrades;
-    delete data.quoteVolume;
     delete data.closeQty;
     delete data.bestBidQty;
     delete data.bestAskQty;
-    delete data.volume;
 
+    data.quoteVolume = parseFloat(data.quoteVolume);
+    data.volume = parseFloat(data.volume);
     data.priceChange = parseFloat(data.priceChange);
     data.percentChange = parseFloat(data.percentChange);
     data.averagePrice = parseFloat(data.averagePrice);
