@@ -110,7 +110,7 @@ async function insertAutomation(req, res, next) {
 
     if (savedAutomation.isActive) {
         if (savedAutomation.schedule)
-            agenda.cancelSchedule(savedAutomation.id);
+            agenda.addSchedule(savedAutomation.get({ plain: true }));
         else
             beholder.updateBrain(savedAutomation);
     }

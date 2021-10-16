@@ -305,7 +305,7 @@ async function placeOrder(settings, automation, action) {
 
     if (automation.logs) logger('A:' + automation.id, savedOrder.get({ plain: true }));
 
-    return { type: 'success', text: `Order #${result.orderId} placed with status ${result.status}` };
+    return { type: 'success', text: `Order ${order.side} ${order.symbol} ${result.status}` };
 }
 
 async function gridEval(settings, automation) {

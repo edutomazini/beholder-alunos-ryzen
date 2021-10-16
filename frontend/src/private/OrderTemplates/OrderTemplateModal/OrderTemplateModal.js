@@ -9,6 +9,7 @@ import PriceTemplate from './PriceTemplate';
 import QuantityTemplate from './QuantityTemplate';
 
 export const DEFAULT_ORDER_TEMPLATE = {
+    id: 0,
     name: '',
     symbol: 'BTCUSDT',
     type: 'MARKET',

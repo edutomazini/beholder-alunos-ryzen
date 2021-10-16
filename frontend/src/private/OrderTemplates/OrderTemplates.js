@@ -47,7 +47,6 @@ function OrderTemplates() {
             .then(result => {
                 setOrderTemplates(result.rows ? result.rows : []);
                 setCount(result.count);
-                setEditOrderTemplate(result.rows && result.rows.length ? result.rows[0] : []);
             })
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message);
