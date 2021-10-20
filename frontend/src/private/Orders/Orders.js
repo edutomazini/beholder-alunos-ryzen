@@ -63,8 +63,9 @@ function Orders() {
 
     function onViewClick(event) {
         const id = event.target.id.replace('view', '');
+        const order = orders.find(o => o.id == id);
         // eslint-disable-next-line
-        setViewOrder(orders.find(o => o.id == id));
+        setViewOrder({...order});
     }
 
     function onOrderSubmit(order) {

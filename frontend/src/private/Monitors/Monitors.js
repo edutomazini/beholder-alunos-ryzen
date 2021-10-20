@@ -62,7 +62,8 @@ function Monitors() {
 
     function onEditClick(event) {
         const id = event.target.id.replace('edit', '');
-        setEditMonitor(monitors.find(m => m.id == id));
+        const monitor = monitors.find(m => m.id == id);
+        setEditMonitor({ ...monitor });
     }
 
     function onLogsClick(event) {

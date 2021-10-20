@@ -63,7 +63,7 @@ function OrderTemplates() {
         const id = event.target.id.replace('edit', '');
         // eslint-disable-next-line
         const orderTemplate = orderTemplates.find(o => o.id == id);
-        setEditOrderTemplate(orderTemplate);
+        setEditOrderTemplate({...orderTemplate});
     }
 
     function onDeleteClick(event) {

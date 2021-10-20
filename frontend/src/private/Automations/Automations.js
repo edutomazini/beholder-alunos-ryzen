@@ -62,7 +62,7 @@ function Automations() {
     function onEditClick(event) {
         const id = event.target.id.replace('edit', '');
         const automation = automations.find(m => m.id == id);
-        setEditAutomation(automation);
+        setEditAutomation({ ...automation });
     }
 
     function onStopClick(event) {

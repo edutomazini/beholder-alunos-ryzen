@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger');
 
 module.exports = (req, res, next) => {
+    if(!process.env.JWT_SECRET) return res.status(500).json('No JWT Secret.');
+
     const token = req.headers['authorization'];
     if (token) {
         try {
@@ -14,7 +16,7 @@ module.exports = (req, res, next) => {
                 }
             }
         } catch (err) {
-            if (err instanceof jwt.TokenExpiredError)
+            if (err instanceof jwt.TokenExpiredError || err instanceof jwt.JsonWebTokenError)
                 logger('system', err.message);
             else
                 logger('system', err);

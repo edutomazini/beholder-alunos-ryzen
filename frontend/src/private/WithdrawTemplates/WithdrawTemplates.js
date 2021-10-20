@@ -61,7 +61,7 @@ function WithdrawTemplates() {
         const id = event.target.id.replace('edit', '');
         // eslint-disable-next-line
         const template = withdrawTemplates.find(o => o.id == id);
-        setEditWithdrawTemplate(template);
+        setEditWithdrawTemplate({...template});
     }
 
     function onDeleteClick(event) {

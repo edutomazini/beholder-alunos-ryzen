@@ -89,7 +89,7 @@ function Symbols() {
     function onViewClick(event) {
         const coinpair = event.target.id.replace("view", "");
         const symbol = symbols.find(s => s.symbol === coinpair);
-        setViewSymbol(symbol);
+        setViewSymbol({...symbol});
     }
 
     return (

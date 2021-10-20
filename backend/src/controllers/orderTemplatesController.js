@@ -24,7 +24,7 @@ async function insertOrderTemplate(req, res, next) {
     const newOrderTemplate = req.body;
 
     if (!validatePrice(newOrderTemplate.limitPrice) || !validatePrice(newOrderTemplate.stopPrice))
-        return res.status(400).json("Invalid price.");
+        return res.status(400).json(`Invalid price.`);
 
         newOrderTemplate.quantity = newOrderTemplate.quantity ? newOrderTemplate.quantity.replace(',', '.') : newOrderTemplate.quantity;
 
