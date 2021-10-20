@@ -24,7 +24,10 @@ async function runSchedule(id) {
     try {
         const automation = await automationsRepository.getAutomation(id);
         let result = await beholder.evalDecision('', automation);
-        result = result.filter(r => r);
+
+        if (Array.isArray(result) && result.length)
+            result = result.filter(r => r);
+
         if (LOGS || automation.logs) logger('A:' + id, `The Scheduled Automation #${id} has fired at ${new Date()}!\n${JSON.stringify(result)}`);
     } catch (err) {
         console.error(err);
