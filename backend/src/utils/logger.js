@@ -1,4 +1,5 @@
 const winston = require('winston');
+const Socket = require('ws');
 const path = require('path');
 
 const LOGGERS = {};
@@ -37,7 +38,7 @@ module.exports = (loggerKey, data) => {
         LOGGERS[loggerKey] = logger;
     }
 
-    if (data instanceof Error) {
+    if (data instanceof Error || data instanceof Socket) {
         logger.info(new Date().toISOString());
         return logger.error(data);
     }
