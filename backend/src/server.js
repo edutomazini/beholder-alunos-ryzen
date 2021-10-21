@@ -9,6 +9,12 @@ const agenda = require('./agenda');
 const logger = require('./utils/logger');
 
 (async () => {
+    const version = process.version.replace('v', '').split('.')[0];
+    if (parseInt(version) < 14) {
+        console.log(`Your Node.js version is ${process.version}. Beholder is compatible with Node 14+.`);
+        process.exit(0);
+    }
+
     logger('system', 'Getting the default settings...');
     const settings = await settingsRepository.getDefaultSettings()
     if (!settings) throw new Error(`There is no settings.`);
@@ -29,14 +35,5 @@ const logger = require('./utils/logger');
     const wss = appWs(server);
 
     appEm.init(settings, wss, beholder);
-
-    // setTimeout(async () => {
-    //     try {
-    //         const result = await beholder.placeOrder(settings, automations[0], automations[0].actions[0]);
-    //         console.log(result);
-    //     } catch (err) {
-    //         console.error(err);
-    //     }
-    // }, 5000)
 
 })();

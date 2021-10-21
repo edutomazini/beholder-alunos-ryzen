@@ -591,9 +591,10 @@ async function updateMemory(symbol, index, interval, value, executeAutomations =
         });
 
         results = await Promise.all(promises);
-        results = results.flat().filter(r => r);
+        if (Array.isArray(results) && results.length)
+            results = results.flat().filter(r => r);
 
-        if (!results || !results.length)
+        if (!results || (Array.isArray(results) && !results.length))
             return false;
         else
             return results;

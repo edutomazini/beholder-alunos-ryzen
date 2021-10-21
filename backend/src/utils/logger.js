@@ -1,6 +1,6 @@
 const winston = require('winston');
-const Socket = require('ws');
 const path = require('path');
+const util = require('util');
 
 const LOGGERS = {};
 
@@ -38,12 +38,12 @@ module.exports = (loggerKey, data) => {
         LOGGERS[loggerKey] = logger;
     }
 
-    if (data instanceof Error || data instanceof Socket) {
+    if (data instanceof Error) {
         logger.info(new Date().toISOString());
         return logger.error(data);
     }
     else if (typeof data === 'object') {
-        return logger.info(new Date().toISOString() + " - " + JSON.stringify(data));
+        return logger.info(new Date().toISOString() + " - " + util.inspect(data));
     }
     else
         return logger.info(new Date().toISOString() + " - " + data);
