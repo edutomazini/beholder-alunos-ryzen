@@ -25,7 +25,7 @@ function SelectSymbol(props) {
     }
 
     useEffect(() => {
-        selectRef.current.value = props.symbol || 'BTCUSDT';
+        selectRef.current.value = props.symbol;
         buttonRef.current.disabled = selectRef.current.disabled = props.disabled;
     }, [props.symbol])
 
@@ -63,6 +63,7 @@ function SelectSymbol(props) {
                     </svg>
                 </button>
                 <select ref={selectRef} id="symbol" className="form-select pe-5" onChange={props.onChange}>
+                    <option value="">Select...</option>
                     {symbols.map(s => (<option key={s} value={s}>{s}</option>))}
                 </select>
             </div>
