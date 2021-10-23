@@ -69,7 +69,9 @@ function startBookMonitor(monitorId, broadcastLabel, logs) {
 }
 
 async function loadWallet() {
-    if (!exchange) return new Error('Exchange Monitor not initialized yet.');
+    if (!exchange) throw new Error('Exchange Monitor not initialized yet.');
+
+    try{
     const info = await exchange.balance();
     const wallet = Object.entries(info).map(async (item) => {
         const results = await beholder.updateMemory(item[0], indexKeys.WALLET, null, parseFloat(item[1].available));
@@ -81,7 +83,10 @@ async function loadWallet() {
             onOrder: item[1].onOrder
         }
     })
-    return wallet;
+    return Promise.all(wallet);
+  } catch (err) {
+      throw new Error(err.response ? err.response.data : err.message);//evita 401 da Binance
+  }
 }
 
 function getLightOrder(order) {
