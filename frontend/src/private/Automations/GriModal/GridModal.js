@@ -39,7 +39,7 @@ function GridModal(props) {
     const [grid, setGrid] = useState(DEFAULT_GRID);
 
     useEffect(() => {
-        if (!props.data || !props.data.grids || !props.data.grids.length) return;
+        if (!props.data) return;
         setAutomation(props.data);
 
         if (!props.data.id) return setGrid(DEFAULT_GRID);
