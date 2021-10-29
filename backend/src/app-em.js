@@ -85,7 +85,7 @@ async function loadWallet() {
     })
     return Promise.all(wallet);
   } catch (err) {
-      throw new Error(err.response ? err.response.data : err.message);//evita 401 da Binance
+      throw new Error(err.body ? err.body : err.message);//evita 401 da Binance
   }
 }
 

@@ -677,7 +677,7 @@ function getEval(prop) {
 
 function getMemoryIndexes() {
     return Object.entries(flattenObject(MEMORY)).map(prop => {
-        if (prop[0].indexOf('previous') !== -1) return false;
+        if (prop[0].indexOf('previous') !== -1 || prop[0].indexOf(':') === -1) return false;
         const propSplit = prop[0].split(':');
         return {
             symbol: propSplit[0],

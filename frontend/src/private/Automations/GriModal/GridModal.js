@@ -42,7 +42,7 @@ function GridModal(props) {
         if (!props.data) return;
         setAutomation(props.data);
 
-        if (!props.data.id) return setGrid(DEFAULT_GRID);
+        if (!props.data.id || !props.data.grids || !props.data.grids.length) return setGrid(DEFAULT_GRID);
 
         const conditionSplit = props.data.conditions.split(' && ');
         if (!conditionSplit || conditionSplit.length < 2) return;
