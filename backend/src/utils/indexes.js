@@ -204,7 +204,7 @@ function execCalc(indexName, ohlc, ...params) {
         case indexKeys.WILLIAMS_R: return williamsR(ohlc, ...params);
         case indexKeys.WEMA: return WEMA(ohlc.close, ...params);
         case indexKeys.WMA: return WMA(ohlc.close, ...params);
-        default: throw new Error(`Unknown index name!`);
+        default: throw new Error(`Unknown index name: ${indexName}`);
     }
 }
 

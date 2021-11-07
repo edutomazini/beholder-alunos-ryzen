@@ -85,6 +85,10 @@ function validateMonitor(newMonitor) {
 
 async function insertMonitor(req, res, next) {
     const newMonitor = validateMonitor(req.body);
+
+    const alreadyExists = await monitorsRepository.monitorExists(newMonitor.type, newMonitor.symbol, newMonitor.interval);
+    if (alreadyExists) res.status(409).send(`Already exists a monitor with these params.`);
+
     const monitor = await monitorsRepository.insertMonitor(newMonitor);
 
     if (monitor.isActive) {

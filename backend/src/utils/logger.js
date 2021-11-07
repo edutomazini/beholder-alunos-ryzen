@@ -6,6 +6,7 @@ const LOGGERS = {};
 
 function createLogger(loggerKey) {
     loggerKey = loggerKey.replace(':', '');//fix para windows
+    if(!loggerKey.endsWith('.log')) loggerKey = loggerKey + ".log";
 
     const logger = winston.createLogger({
         format: winston.format.combine(
@@ -14,7 +15,7 @@ function createLogger(loggerKey) {
         ),
         transports: [
             new winston.transports.File({
-                filename: path.resolve(__dirname, "..", "..", "logs", loggerKey + ".log"), 
+                filename: path.resolve(__dirname, "..", "..", "logs", loggerKey), 
                 maxsize: 1024 * 1024,
                 maxFiles: 1,
                 tailable: true
@@ -32,7 +33,9 @@ function createLogger(loggerKey) {
 }
 
 module.exports = (loggerKey, data) => {
-    let logger = LOGGERS[loggerKey.replace(':', '')];//fix para windows
+    loggerKey = loggerKey.replace(':', '').replace('.log', '')
+
+    let logger = LOGGERS[loggerKey];
     if (!logger) {
         logger = createLogger(loggerKey);
         LOGGERS[loggerKey] = logger;
