@@ -517,16 +517,19 @@ async function evalDecision(memoryKey, automation) {
 
     try {
         const indexes = automation.indexes ? automation.indexes.split(',') : [];
-        const isChecked = indexes.every(ix => MEMORY[ix] !== null && MEMORY[ix] !== undefined);
-        if (!isChecked) return false;
 
-        const invertedCondition = automation.name.startsWith('GRID') || automation.schedule ? '' : invertCondition(memoryKey, automation.conditions);
-        const evalCondition = automation.conditions + (invertedCondition ? ' && ' + invertedCondition : '');
+        if (indexes.length) {
+            const isChecked = indexes.every(ix => MEMORY[ix] !== null && MEMORY[ix] !== undefined);
+            if (!isChecked) return false;
 
-        if (LOGS) logger('A:' + automation.id, `Beholder trying to evaluate:\n${evalCondition}\n at ${automation.name}`);
+            const invertedCondition = automation.name.startsWith('GRID') || automation.schedule ? '' : invertCondition(memoryKey, automation.conditions);
+            const evalCondition = automation.conditions + (invertedCondition ? ' && ' + invertedCondition : '');
 
-        const isValid = evalCondition ? eval(evalCondition) : true;
-        if (!isValid) return false;
+            if (LOGS) logger('A:' + automation.id, `Beholder trying to evaluate:\n${evalCondition}\n at ${automation.name}`);
+
+            const isValid = evalCondition ? eval(evalCondition) : true;
+            if (!isValid) return false;
+        }
 
         if (!automation.actions || !automation.actions.length) {
             if (LOGS || automation.logs) logger('A:' + automation.id, `No actions defined for automation ${automation.name}`);
@@ -537,7 +540,7 @@ async function evalDecision(memoryKey, automation) {
             logger('A:' + automation.id, `Beholder evaluated a condition at automation: ${automation.name} => ${automation.conditions}`);
 
         const settings = await getDefaultSettings();
-        //TODO: implementar sincronismo aqui, para poder fazer compra seguida de venda
+
         let results = automation.actions.map(async (action) => {
             const result = await doAction(settings, action, automation);
             if (automation.logs && result) logger('A:' + automation.id, `Result for action ${action.type} was ${JSON.stringify(result)}`);
