@@ -15,7 +15,7 @@ async function placeOrder(req, res, next) {
     const settings = await settingsRepository.getSettingsDecrypted(id);
     const exchange = require('../utils/exchange')(settings.get({ plain: true }));
 
-    const { side, symbol, quantity, price, type, options, automationId } = req.body;
+    const { side, symbol, quantity, price, options, automationId } = req.body;
 
     let result;
 
@@ -33,7 +33,7 @@ async function placeOrder(req, res, next) {
         automationId,
         symbol,
         quantity,
-        type,
+        type: options ? options.type : 'MARKET',
         side,
         limitPrice: price,
         stopPrice: options ? options.stopPrice : null,
@@ -41,7 +41,7 @@ async function placeOrder(req, res, next) {
         orderId: result.orderId,
         clientOrderId: result.clientOrderId,
         transactTime: result.transactTime,
-        status: result.status
+        status: result.status || 'NEW'
     })
 
     res.status(201).json(order.get({ plain: true }));

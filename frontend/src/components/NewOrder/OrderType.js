@@ -7,6 +7,11 @@ import React, { useMemo } from 'react';
  */
 function OrderType(props) {
 
+    /**
+     * <option value="STOP_LOSS">Stop Loss</option>
+     * <option value="TAKE_PROFIT">Take Profit</option>
+     */
+
     const orderType = useMemo(() => {
         return (
             <div className="form-group">
@@ -15,9 +20,7 @@ function OrderType(props) {
                     <option value="ICEBERG">Iceberg</option>
                     <option value="LIMIT">Limit</option>
                     <option value="MARKET">Market</option>
-                    <option value="STOP_LOSS">Stop Loss</option>
                     <option value="STOP_LOSS_LIMIT">Stop Loss Limit</option>
-                    <option value="TAKE_PROFIT">Take Profit</option>
                     <option value="TAKE_PROFIT_LIMIT">Take Profit Limit</option>
                 </select>
             </div>

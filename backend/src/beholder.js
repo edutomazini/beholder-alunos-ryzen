@@ -235,7 +235,9 @@ async function placeOrder(settings, automation, action) {
     const order = {
         symbol: orderTemplate.symbol.toUpperCase(),
         side: orderTemplate.side.toUpperCase(),
-        type: orderTemplate.type.toUpperCase()
+        options: {
+            type: orderTemplate.type.toUpperCase()
+        }
     }
 
     const price = calcPrice(orderTemplate, symbol, false);
@@ -243,7 +245,7 @@ async function placeOrder(settings, automation, action) {
     if (!isFinite(price) || !price)
         throw new Error(`Error in calcPrice function, params: OTID ${orderTemplate.id}, $: ${price}, stop: false`);
 
-    if (LIMIT_TYPES.includes(order.type))
+    if (LIMIT_TYPES.includes(order.options.type))
         order.limitPrice = price;
 
     const quantity = calcQty(orderTemplate, price, symbol, false);
@@ -253,21 +255,21 @@ async function placeOrder(settings, automation, action) {
 
     order.quantity = quantity;
 
-    if (order.type === 'ICEBERG') {
+    if (order.options.type === 'ICEBERG') {
         const icebergQty = calcQty(orderTemplate, price, symbol, true);
 
         if (!isFinite(icebergQty) || !icebergQty)
             throw new Error(`Error in calcQty function, params: OTID ${orderTemplate.id}, $: ${price}, qty: ${icebergQty}, iceberg: true`);
 
-        order.options = { icebergQty };
+        order.options.icebergQty = icebergQty;
     }
-    else if (STOP_TYPES.includes(order.type)) {
+    else if (STOP_TYPES.includes(order.options.type)) {
         const stopPrice = calcPrice(orderTemplate, symbol, true);
 
         if (!isFinite(stopPrice) || !stopPrice)
             throw new Error(`Error in calcPrice function, params: OTID ${orderTemplate.id}, $: ${stopPrice}, stop: true`);
 
-        order.options = { stopPrice, type: order.type };
+        order.options.stopPrice = stopPrice;
     }
 
     if (!hasEnoughAssets(symbol, order, price))
@@ -292,7 +294,7 @@ async function placeOrder(settings, automation, action) {
         automationId: automation.id,
         symbol: order.symbol,
         quantity: order.quantity,
-        type: order.type,
+        type: order.options.type,
         side: order.side,
         limitPrice: LIMIT_TYPES.includes(order.type) ? order.limitPrice : null,
         stopPrice: STOP_TYPES.includes(order.type) ? order.options.stopPrice : null,
@@ -300,7 +302,7 @@ async function placeOrder(settings, automation, action) {
         orderId: result.orderId,
         clientOrderId: result.clientOrderId,
         transactTime: result.transactTime,
-        status: result.status
+        status: result.status || 'NEW'
     })
 
     if (automation.logs) logger('A:' + automation.id, savedOrder.get({ plain: true }));
@@ -522,7 +524,7 @@ async function evalDecision(memoryKey, automation) {
             const isChecked = indexes.every(ix => MEMORY[ix] !== null && MEMORY[ix] !== undefined);
             if (!isChecked) return false;
 
-            const invertedCondition = automation.name.startsWith('GRID') || automation.schedule ? '' : invertCondition(memoryKey, automation.conditions);
+            const invertedCondition = automation.actions[0].type !== 'GRID' || automation.schedule ? '' : invertCondition(memoryKey, automation.conditions);
             const evalCondition = automation.conditions + (invertedCondition ? ' && ' + invertedCondition : '');
 
             if (LOGS) logger('A:' + automation.id, `Beholder trying to evaluate:\n${evalCondition}\n at ${automation.name}`);

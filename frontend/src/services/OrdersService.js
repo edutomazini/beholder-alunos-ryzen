@@ -28,12 +28,19 @@ export async function placeOrder(order, token) {
         symbol: order.symbol.toUpperCase(),
         quantity: order.quantity,
         side: order.side.toUpperCase(),
-        type: order.type.toUpperCase()
+        options: {
+            type: order.type.toUpperCase()
+        }
     }
 
-    if (order.type !== "MARKET") postOrder.price = order.price;
-    else if (order.type === "ICEBERG") postOrder.options = { icebergQty: order.icebergQty };
-    else if (STOP_TYPES.indexOf(order.type) !== -1) postOrder.options = { stopPrice: order.stopPrice, type: postOrder.type };
+    if (['LIMIT', 'STOP_LOSS_LIMIT', 'TAKE_PROFIT_LIMIT'].includes(postOrder.options.type))
+        postOrder.price = order.price;
+
+    if (postOrder.options.type === "ICEBERG")
+        postOrder.options.icebergQty = order.icebergQty;
+
+    if (STOP_TYPES.includes(postOrder.options.type))
+        postOrder.options.stopPrice = order.stopPrice;
 
     const headers = { 'authorization': token };
     const response = await axios.post(ORDERS_URL, postOrder, { headers });

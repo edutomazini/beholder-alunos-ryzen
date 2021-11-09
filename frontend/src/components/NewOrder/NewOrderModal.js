@@ -63,90 +63,89 @@ function NewOrderModal(props) {
             })
     }
 
-        function onInputChange(event) {
-            setOrder(prevState => ({ ...prevState, [event.target.id]: event.target.value }));
+    function onInputChange(event) {
+        setOrder(prevState => ({ ...prevState, [event.target.id]: event.target.value }));
+    }
+
+    useEffect(() => {
+        setError('');
+        btnSend.current.disabled = false;
+
+        const quantity = parseFloat(order.quantity);
+
+        if (quantity && quantity < parseFloat(symbol.minLotSize)) {
+            btnSend.current.disabled = true;
+            return setError('Min Lot Size ' + symbol.minLotSize);
         }
 
-        useEffect(() => {
-            setError('');
+        if (order.type === 'ICEBERG') {
+            const icebergQty = parseFloat(order.icebergQty);
+            if (icebergQty && icebergQty < parseFloat(symbol.minLotSize)) {
+                btnSend.current.disabled = true;
+                return setError('Min Lot Size (I) ' + symbol.minLotSize);
+            }
+        }
+
+        if (!quantity) return;
+
+        const price = parseFloat(order.price);
+        if (!price) return;
+
+        const total = quantity * price;
+        inputTotal.current.value = `${total}`.substring(0, 8);
+
+        const minNotional = parseFloat(symbol.minNotional);
+        if (total < minNotional) {
+            btnSend.current.disabled = true;
+            return setError('Min Notional: ' + symbol.minNotional);
+        }
+
+    }, [order.price, order.quantity, order.icebergQty])
+
+    useEffect(() => {
+        if (!order.symbol) return;
+        const token = localStorage.getItem('token');
+        getSymbol(order.symbol, token)
+            .then(symbol => setSymbol(symbol))
+            .catch(err => {
+                console.error(err.response ? err.response.data : err.message);
+                return setError(err.response ? err.response.data : err.message);
+            })
+    }, [order.symbol])
+
+    function getPriceClasses(orderType) {
+        return orderType === 'MARKET' || orderType === 'STOP_LOSS' || orderType === 'TAKE_PROFIT' ? "col-md-6 mb-3 d-none" : "col-md-6 mb-3";
+    }
+
+    function getIcebergClasses(orderType) {
+        return orderType === 'ICEBERG' ? "col-md-6 mb-3" : "col-md-6 mb-3 d-none";
+    }
+
+    function getStopPriceClasses(orderType) {
+        return STOP_TYPES.indexOf(orderType) !== -1 ? "col-md-6 mb-3" : "col-md-6 mb-3 d-none";
+    }
+
+    function onPriceChange(book) {
+        if (!['MARKET', 'STOP_LOSS', 'TAKE_PROFIT'].includes(order.type) || !btnSend.current) return;
+
+        const quantity = parseFloat(order.quantity);
+        if (quantity) {
+
             btnSend.current.disabled = false;
 
-            const quantity = parseFloat(order.quantity);
+            if (order.side === 'BUY')
+                inputTotal.current.value = `${quantity * parseFloat(book.ask)}`.substring(0, 8);
+            else
+                inputTotal.current.value = `${quantity * parseFloat(book.bid)}`.substring(0, 8);
 
-            if (quantity && quantity < parseFloat(symbol.minLotSize)) {
-                btnSend.current.disabled = true;
-                return setError('Min Lot Size ' + symbol.minLotSize);
-            }
-
-            if (order.type === 'ICEBERG') {
-                const icebergQty = parseFloat(order.icebergQty);
-                if (icebergQty && icebergQty < parseFloat(symbol.minLotSize)) {
-                    btnSend.current.disabled = true;
-                    return setError('Min Lot Size (I) ' + symbol.minLotSize);
-                }
-            }
-
-            if (!quantity) return;
-
-            const price = parseFloat(order.price);
-            if (!price) return;
-
-            const total = quantity * price;
-            inputTotal.current.value = `${total}`.substring(0, 8);
-
-            const minNotional = parseFloat(symbol.minNotional);
-            if (total < minNotional) {
+            if (parseFloat(inputTotal.current.value) < parseFloat(symbol.minNotional)) {
                 btnSend.current.disabled = true;
                 return setError('Min Notional: ' + symbol.minNotional);
             }
-
-        }, [order.price, order.quantity, order.icebergQty])
-
-        useEffect(() => {
-            if (!order.symbol) return;
-            const token = localStorage.getItem('token');
-            getSymbol(order.symbol, token)
-                .then(symbol => setSymbol(symbol))
-                .catch(err => {
-                    console.error(err.response ? err.response.data : err.message);
-                    return setError(err.response ? err.response.data : err.message);
-                })
-        }, [order.symbol])
-
-        function getPriceClasses(orderType) {
-            return orderType === 'MARKET' || orderType === 'STOP_LOSS' || orderType === 'TAKE_PROFIT' ? "col-md-6 mb-3 d-none" : "col-md-6 mb-3";
         }
 
-        function getIcebergClasses(orderType) {
-            return orderType === 'ICEBERG' ? "col-md-6 mb-3" : "col-md-6 mb-3 d-none";
-        }
-
-        function getStopPriceClasses(orderType) {
-            return STOP_TYPES.indexOf(orderType) !== -1 ? "col-md-6 mb-3" : "col-md-6 mb-3 d-none";
-        }
-
-        function onPriceChange(book) {
-            if (order.type !== 'MARKET' || !btnSend.current) return;
-
-            const quantity = parseFloat(order.quantity);
-            if (quantity) {
-
-                btnSend.current.disabled = false;
-                setError('');
-
-                if (order.side === 'BUY')
-                    inputTotal.current.value = `${quantity * parseFloat(book.ask)}`.substring(0, 8);
-                else
-                    inputTotal.current.value = `${quantity * parseFloat(book.bid)}`.substring(0, 8);
-
-                if (parseFloat(inputTotal.current.value) < parseFloat(symbol.minNotional)) {
-                    btnSend.current.disabled = true;
-                    return setError('Min Notional: ' + symbol.minNotional);
-                }
-            }
-
-            setOrder(prevState => ({ ...prevState, price: parseFloat(book.bid) }));
-        }
+        setOrder(prevState => ({ ...prevState, price: parseFloat(book.bid) }));
+    }
 
     const [wallet, setWallet] = useState({ base: { symbol: '', qty: 0 }, quote: { symbol: '', qty: 0 } });
 

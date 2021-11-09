@@ -28,17 +28,17 @@ module.exports = (settings) => {
     }
 
     function buy(symbol, quantity, price, options) {
-        if (price)
-            return binance.buy(symbol, quantity, price, options);
+        if (!options.type || options.type === 'MARKET')
+            return binance.marketBuy(symbol, quantity, options);
 
-        return binance.marketBuy(symbol, quantity);
+        return binance.buy(symbol, quantity, price, options);
     }
 
     function sell(symbol, quantity, price, options) {
-        if (price)
-            return binance.sell(symbol, quantity, price, options);
+        if (!options.type || options.type === 'MARKET')
+            return binance.marketSell(symbol, quantity, options);
 
-        return binance.marketSell(symbol, quantity);
+        return binance.sell(symbol, quantity, price, options);
     }
 
     function cancel(symbol, orderId) {
