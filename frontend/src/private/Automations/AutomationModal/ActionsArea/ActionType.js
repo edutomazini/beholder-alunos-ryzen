@@ -19,6 +19,7 @@ function ActionType(props) {
             <option value="ALERT_SMS">Alert via SMS</option>
             <option value="ALERT_TELEGRAM">Alert via Telegram</option>
             <option value="ORDER">Place Order</option>
+            <option value="TRAILING">Place Trailing</option>
             <option value="WITHDRAW">Withdraw Crypto</option>
         </select>
     )

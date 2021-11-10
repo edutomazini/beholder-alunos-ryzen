@@ -30,7 +30,7 @@ function ActionsArea(props) {
         if (event.target.id === 'orderTemplateId') {
             const orderTemplateId = parseInt(event.target.value);
             const orderTemplate = orderTemplates.find(ot => ot.id === orderTemplateId);
-            if(!orderTemplate) return;
+            if (!orderTemplate) return;
 
             setNewAction(prevState => ({
                 ...prevState,
@@ -41,7 +41,7 @@ function ActionsArea(props) {
         else if (event.target.id === 'withdrawTemplateId') {
             const withdrawTemplateId = parseInt(event.target.value);
             const withdrawTemplate = withdrawTemplates.find(ot => ot.id === withdrawTemplateId);
-            if(!withdrawTemplate) return;
+            if (!withdrawTemplate) return;
 
             setNewAction(prevState => ({
                 ...prevState,
@@ -120,7 +120,18 @@ function ActionsArea(props) {
                                 <select id="orderTemplateId" className="form-select" onChange={onInputChange}>
                                     <option value="0">Select one...</option>
                                     {
-                                        orderTemplates.map(ot => (<option key={ot.id} value={ot.id}>{ot.name}</option>))
+                                        orderTemplates.filter(ot => ot.type !== 'TRAILING_STOP').map(ot => (<option key={ot.id} value={ot.id}>{ot.name}</option>))
+                                    }
+                                </select>
+                                : <React.Fragment></React.Fragment>
+                        }
+                        {
+                            newAction.type === 'TRAILING' && orderTemplates
+                                ?
+                                <select id="orderTemplateId" className="form-select" onChange={onInputChange}>
+                                    <option value="0">Select one...</option>
+                                    {
+                                        orderTemplates.filter(ot => ot.type === 'TRAILING_STOP').map(ot => (<option key={ot.id} value={ot.id}>{ot.name}</option>))
                                     }
                                 </select>
                                 : <React.Fragment></React.Fragment>
