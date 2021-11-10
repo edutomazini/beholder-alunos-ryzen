@@ -103,16 +103,13 @@ async function insertAutomation(req, res, next) {
         return res.status(500).json(err.message);
     }
 
-    savedAutomation.actions = actions;
-
-    if (isGrid)
-        savedAutomation.grids = grids;
+    savedAutomation = await automationsRepository.getAutomation(savedAutomation.id);
 
     if (savedAutomation.isActive) {
         if (savedAutomation.schedule)
             agenda.addSchedule(savedAutomation.get({ plain: true }));
         else
-            beholder.updateBrain(savedAutomation);
+            beholder.updateBrain(savedAutomation.get({ plain: true }));
     }
 
     res.status(201).json(savedAutomation);
@@ -169,7 +166,7 @@ async function updateAutomation(req, res, next) {
             agenda.addSchedule(updatedAutomation.get({ plain: true }));
         } else {
             beholder.deleteBrain(currentAutomation);
-            beholder.updateBrain(updatedAutomation);
+            beholder.updateBrain(updatedAutomation.get({ plain: true }));
         }
     }
     else {
