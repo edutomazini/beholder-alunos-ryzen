@@ -22,6 +22,7 @@ function OrderType(props) {
                     <option value="MARKET">Market</option>
                     <option value="STOP_LOSS_LIMIT">Stop Loss Limit</option>
                     <option value="TAKE_PROFIT_LIMIT">Take Profit Limit</option>
+                    <option value="TRAILING_STOP">Trailing Stop</option>
                 </select>
             </div>
         )

@@ -7,6 +7,7 @@ import { STOP_TYPES } from '../../../services/ExchangeService';
 import { getIndexes } from '../../../services/BeholderService';
 import PriceTemplate from './PriceTemplate';
 import QuantityTemplate from './QuantityTemplate';
+import TrailingTemplate from './TrailingTemplate';
 
 export const DEFAULT_ORDER_TEMPLATE = {
     id: 0,
@@ -78,7 +79,7 @@ function OrderTemplateModal(props) {
     }, [props.data])
 
     function getPriceClasses(orderType) {
-        return orderType === 'MARKET' ? "col-md-6 mb-3 d-none" : "col-md-6 mb-3";
+        return ['MARKET', 'STOP_LOSS', 'TAKE_PROFIT', 'TRAILING_STOP'].includes(orderType) ? "col-md-6 mb-3 d-none" : "col-md-6 mb-3";
     }
 
     function getIcebergClasses(orderType) {
@@ -121,6 +122,12 @@ function OrderTemplateModal(props) {
                                     </div>
                                 </div>
                             </div>
+                            {
+                                orderTemplate.type === 'TRAILING_STOP'
+                                    ? <TrailingTemplate data={orderTemplate} onChange={onInputChange} />
+                                    : <React.Fragment></React.Fragment>
+                            }
+
                             <div className="row">
                                 <div className={getPriceClasses(orderTemplate.type)}>
                                     <PriceTemplate id="limitPrice" text="Unit Price:" indexes={priceIndexes} onChange={onInputChange} price={orderTemplate.limitPrice} multiplier={orderTemplate.limitPriceMultiplier} />
