@@ -495,6 +495,10 @@ async function sendTelegram(settings, automation) {
     return { text: `Telegram sent from automation '${automation.name}'`, type: 'success' };
 }
 
+function evalTrailing(settings, automation, action) {
+    console.log(action.orderTemplate);
+}
+
 function doAction(settings, action, automation) {
     try {
         switch (action.type) {
@@ -502,6 +506,7 @@ function doAction(settings, action, automation) {
             case actionTypes.ALERT_SMS: return sendSms(settings, automation);
             case actionTypes.ALERT_TELEGRAM: return sendTelegram(settings, automation);
             case actionTypes.ORDER: return placeOrder(settings, automation, action);
+            case actionTypes.TRAILING: return evalTrailing(settings, automation, action);
             case actionTypes.WITHDRAW: return withdrawCrypto(settings, automation, action);
             case actionTypes.GRID: return gridEval(settings, automation);
         }
@@ -524,7 +529,7 @@ async function evalDecision(memoryKey, automation) {
             const isChecked = indexes.every(ix => MEMORY[ix] !== null && MEMORY[ix] !== undefined);
             if (!isChecked) return false;
 
-            const invertedCondition = automation.actions[0].type !== 'GRID' || automation.schedule ? '' : invertCondition(memoryKey, automation.conditions);
+            const invertedCondition = ['GRID', 'TRAILING'].includes(automation.actions[0].type) || automation.schedule ? '' : invertCondition(memoryKey, automation.conditions);
             const evalCondition = automation.conditions + (invertedCondition ? ' && ' + invertedCondition : '');
 
             if (LOGS) logger('A:' + automation.id, `Beholder trying to evaluate:\n${evalCondition}\n at ${automation.name}`);
@@ -542,19 +547,17 @@ async function evalDecision(memoryKey, automation) {
             logger('A:' + automation.id, `Beholder evaluated a condition at automation: ${automation.name} => ${automation.conditions}`);
 
         const settings = await getDefaultSettings();
+        const results = [];
 
-        let results = automation.actions.map(async (action) => {
-            const result = await doAction(settings, action, automation);
-            if (automation.logs && result) logger('A:' + automation.id, `Result for action ${action.type} was ${JSON.stringify(result)}`);
-            return result;
-        })
-
-        results = await Promise.all(results);
+        for (let i = 0; i < automation.actions.length; i++) {
+            const action = automation.actions[i];
+            results.push(await doAction(settings, action, automation));
+        }
 
         if (automation.logs && results && results.length && results[0])
-            logger('A:' + automation.id, `Automation ${automation.name} finished execution at ${new Date()}`);
+            logger('A:' + automation.id, `Automation ${automation.name} finished execution at ${new Date()}\nResults: ${JSON.stringify(results)}`);
 
-        return results;
+        return results.flat();
     } catch (err) {
         if (automation.logs) logger('A:' + automation.id, err);
         return { type: 'error', text: `Error at evalDecision for '${automation.name}': ${err}` };

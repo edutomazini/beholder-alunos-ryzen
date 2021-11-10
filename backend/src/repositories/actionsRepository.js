@@ -6,7 +6,8 @@ const actionTypes = {
     ALERT_TELEGRAM: 'ALERT_TELEGRAM',
     ORDER: 'ORDER',
     GRID: 'GRID',
-    WITHDRAW: 'WITHDRAW'
+    WITHDRAW: 'WITHDRAW',
+    TRAILING: 'TRAILING'
 }
 
 function insertActions(actions, transaction) {

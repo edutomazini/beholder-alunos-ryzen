@@ -10,6 +10,17 @@ const orderStatus = {
     NEW: 'NEW'
 }
 
+const orderTypes = {
+    STOP_LOSS: 'STOP_LOSS',
+    STOP_LOSS_LIMIT: 'STOP_LOSS_LIMIT',
+    TAKE_PROFIT: 'TAKE_PROFIT',
+    TAKE_PROFIT_LIMIT: 'TAKE_PROFIT_LIMIT',
+    MARKET: 'MARKET',
+    LIMIT: 'LIMIT',
+    ICEBERG: 'ICEBERG',
+    TRAILING_STOP: 'TRAILING_STOP'
+}
+
 function insertOrder(newOrder) {
     return orderModel.create(newOrder);
 }
@@ -62,7 +73,7 @@ async function updateOrder(currentOrder, newOrder) {
 
     if (newOrder.status &&
         newOrder.status !== currentOrder.status &&
-        (currentOrder.status === 'NEW' || currentOrder.status === 'PARTIALLY_FILLED'))
+        (currentOrder.status === orderStatus.NEW || currentOrder.status === orderStatus.PARTIALLY_FILLED))
         currentOrder.status = newOrder.status;//somente dá para atualizar ordens não finalizadas
 
     if (newOrder.avgPrice && newOrder.avgPrice !== currentOrder.avgPrice)
@@ -89,7 +100,7 @@ async function updateOrder(currentOrder, newOrder) {
 
 async function getLastFilledOrders() {
     const idObjects = await orderModel.findAll({
-        where: { status: 'FILLED' },
+        where: { status: orderStatus.FILLED },
         group: 'symbol',
         attributes: [Sequelize.fn('max', Sequelize.col('id'))],
         raw: true
@@ -115,7 +126,7 @@ function getReportOrders(quoteAsset, startDate, endDate) {
         where: {
             symbol: { [Sequelize.Op.like]: `%${quoteAsset}` },
             transactTime: { [Sequelize.Op.between]: [startDate, endDate] },
-            status: 'FILLED',
+            status: orderStatus.FILLED,
             net: { [Sequelize.Op.gt]: 0 }
         },
         order: [['transactTime', 'ASC']],
@@ -125,14 +136,15 @@ function getReportOrders(quoteAsset, startDate, endDate) {
     });
 }
 
-const STOP_TYPES = ["STOP_LOSS", "STOP_LOSS_LIMIT", "TAKE_PROFIT", "TAKE_PROFIT_LIMIT"];
+const STOP_TYPES = [orderTypes.STOP_LOSS, orderTypes.STOP_LOSS_LIMIT, orderTypes.TAKE_PROFIT, orderTypes.TAKE_PROFIT_LIMIT];
 
-const LIMIT_TYPES = ["LIMIT", "STOP_LOSS_LIMIT", "TAKE_PROFIT_LIMIT"];
+const LIMIT_TYPES = [orderTypes.LIMIT, orderTypes.STOP_LOSS_LIMIT, orderTypes.TAKE_PROFIT_LIMIT];
 
 module.exports = {
     orderStatus,
     STOP_TYPES,
     LIMIT_TYPES,
+    orderTypes,
     insertOrder,
     getOrders,
     getOrder,

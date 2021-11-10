@@ -1,5 +1,6 @@
 const orderTemplatesRepository = require('../repositories/orderTemplatesRepository');
 const actionsRepository = require('../repositories/actionsRepository');
+const { orderTypes } = require('../repositories/ordersRepository')
 
 function validatePrice(price) {
     if (!price) return true;
@@ -20,13 +21,21 @@ async function getOrderTemplates(req, res, next) {
     res.json(result);
 }
 
+function calcTrailingStop(orderTemplate) {
+    return orderTemplate.side === 'BUY' ? orderTemplate.limitPrice * (1 + (orderTemplate.stopPriceMultiplier / 100))
+        : orderTemplate.limitPrice * (1 - (orderTemplate.stopPriceMultiplier / 100))
+}
+
 async function insertOrderTemplate(req, res, next) {
     const newOrderTemplate = req.body;
+
+    if (newOrderTemplate.type === orderTypes.TRAILING_STOP)
+        newOrderTemplate.stopPrice = calcTrailingStop(newOrderTemplate);
 
     if (!validatePrice(newOrderTemplate.limitPrice) || !validatePrice(newOrderTemplate.stopPrice))
         return res.status(400).json(`Invalid price.`);
 
-        newOrderTemplate.quantity = newOrderTemplate.quantity ? newOrderTemplate.quantity.replace(',', '.') : newOrderTemplate.quantity;
+    newOrderTemplate.quantity = newOrderTemplate.quantity ? newOrderTemplate.quantity.replace(',', '.') : newOrderTemplate.quantity;
 
     const orderTemplate = await orderTemplatesRepository.insertOrderTemplate(newOrderTemplate);
     res.status(201).json(orderTemplate);
@@ -36,7 +45,10 @@ async function updateOrderTemplate(req, res, next) {
     const id = req.params.id;
     const newOrderTemplate = req.body;
     newOrderTemplate.quantity = newOrderTemplate.quantity ? newOrderTemplate.quantity.replace(',', '.') : newOrderTemplate.quantity;
-    
+
+    if (newOrderTemplate.type === orderTypes.TRAILING_STOP)
+        newOrderTemplate.stopPrice = calcTrailingStop(newOrderTemplate);
+
     const updatedOrderTemplate = await orderTemplatesRepository.updateOrderTemplate(id, newOrderTemplate);
     res.json(updatedOrderTemplate);
 }
