@@ -229,7 +229,13 @@ async function placeOrder(settings, automation, action) {
     if (!action.orderTemplateId)
         throw new Error(`There is no order template for '${automation.name}', action #${action.id}`);
 
-    const orderTemplate = await orderTemplatesRepository.getOrderTemplate(action.orderTemplateId);
+    const orderTemplate = action.orderTemplate ? { ...action.orderTemplate } : await orderTemplatesRepository.getOrderTemplate(action.orderTemplateId);
+    if (orderTemplate.type === 'TRAILING_STOP') {
+        orderTemplate.type = 'MARKET';
+        orderTemplate.limitPrice = null;
+        orderTemplate.stopPrice = null;
+    }
+
     const symbol = await getSymbol(orderTemplate.symbol);
 
     const order = {
@@ -495,18 +501,64 @@ async function sendTelegram(settings, automation) {
     return { text: `Telegram sent from automation '${automation.name}'`, type: 'success' };
 }
 
-function evalTrailing(settings, automation, action) {
-    console.log(action.orderTemplate);
+async function trailingEval(settings, automation, action) {
+    const isBuy = action.orderTemplate.side === 'BUY';
+
+    const book = MEMORY[`${automation.symbol}:BOOK`];
+    if (!book) return { type: 'error', text: `No book info for ${automation.name}` };
+
+    const activationPrice = parseFloat(action.orderTemplate.limitPrice);
+    const stopPrice = parseFloat(action.orderTemplate.stopPrice);
+
+    const currentPrice = isBuy ? book.current.bestAsk : book.current.bestBid;
+    const previousPrice = isBuy ? book.previous.bestAsk : book.previous.bestBid;
+
+    const isPriceActivated = isBuy ? currentPrice <= activationPrice : currentPrice >= activationPrice;
+    
+    if (!isPriceActivated) return false;
+
+    if (LOGS)
+        logger('A:' + automation.id, `Beholder is in the Trailing zone at ${automation.name}`);
+
+    const isStopActivated = isBuy ? currentPrice >= stopPrice && previousPrice < stopPrice
+        : currentPrice <= stopPrice && previousPrice > stopPrice;
+
+    if (isStopActivated) {
+        if (automation.logs || LOGS)
+            logger('A:' + automation.id, `Stop price activated at ${automation.name}`);
+
+        const results = await placeOrder(settings, automation, action);
+
+        //para executar apenas uma vez
+        deleteBrain(automation);
+
+        automation.isActive = false;
+        await automationsRepository.updateAutomation(automation.id, automation);
+
+        return results;
+    }
+
+    const newStopPrice = isBuy ? currentPrice * (1 + (parseFloat(action.orderTemplate.stopPriceMultiplier) / 100))
+        : currentPrice * (1 - (parseFloat(action.orderTemplate.stopPriceMultiplier) / 100));
+
+    if ((isBuy && newStopPrice < stopPrice) || (!isBuy && newStopPrice > stopPrice)) {
+        if (LOGS)
+            logger('A:' + automation.id, `Stop price changed to ${newStopPrice} at ${automation.name}`);
+
+        action.orderTemplate.stopPrice = newStopPrice;
+        await orderTemplatesRepository.updateOrderTemplate(action.orderTemplate.id, action.orderTemplate);
+    }
 }
 
 function doAction(settings, action, automation) {
+    
     try {
         switch (action.type) {
             case actionTypes.ALERT_EMAIL: return sendEmail(settings, automation);
             case actionTypes.ALERT_SMS: return sendSms(settings, automation);
             case actionTypes.ALERT_TELEGRAM: return sendTelegram(settings, automation);
             case actionTypes.ORDER: return placeOrder(settings, automation, action);
-            case actionTypes.TRAILING: return evalTrailing(settings, automation, action);
+            case actionTypes.TRAILING: return trailingEval(settings, automation, action);
             case actionTypes.WITHDRAW: return withdrawCrypto(settings, automation, action);
             case actionTypes.GRID: return gridEval(settings, automation);
         }
@@ -543,12 +595,12 @@ async function evalDecision(memoryKey, automation) {
             return false;
         }
 
-        if ((LOGS || automation.logs) && automation.actions[0].type !== 'GRID')
+        if ((LOGS || automation.logs) && !['GRID', 'TRAILING'].includes(automation.actions[0].type))
             logger('A:' + automation.id, `Beholder evaluated a condition at automation: ${automation.name} => ${automation.conditions}`);
 
         const settings = await getDefaultSettings();
         const results = [];
-
+        
         for (let i = 0; i < automation.actions.length; i++) {
             const action = automation.actions[i];
             results.push(await doAction(settings, action, automation));
