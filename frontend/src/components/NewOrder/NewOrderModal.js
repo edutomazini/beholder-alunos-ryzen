@@ -20,7 +20,7 @@ function NewOrderModal(props) {
 
     const DEFAULT_ORDER = {
         symbol: "",
-        price: "0",
+        limitPrice: "0",
         stopPrice: "0",
         quantity: "0",
         icebergQty: "0",
@@ -55,7 +55,7 @@ function NewOrderModal(props) {
         placeOrder(order, token)
             .then(result => {
                 btnClose.current.click();
-                if (props.onSubmit) props.onSubmit(result);
+                if (result.id && props.onSubmit) props.onSubmit(result);
             })
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message);
@@ -88,7 +88,7 @@ function NewOrderModal(props) {
 
         if (!quantity) return;
 
-        const price = parseFloat(order.price);
+        const price = parseFloat(order.limitPrice);
         if (!price) return;
 
         const total = quantity * price;
@@ -100,7 +100,7 @@ function NewOrderModal(props) {
             return setError('Min Notional: ' + symbol.minNotional);
         }
 
-    }, [order.price, order.quantity, order.icebergQty])
+    }, [order.limitPrice, order.quantity, order.icebergQty])
 
     useEffect(() => {
         if (!order.symbol) return;
@@ -114,7 +114,7 @@ function NewOrderModal(props) {
     }, [order.symbol])
 
     function getPriceClasses(orderType) {
-        return orderType === 'MARKET' || orderType === 'STOP_LOSS' || orderType === 'TAKE_PROFIT' ? "col-md-6 mb-3 d-none" : "col-md-6 mb-3";
+        return ['MARKET', 'STOP_LOSS', 'TAKE_PROFIT', 'TRAILING_STOP'].includes(orderType) ? "col-md-6 mb-3 d-none" : "col-md-6 mb-3";
     }
 
     function getIcebergClasses(orderType) {
@@ -124,9 +124,12 @@ function NewOrderModal(props) {
     function getStopPriceClasses(orderType) {
         return STOP_TYPES.indexOf(orderType) !== -1 ? "col-md-6 mb-3" : "col-md-6 mb-3 d-none";
     }
+    function getTrailingStopClasses(orderType) {
+        return orderType === 'TRAILING_STOP' ? 'row' : 'd-none';
+    }
 
     function onPriceChange(book) {
-        if (!['MARKET', 'STOP_LOSS', 'TAKE_PROFIT'].includes(order.type) || !btnSend.current) return;
+        if (!['MARKET', 'STOP_LOSS', 'TAKE_PROFIT', 'TRAILING_STOP'].includes(order.type) || !btnSend.current) return;
 
         const quantity = parseFloat(order.quantity);
         if (quantity) {
@@ -144,7 +147,7 @@ function NewOrderModal(props) {
             }
         }
 
-        setOrder(prevState => ({ ...prevState, price: parseFloat(book.bid) }));
+        setOrder(prevState => ({ ...prevState, limitPrice: parseFloat(book.bid) }));
     }
 
     const [wallet, setWallet] = useState({ base: { symbol: '', qty: 0 }, quote: { symbol: '', qty: 0 } });
@@ -208,20 +211,37 @@ function NewOrderModal(props) {
                                     <OrderType type={order.type} onChange={onInputChange} />
                                 </div>
                             </div>
+
+                            <div className={getTrailingStopClasses(order.type)}>
+                                <div className="col-md-6 mb-3">
+                                    <label htmlFor="limitPrice">Activation Price:</label>
+                                    <input id="limitPrice" type="number" className="form-control" placeholder="0" onChange={onInputChange} />
+                                </div>
+                                <div className="col-md-6 mb-3">
+                                    <label htmlFor="stopPriceMultiplier">Callback Rate:</label>
+                                    <div className="input-group">
+                                        <input id="stopPriceMultiplier" type="number" className="form-control" placeholder="1" onChange={onInputChange} />
+                                        <span className="input-group-text bg-secondary">
+                                            %
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div className="row">
                                 <div className={getPriceClasses(order.type)}>
                                     <div className="form-group">
-                                        <label htmlFor="price">Unit Price:</label>
-                                        <input type="number" className="form-control" id="price" placeholder="0" onChange={onInputChange} />
+                                        <label htmlFor="limitPrice">Unit Price:</label>
+                                        <input type="number" className="form-control" id="limitPrice" placeholder="0" onChange={onInputChange} />
                                     </div>
                                 </div>
                                 <div className="col-md-6 mb-3">
-                                    <QuantityInput id="quantity" text="Quantity:" side={order.side} symbol={symbol} wallet={wallet} price={order.price} onChange={onInputChange} />
+                                    <QuantityInput id="quantity" text="Quantity:" side={order.side} symbol={symbol} wallet={wallet} price={order.limitPrice} onChange={onInputChange} />
                                 </div>
                             </div>
                             <div className="row">
                                 <div className={getIcebergClasses(order.type)}>
-                                    <QuantityInput id="icebergQty" text="Iceberg Qty:" side={order.side} symbol={symbol} wallet={wallet} price={order.price} onChange={onInputChange} />
+                                    <QuantityInput id="icebergQty" text="Iceberg Qty:" side={order.side} symbol={symbol} wallet={wallet} price={order.limitPrice} onChange={onInputChange} />
                                 </div>
                                 <div className={getStopPriceClasses(order.type)}>
                                     <div className="form-group">

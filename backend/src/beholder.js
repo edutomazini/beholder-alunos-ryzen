@@ -296,6 +296,12 @@ async function placeOrder(settings, automation, action) {
         return { type: 'error', text: `Order failed! ` + err.body ? err.body : err.message };
     }
 
+    let stopPrice;
+    if (action.orderTemplate.type === 'TRAILING_STOP')
+        stopPrice = action.orderTemplate.stopPrice;
+    else if (STOP_TYPES.includes(order.type))
+        stopPrice = order.options.stopPrice;
+
     const savedOrder = await insertOrder({
         automationId: automation.id,
         symbol: order.symbol,
@@ -303,7 +309,7 @@ async function placeOrder(settings, automation, action) {
         type: order.options.type,
         side: order.side,
         limitPrice: LIMIT_TYPES.includes(order.type) ? order.limitPrice : null,
-        stopPrice: STOP_TYPES.includes(order.type) ? order.options.stopPrice : null,
+        stopPrice,
         icebergQty: order.type === 'ICEBERG' ? order.options.icebergQty : null,
         orderId: result.orderId,
         clientOrderId: result.clientOrderId,
@@ -514,7 +520,7 @@ async function trailingEval(settings, automation, action) {
     const previousPrice = isBuy ? book.previous.bestAsk : book.previous.bestBid;
 
     const isPriceActivated = isBuy ? currentPrice <= activationPrice : currentPrice >= activationPrice;
-    
+
     if (!isPriceActivated) return false;
 
     if (LOGS)
@@ -551,7 +557,7 @@ async function trailingEval(settings, automation, action) {
 }
 
 function doAction(settings, action, automation) {
-    
+
     try {
         switch (action.type) {
             case actionTypes.ALERT_EMAIL: return sendEmail(settings, automation);
@@ -600,7 +606,7 @@ async function evalDecision(memoryKey, automation) {
 
         const settings = await getDefaultSettings();
         const results = [];
-        
+
         for (let i = 0; i < automation.actions.length; i++) {
             const action = automation.actions[i];
             results.push(await doAction(settings, action, automation));

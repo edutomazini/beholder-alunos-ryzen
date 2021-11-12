@@ -71,22 +71,22 @@ function startBookMonitor(monitorId, broadcastLabel, logs) {
 async function loadWallet() {
     if (!exchange) throw new Error('Exchange Monitor not initialized yet.');
 
-    try{
-    const info = await exchange.balance();
-    const wallet = Object.entries(info).map(async (item) => {
-        const results = await beholder.updateMemory(item[0], indexKeys.WALLET, null, parseFloat(item[1].available));
-        if (results) results.map(r => WSS.broadcast({ notification: r }));
+    try {
+        const info = await exchange.balance();
+        const wallet = Object.entries(info).map(async (item) => {
+            const results = await beholder.updateMemory(item[0], indexKeys.WALLET, null, parseFloat(item[1].available));
+            if (results) results.map(r => WSS.broadcast({ notification: r }));
 
-        return {
-            symbol: item[0],
-            available: item[1].available,
-            onOrder: item[1].onOrder
-        }
-    })
-    return Promise.all(wallet);
-  } catch (err) {
-      throw new Error(err.body ? JSON.stringify(err.body) : err.message);//evita 401 da Binance
-  }
+            return {
+                symbol: item[0],
+                available: item[1].available,
+                onOrder: item[1].onOrder
+            }
+        })
+        return Promise.all(wallet);
+    } catch (err) {
+        throw new Error(err.body ? JSON.stringify(err.body) : err.message);//evita 401 da Binance
+    }
 }
 
 function getLightOrder(order) {
@@ -331,6 +331,10 @@ async function startTickerMonitor(monitorId, symbol, broadcastLabel, logs) {
     logger('M:' + monitorId, `Ticker Monitor has started for ${symbol}`);
 }
 
+function sendMessage(json) {
+    return WSS.broadcast(json);
+}
+
 async function init(settings, wssInstance, beholderInstance) {
     if (!settings || !beholderInstance) throw new Error(`You can't init the Exchange Monitor App without his settings. Check your database and/or startup code.`);
 
@@ -370,5 +374,6 @@ module.exports = {
     startChartMonitor,
     stopChartMonitor,
     startTickerMonitor,
-    stopTickerMonitor
+    stopTickerMonitor,
+    sendMessage
 }

@@ -33,14 +33,17 @@ export async function placeOrder(order, token) {
         }
     }
 
-    if (['LIMIT', 'STOP_LOSS_LIMIT', 'TAKE_PROFIT_LIMIT'].includes(postOrder.options.type))
-        postOrder.price = order.price;
+    if (['LIMIT', 'STOP_LOSS_LIMIT', 'TAKE_PROFIT_LIMIT', 'TRAILING_STOP'].includes(postOrder.options.type))
+        postOrder.limitPrice = order.limitPrice;
 
     if (postOrder.options.type === "ICEBERG")
         postOrder.options.icebergQty = order.icebergQty;
 
     if (STOP_TYPES.includes(postOrder.options.type))
         postOrder.options.stopPrice = order.stopPrice;
+
+    if(postOrder.options.type === 'TRAILING_STOP')
+        postOrder.options.stopPriceMultiplier = order.stopPriceMultiplier;
 
     const headers = { 'authorization': token };
     const response = await axios.post(ORDERS_URL, postOrder, { headers });

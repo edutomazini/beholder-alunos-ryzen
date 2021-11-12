@@ -1,7 +1,12 @@
 const settingsRepository = require('../repositories/settingsRepository');
 const ordersRepository = require('../repositories/ordersRepository');
+const orderTemplatesRepository = require('../repositories/orderTemplatesRepository');
+const automationsRepository = require('../repositories/automationsRepository');
+const actionsRepository = require('../repositories/actionsRepository');
 const beholder = require('../beholder');
 const logger = require('../utils/logger');
+const db = require('../db');
+const appEm = require('../app-em');
 
 async function getOrders(req, res, next) {
     const symbol = req.params.symbol && req.params.symbol.toUpperCase();
@@ -10,20 +15,100 @@ async function getOrders(req, res, next) {
     res.json(orders);
 }
 
+function calcTrailingStop(side, limitPrice, stopPriceMultiplier) {
+    return side === 'BUY' ? limitPrice * (1 + (stopPriceMultiplier / 100))
+        : limitPrice * (1 - (stopPriceMultiplier / 100))
+}
+
+function saveOrderTemplate(order, timestamp, transaction) {
+    const stopPriceMultiplier = parseFloat(order.options.stopPriceMultiplier);
+    const orderTemplate = {
+        name: `TRAILING ${order.side} ${timestamp}`,
+        symbol: order.symbol,
+        type: order.options.type,
+        side: order.side,
+        limitPrice: order.limitPrice,
+        limitPriceMultiplier: 1,
+        stopPrice: calcTrailingStop(order.side, order.limitPrice, stopPriceMultiplier),
+        stopPriceMultiplier,
+        quantity: order.quantity,
+        quantityMultiplier: 1,
+        icebergQtyMultiplier: 1
+    }
+    return orderTemplatesRepository.insertOrderTemplate(orderTemplate, transaction);
+}
+
+function saveAutomation(order, timestamp, transaction) {
+    const conditions = order.side === 'BUY'
+        ? `MEMORY['${order.symbol}:BOOK'].current.bestAsk<=${order.limitPrice}`
+        : `MEMORY['${order.symbol}:BOOK'].current.bestBid>=${order.limitPrice}`
+
+    const automation = {
+        name: `TRAILING ${order.side} ${timestamp}`,
+        symbol: order.symbol,
+        indexes: `${order.symbol}:BOOK`,
+        conditions,
+        isActive: true,
+        logs: false
+    }
+    return automationsRepository.insertAutomation(automation, transaction);
+}
+
+function saveAction(automationId, orderTemplateId, transaction) {
+    const action = {
+        type: 'TRAILING',
+        automationId,
+        orderTemplateId
+    }
+    return actionsRepository.insertActions([action], transaction);
+}
+
+async function placeTrailingStop(req, res, next) {
+    const order = req.body;
+
+    const transaction = await db.transaction();
+    const timestamp = Date.now();
+
+    try {
+        const orderTemplate = await saveOrderTemplate(order, timestamp, transaction);
+
+        let automation = await saveAutomation(order, timestamp, transaction);
+
+        await saveAction(automation.id, orderTemplate.id, transaction);
+
+        await transaction.commit();
+
+        automation = await automationsRepository.getAutomation(automation.id);
+
+        beholder.updateBrain(automation);
+
+        await appEm.sendMessage({ notification: { type: 'success', text: 'Trailing Stop placed!' } });
+
+        return res.status(202).send(`Trailing Stop placed!`);
+    }
+    catch (err) {
+        await transaction.rollback();
+        logger('system', err);
+        return res.status(500).send(err.message);
+    }
+}
+
 async function placeOrder(req, res, next) {
+    if (req.body.options.type === 'TRAILING_STOP') return placeTrailingStop(req, res, next);
+
     const id = res.locals.token.id;
     const settings = await settingsRepository.getSettingsDecrypted(id);
     const exchange = require('../utils/exchange')(settings.get({ plain: true }));
 
-    const { side, symbol, quantity, price, options, automationId } = req.body;
+    const { side, symbol, quantity, limitPrice, options, automationId } = req.body;
 
     let result;
 
     try {
         if (side === 'BUY')
-            result = await exchange.buy(symbol, quantity, price, options);
+            result = await exchange.buy(symbol, quantity, limitPrice, options);
         else if (side === 'SELL')
-            result = await exchange.sell(symbol, quantity, price, options);
+            result = await exchange.sell(symbol, quantity, limitPrice, options);
     }
     catch (err) {
         return res.status(400).json(err.body);
@@ -35,7 +120,7 @@ async function placeOrder(req, res, next) {
         quantity,
         type: options ? options.type : 'MARKET',
         side,
-        limitPrice: price,
+        limitPrice,
         stopPrice: options ? options.stopPrice : null,
         icebergQty: options ? options.icebergQty : null,
         orderId: result.orderId,
@@ -165,7 +250,7 @@ const EMPTY_REPORT = {
     automations: []
 }
 
-function groupByAutomations(orders){
+function groupByAutomations(orders) {
     const automationsObj = {};
     orders.forEach(o => {
         const automationId = o.automationId ?? 'M';
@@ -193,7 +278,7 @@ async function getDayTradeReport(req, res, next) {
     if ((endDate - startDate) > (1 * 24 * 60 * 60 * 1000)) startDate = getStartToday();
 
     const orders = await ordersRepository.getReportOrders(quote, startDate, endDate);
-    if (!orders || !orders.length) return res.json({...EMPTY_REPORT, quote, startDate, endDate});
+    if (!orders || !orders.length) return res.json({ ...EMPTY_REPORT, quote, startDate, endDate });
 
     const subs = [];
     const series = [];
@@ -245,7 +330,7 @@ async function getMonthReport(req, res, next) {
     if ((endDate - startDate) > (31 * 24 * 60 * 60 * 1000)) startDate = thirtyDaysAgo();
 
     const orders = await ordersRepository.getReportOrders(quote, startDate, endDate);
-    if (!orders || !orders.length) return res.json({...EMPTY_REPORT, quote, startDate, endDate});
+    if (!orders || !orders.length) return res.json({ ...EMPTY_REPORT, quote, startDate, endDate });
 
     const daysInRange = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
 
