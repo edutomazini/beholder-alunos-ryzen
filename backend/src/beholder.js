@@ -297,7 +297,7 @@ async function placeOrder(settings, automation, action) {
     }
 
     let stopPrice;
-    if (action.orderTemplate.type === 'TRAILING_STOP')
+    if (action.orderTemplate && action.orderTemplate.type === 'TRAILING_STOP')
         stopPrice = action.orderTemplate.stopPrice;
     else if (STOP_TYPES.includes(order.type))
         stopPrice = order.options.stopPrice;
