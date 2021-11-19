@@ -63,7 +63,7 @@ function OrderTemplates() {
         const id = event.target.id.replace('edit', '');
         // eslint-disable-next-line
         const orderTemplate = orderTemplates.find(o => o.id == id);
-        setEditOrderTemplate({...orderTemplate});
+        setEditOrderTemplate({ ...orderTemplate });
     }
 
     function onDeleteClick(event) {
@@ -82,7 +82,7 @@ function OrderTemplates() {
     }
 
     function onNewOrderTemplateClick(event) {
-        setEditOrderTemplate(DEFAULT_ORDER_TEMPLATE);
+        setEditOrderTemplate({ ...DEFAULT_ORDER_TEMPLATE });
     }
 
     return (
@@ -116,8 +116,8 @@ function OrderTemplates() {
                         <tbody>
                             {
                                 orderTemplates && orderTemplates.length
-                                ? orderTemplates.map(ot => (<OrderTemplateRow key={ot.id} data={ot} onEditClick={onEditClick} onDeleteClick={onDeleteClick} />))
-                                : <React.Fragment></React.Fragment>
+                                    ? orderTemplates.map(ot => (<OrderTemplateRow key={ot.id} data={ot} onEditClick={onEditClick} onDeleteClick={onDeleteClick} />))
+                                    : <React.Fragment></React.Fragment>
                             }
                         </tbody>
                     </table>

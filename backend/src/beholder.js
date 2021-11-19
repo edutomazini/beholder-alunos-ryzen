@@ -157,11 +157,11 @@ function calcPrice(orderTemplate, symbol, isStopPrice) {
         try {
             if (!isStopPrice) {
                 if (parseFloat(orderTemplate.limitPrice)) return orderTemplate.limitPrice;
-                newPrice = eval(getEval(orderTemplate.limitPrice)) * orderTemplate.limitPriceMultiplier;
+                newPrice = Function("MEMORY", "return " + getEval(orderTemplate.limitPrice))(MEMORY) * orderTemplate.limitPriceMultiplier;
             }
             else {
                 if (parseFloat(orderTemplate.stopPrice)) return orderTemplate.stopPrice;
-                newPrice = eval(getEval(orderTemplate.stopPrice)) * orderTemplate.stopPriceMultiplier;
+                newPrice = Function("MEMORY", "return " + getEval(orderTemplate.stopPrice))(MEMORY) * orderTemplate.stopPriceMultiplier;
             }
         }
         catch (err) {
@@ -344,7 +344,7 @@ async function gridEval(settings, automation) {
 
     for (let i = 0; i < automation.grids.length; i++) {
         const grid = automation.grids[i];
-        if (!eval(grid.conditions)) continue;
+        if (!Function("MEMORY", "return " + grid.conditions)(MEMORY)) continue;
 
         if (automation.logs)
             logger('A:' + automation.id, `Beholder evaluated a condition at ${automation.name} => ${grid.conditions}`);
@@ -606,7 +606,7 @@ async function evalDecision(memoryKey, automation) {
 
             if (LOGS) logger('A:' + automation.id, `Beholder trying to evaluate:\n${evalCondition}\n at ${automation.name}`);
 
-            const isValid = evalCondition ? eval(evalCondition) : true;
+            const isValid = evalCondition ? Function("MEMORY", "return " + evalCondition)(MEMORY) : true;
             if (!isValid) return false;
         }
 
