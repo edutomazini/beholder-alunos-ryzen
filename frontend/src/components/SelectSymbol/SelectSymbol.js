@@ -42,9 +42,11 @@ function SelectSymbol(props) {
 
     useEffect(() => {
         const token = localStorage.getItem("token");
-        getSymbols(onlyFavorites, token)
+        getSymbols(token)
             .then(symbolObjects => {
-                const symbolNames = symbolObjects.rows ? symbolObjects.rows.map(s => s.symbol) : symbolObjects.map(s => s.symbol);
+                const symbolNames = onlyFavorites
+                    ? symbolObjects.filter(s => s.isFavorite).map(s => s.symbol)
+                    : symbolObjects.map(s => s.symbol);
 
                 if (onlyFavorites && !symbolNames.length)
                     setOnlyFavorites(false);
