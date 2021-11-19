@@ -673,8 +673,9 @@ async function updateMemory(symbol, index, interval, value, executeAutomations =
             let auto = { ...automation };
 
             if (auto.symbol.startsWith('*')) {
-                auto.indexes = auto.indexes.replace(auto.symbol, symbol);
-                auto.conditions = auto.conditions.replace(auto.symbol, symbol);
+                const regex = new RegExp(auto.symbol.replace('*', '\\*'));
+                auto.indexes = auto.indexes.replace(regex, symbol);
+                auto.conditions = auto.conditions.replace(regex, symbol);
                 if (auto.actions) {
                     auto.actions.forEach(action => {
                         if (action.orderTemplate)
