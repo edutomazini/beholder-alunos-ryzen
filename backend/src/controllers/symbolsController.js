@@ -22,6 +22,7 @@ async function getSymbols(req, res, next) {
 
 async function getSymbol(req, res, next) {
     const symbol = req.params.symbol;
+    if (symbol.startsWith('*')) return res.json({ symbol, base: '*', quote: symbol.replace('*', '') });
     const symbolObj = await symbolsRepository.getSymbol(symbol);
     res.json(symbolObj);
 }

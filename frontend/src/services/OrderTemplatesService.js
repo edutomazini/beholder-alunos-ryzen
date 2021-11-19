@@ -10,6 +10,14 @@ export async function getOrderTemplates(symbol, page, token) {
     return response.data;//{count, rows}
 }
 
+export async function getAllOrderTemplates(symbol, token) {
+    const orderTemplatesUrl = `${ORDER_TEMPLATES_URL}all/${symbol}`;
+
+    const headers = { 'authorization': token };
+    const response = await axios.get(orderTemplatesUrl, { headers });
+    return response.data;
+}
+
 export async function getOrderTemplate(id, token) {
     const headers = { 'authorization': token };
     const response = await axios.get(`${ORDER_TEMPLATES_URL}${id}`, { headers });

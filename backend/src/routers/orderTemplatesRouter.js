@@ -4,6 +4,8 @@ const orderTemplatesController = require('../controllers/orderTemplatesControlle
 
 router.delete('/:id', orderTemplatesController.deleteOrderTemplate);
 
+router.get('/all/:symbol', orderTemplatesController.getAllOrderTemplates);
+
 router.get('/:symbol?', orderTemplatesController.getOrderTemplates);
 
 router.patch('/:id', orderTemplatesController.updateOrderTemplate);

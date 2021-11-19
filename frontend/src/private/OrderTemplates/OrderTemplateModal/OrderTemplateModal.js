@@ -104,7 +104,7 @@ function OrderTemplateModal(props) {
                                 <div className="col-md-4 mb-3">
                                     <div className="form-group">
                                         <label htmlFor="symbol">Symbol:</label>
-                                        <SelectSymbol symbol={orderTemplate.symbol} onChange={onInputChange} onlyFavorites={false} disabled={orderTemplate.id > 0} />
+                                        <SelectSymbol symbol={orderTemplate.symbol} showAny={true} onChange={onInputChange} onlyFavorites={false} disabled={orderTemplate.id > 0} />
                                     </div>
                                 </div>
                                 <div className="col-md-4 mb-3">

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ActionBadge from './ActionBadge';
 import ActionType from './ActionType';
-import { getOrderTemplates } from '../../../../services/OrderTemplatesService';
+import { getAllOrderTemplates } from '../../../../services/OrderTemplatesService';
 import { getWithdrawTemplates } from '../../../../services/WithdrawTemplatesService';
 import { getSymbol } from '../../../../services/SymbolsService';
 
@@ -60,8 +60,8 @@ function ActionsArea(props) {
 
         const token = localStorage.getItem('token');
 
-        getOrderTemplates(props.symbol, 1, token)
-            .then(result => setOrderTemplates(result.rows))
+        getAllOrderTemplates(props.symbol, token)
+            .then(result => setOrderTemplates(result))
             .catch(err => console.error(err.response ? err.response.data : err.message));
 
         getSymbol(props.symbol, token)

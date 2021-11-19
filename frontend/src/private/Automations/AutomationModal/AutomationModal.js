@@ -55,16 +55,38 @@ function AutomationModal(props) {
 
     useEffect(() => {
         if (!automation || !automation.symbol) return;
-        
+
         const token = localStorage.getItem('token');
         getIndexes(token)
             .then(indexes => {
-                const filteredIndexes = indexes.filter(k => k.symbol === automation.symbol);
-                const baseWallet = indexes.find(ix => ix.variable === 'WALLET' && automation.symbol.startsWith(ix.symbol));
-                if (baseWallet) filteredIndexes.splice(0, 0, baseWallet);
+                const isWildcard = automation.symbol.startsWith('*');
+                let filteredIndexes = isWildcard
+                    ? indexes.filter(k => k.symbol.endsWith(automation.symbol.replace('*', '')))
+                    : indexes.filter(k => k.symbol === automation.symbol);
 
-                const quoteWallet = indexes.find(ix => ix.variable === 'WALLET' && automation.symbol.endsWith(ix.symbol));
-                if (quoteWallet) filteredIndexes.splice(0, 0, quoteWallet);
+                if (isWildcard) {
+                    filteredIndexes.forEach(ix => {
+                        if (ix.variable.startsWith('WALLET')) {
+                            ix.symbol = ix.symbol.replace('*', '');
+                            ix.eval = ix.eval.replace('*', '')
+                        }
+                        else {
+                            ix.eval = ix.eval.replace(ix.symbol, automation.symbol);
+                            ix.symbol = automation.symbol;
+                        }
+                    })
+
+                    filteredIndexes = filteredIndexes.filter((item, index, self) =>
+                        index === self.findIndex(t => t.eval === item.eval)
+                    )
+                }
+                else {
+                    const baseWallet = indexes.find(ix => ix.variable === 'WALLET' && automation.symbol.startsWith(ix.symbol));
+                    if (baseWallet) filteredIndexes.splice(0, 0, baseWallet);
+
+                    const quoteWallet = indexes.find(ix => ix.variable === 'WALLET' && automation.symbol.endsWith(ix.symbol));
+                    if (quoteWallet) filteredIndexes.splice(0, 0, quoteWallet);
+                }
 
                 setIndexes(filteredIndexes);
             })
@@ -90,10 +112,10 @@ function AutomationModal(props) {
                     <div className="modal-body">
                         <div className="form-group">
                             <div className="row">
-                                <div className="col-md-6 mb-3">
+                                <div className="col-md-7 mb-3">
                                     <div className="form-group">
                                         <label htmlFor="symbol">Symbol:</label>
-                                        <SelectSymbol onChange={onInputChange} symbol={automation.symbol} onlyFavorites={false} disabled={automation.id > 0} />
+                                        <SelectSymbol onChange={onInputChange} showAny={true} symbol={automation.symbol} onlyFavorites={false} disabled={automation.id > 0} />
                                     </div>
                                 </div>
                             </div>

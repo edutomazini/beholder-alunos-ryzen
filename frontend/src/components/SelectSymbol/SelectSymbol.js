@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { getSymbols } from '../../services/SymbolsService';
+import SelectQuote, { getDefaultQuote } from '../SelectQuote/SelectQuote';
 
 /**
  * props:
@@ -7,9 +8,11 @@ import { getSymbols } from '../../services/SymbolsService';
  * - onlyFavorites
  * - disabled
  * - onChange
+ * - showAny
  */
 function SelectSymbol(props) {
 
+    const [quote, setQuote] = useState(false);
     const [symbols, setSymbols] = useState(["LOADING"]);
     const [onlyFavorites, setOnlyFavorites] = useState(props.onlyFavorites === null || props.onlyFavorites === undefined ? true : props.onlyFavorites);
 
@@ -25,8 +28,12 @@ function SelectSymbol(props) {
     }
 
     useEffect(() => {
-        selectRef.current.value = props.symbol;
+        if (!props.symbol || selectRef.current.value === props.symbol) return;
+
+        const isWildcard = props.symbol.startsWith('*');
+        selectRef.current.value = isWildcard ? '*' : props.symbol;
         buttonRef.current.disabled = selectRef.current.disabled = props.disabled;
+        setQuote(isWildcard ? props.symbol.replace('*', '') : false);
     }, [props.symbol])
 
     useEffect(() => {
@@ -54,6 +61,22 @@ function SelectSymbol(props) {
             })
     }, [onlyFavorites])
 
+    function onSymbolChange(event) {
+        if (event.target.value !== '*') {
+            setQuote(false);
+            props.onChange(event);
+        }
+        else {
+            setQuote(true);
+            const quote = getDefaultQuote();
+            props.onChange({ target: { id: 'symbol', value: '*' + quote } });
+        }
+    }
+
+    function onQuoteChange(event) {
+        props.onChange({ target: { id: 'symbol', value: '*' + event.target.value } });
+    }
+
     const selectSymbol = useMemo(() => {
         return (
             <div className="input-group">
@@ -62,13 +85,23 @@ function SelectSymbol(props) {
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                 </button>
-                <select ref={selectRef} id="symbol" className="form-select pe-5" onChange={props.onChange}>
+                <select ref={selectRef} id="symbol" className="form-select pe-5" onChange={onSymbolChange}>
                     <option value="">Select...</option>
+                    {
+                        props.showAny
+                            ? <option value="*">Any</option>
+                            : <React.Fragment></React.Fragment>
+                    }
                     {symbols.map(s => (<option key={s} value={s}>{s}</option>))}
                 </select>
+                {
+                    quote
+                        ? <SelectQuote onChange={onQuoteChange} value={quote} disabled={props.disabled} noFavorites={true} />
+                        : <React.Fragment></React.Fragment>
+                }
             </div>
         )
-    }, [symbols])
+    }, [symbols, quote])
 
     return (selectSymbol);
 }

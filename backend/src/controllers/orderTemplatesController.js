@@ -21,6 +21,12 @@ async function getOrderTemplates(req, res, next) {
     res.json(result);
 }
 
+async function getAllOrderTemplates(req, res, next) {
+    const symbol = req.params.symbol;
+    const result = await orderTemplatesRepository.getAllOrderTemplates(symbol);
+    res.json(result);
+}
+
 function calcTrailingStop(orderTemplate) {
     return orderTemplate.side === 'BUY' ? orderTemplate.limitPrice * (1 + (orderTemplate.stopPriceMultiplier / 100))
         : orderTemplate.limitPrice * (1 - (orderTemplate.stopPriceMultiplier / 100))
@@ -68,5 +74,6 @@ module.exports = {
     getOrderTemplates,
     insertOrderTemplate,
     updateOrderTemplate,
-    deleteOrderTemplate
+    deleteOrderTemplate,
+    getAllOrderTemplates
 }

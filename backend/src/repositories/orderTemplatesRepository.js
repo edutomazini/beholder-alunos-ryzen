@@ -28,6 +28,18 @@ function getOrderTemplates(symbol, page = 1) {
     return orderTemplateModel.findAndCountAll(options);
 }
 
+function getAllOrderTemplates(symbol) {
+    const options = {
+        where: { symbol }
+    };
+
+    if (symbol.startsWith('*')) {
+        options.where.symbol = { [Sequelize.Op.like]: `%${symbol.replace('*', '')}` };
+    }
+
+    return orderTemplateModel.findAll(options);
+}
+
 async function getOrderTemplate(id) {
     return orderTemplateModel.findOne({ where: { id } });
 }
@@ -96,5 +108,6 @@ module.exports = {
     updateOrderTemplate,
     deleteOrderTemplate,
     deleteOrderTemplatesByGridName,
-    getOrderTemplatesByGridName
+    getOrderTemplatesByGridName,
+    getAllOrderTemplates
 }

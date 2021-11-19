@@ -5,21 +5,30 @@ const DEFAULT_QUOTE_PROPERTY = "defaultQuote";
 /**
  * props:
  * - onChange
+ * - disabled
+ * - noFavorites
+ * - value
  */
 function SelectQuote(props) {
 
     return (
-        <select id="selectQuote" className="form-select" defaultValue={getDefaultQuote()} onChange={props.onChange}>
-            <option value="FAVORITES">Favorites</option>
-            <option value="BNB">BNB</option>
-            <option value="BRL">BRL</option>
-            <option value="BTC">BTC</option>
-            <option value="GBP">GBP</option>
-            <option value="ETH">ETH</option>
-            <option value="EUR">EUR</option>
-            <option value="USD">USD</option>
-            <option value="USDT">USDT</option>
-        </select>
+        <React.Fragment>
+            <select id="selectQuote" className="form-select" disabled={props.disabled} value={props.value ? props.value : getDefaultQuote()} onChange={props.onChange}>
+                {
+                    props.noFavorites
+                        ? <React.Fragment></React.Fragment>
+                        : <option value="FAVORITES">Favorites</option>
+                }
+                <option value="BNB">BNB</option>
+                <option value="BRL">BRL</option>
+                <option value="BTC">BTC</option>
+                <option value="GBP">GBP</option>
+                <option value="ETH">ETH</option>
+                <option value="EUR">EUR</option>
+                <option value="USD">USD</option>
+                <option value="USDT">USDT</option>
+            </select>
+        </React.Fragment>
     )
 }
 

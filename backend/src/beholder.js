@@ -45,6 +45,8 @@ function init(automations) {
 function updateBrainIndex(index, automationId) {
     if (!BRAIN_INDEX[index]) BRAIN_INDEX[index] = [];
     BRAIN_INDEX[index].push(automationId);
+
+    if (index.startsWith('*')) BRAIN_INDEX.hasWildcard = true;
 }
 
 function deleteBrainIndex(indexes, automationId) {
@@ -54,6 +56,9 @@ function deleteBrainIndex(indexes, automationId) {
         const pos = BRAIN_INDEX[ix].findIndex(id => id === automationId);
         BRAIN_INDEX[ix].splice(pos, 1);
     });
+
+    if (BRAIN_INDEX.hasWildcard)
+        BRAIN_INDEX.hasWildcard = Object.entries(BRAIN_INDEX).some(p => p[0].startsWith('*'));
 }
 
 function updateBrain(automation) {
@@ -106,7 +111,14 @@ function deleteBrain(automation) {
 }
 
 function findAutomations(indexKey) {
-    const ids = BRAIN_INDEX[indexKey];
+    let ids = [];
+    if (BRAIN_INDEX.hasWildcard) {
+        const props = Object.entries(BRAIN_INDEX).filter(p => indexKey.endsWith(p[0].replace('*', '')));
+        ids = props.map(p => p[1]).flat();
+    }
+    else
+        ids = BRAIN_INDEX[indexKey];
+
     if (!ids) return [];
     return [...new Set(ids)].map(id => BRAIN[id]);
 }
@@ -116,6 +128,8 @@ function invertCondition(memoryKey, conditions) {
     const condToInvert = conds.find(c => c.indexOf(memoryKey) !== -1 && c.indexOf('current') !== -1);
     if (!condToInvert) return false;
 
+    if (condToInvert.indexOf('>=') != -1) return condToInvert.replace('>=', '<').replace('current', 'previous');
+    if (condToInvert.indexOf('<=') != -1) return condToInvert.replace('<=', '>').replace('current', 'previous');
     if (condToInvert.indexOf('>') != -1) return condToInvert.replace('>', '<').replace('current', 'previous');
     if (condToInvert.indexOf('<') != -1) return condToInvert.replace('<', '>').replace('current', 'previous');
     if (condToInvert.indexOf('!') != -1) return condToInvert.replace('!', '').replace('current', 'previous');
@@ -609,7 +623,10 @@ async function evalDecision(memoryKey, automation) {
 
         for (let i = 0; i < automation.actions.length; i++) {
             const action = automation.actions[i];
-            results.push(await doAction(settings, action, automation));
+            const result = await doAction(settings, action, automation);
+            if (!result || result.type === 'error') break;
+
+            results.push(result);
         }
 
         if (automation.logs && results && results.length && results[0])
@@ -652,7 +669,21 @@ async function updateMemory(symbol, index, interval, value, executeAutomations =
     let results;
 
     try {
-        const promises = automations.map(async (auto) => {
+        const promises = automations.map(async (automation) => {
+            let auto = { ...automation };
+
+            if (auto.symbol.startsWith('*')) {
+                auto.indexes = auto.indexes.replace(auto.symbol, symbol);
+                auto.conditions = auto.conditions.replace(auto.symbol, symbol);
+                if (auto.actions) {
+                    auto.actions.forEach(action => {
+                        if (action.orderTemplate)
+                            action.orderTemplate.symbol = symbol;
+                    })
+                }
+                auto.symbol = symbol;
+            }
+
             return evalDecision(memoryKey, auto);
         });
 
