@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const DEFAULT_QUOTE_PROPERTY = "defaultQuote";
 
@@ -11,24 +11,34 @@ const DEFAULT_QUOTE_PROPERTY = "defaultQuote";
  */
 function SelectQuote(props) {
 
+    const [quote, setQuote] = useState('');
+    const [isDisabled, setIsDisabled] = useState(false);
+
+    useEffect(() => {
+        if (!props.value) return setQuote(getDefaultQuote());
+        setQuote(props.value);
+    }, [props.value])
+
+    useEffect(() => {
+        setIsDisabled(props.disabled);
+    }, [props.disabled])
+
     return (
-        <React.Fragment>
-            <select id="selectQuote" className="form-select" disabled={props.disabled} value={props.value ? props.value : getDefaultQuote()} onChange={props.onChange}>
-                {
-                    props.noFavorites
-                        ? <React.Fragment></React.Fragment>
-                        : <option value="FAVORITES">Favorites</option>
-                }
-                <option value="BNB">BNB</option>
-                <option value="BRL">BRL</option>
-                <option value="BTC">BTC</option>
-                <option value="GBP">GBP</option>
-                <option value="ETH">ETH</option>
-                <option value="EUR">EUR</option>
-                <option value="USD">USD</option>
-                <option value="USDT">USDT</option>
-            </select>
-        </React.Fragment>
+        <select id="selectQuote" className="form-select" disabled={isDisabled} defaultValue={quote} onChange={props.onChange}>
+            {
+                props.noFavorites
+                    ? <React.Fragment></React.Fragment>
+                    : <option value="FAVORITES">Favorites</option>
+            }
+            <option value="BNB">BNB</option>
+            <option value="BRL">BRL</option>
+            <option value="BTC">BTC</option>
+            <option value="GBP">GBP</option>
+            <option value="ETH">ETH</option>
+            <option value="EUR">EUR</option>
+            <option value="USD">USD</option>
+            <option value="USDT">USDT</option>
+        </select>
     )
 }
 

@@ -75,10 +75,6 @@ function AutomationModal(props) {
                             ix.symbol = automation.symbol;
                         }
                     })
-
-                    filteredIndexes = filteredIndexes.filter((item, index, self) =>
-                        index === self.findIndex(t => t.eval === item.eval)
-                    )
                 }
                 else {
                     const baseWallet = indexes.find(ix => ix.variable === 'WALLET' && automation.symbol.startsWith(ix.symbol));
@@ -87,6 +83,10 @@ function AutomationModal(props) {
                     const quoteWallet = indexes.find(ix => ix.variable === 'WALLET' && automation.symbol.endsWith(ix.symbol));
                     if (quoteWallet) filteredIndexes.splice(0, 0, quoteWallet);
                 }
+
+                filteredIndexes = filteredIndexes.filter((item, index, self) =>
+                    index === self.findIndex(t => t.eval === item.eval)
+                )
 
                 setIndexes(filteredIndexes);
             })

@@ -12,6 +12,7 @@ import SelectQuote, { getDefaultQuote } from '../SelectQuote/SelectQuote';
  */
 function SelectSymbol(props) {
 
+    const [quote, setQuote] = useState(false);
     const [symbols, setSymbols] = useState(["LOADING"]);
     const [isDisabled, setIsDisabled] = useState(false);
     const [onlyFavorites, setOnlyFavorites] = useState(props.onlyFavorites === null || props.onlyFavorites === undefined ? true : props.onlyFavorites);
@@ -32,7 +33,7 @@ function SelectSymbol(props) {
 
         const isWildcard = props.symbol.startsWith('*');
         selectRef.current.value = isWildcard ? '*' : props.symbol;
-        setShowQuote(isWildcard);
+        setQuote(isWildcard ? props.symbol.replace('*', '') : false);
     }, [props.symbol])
 
     useEffect(() => {
@@ -65,15 +66,13 @@ function SelectSymbol(props) {
             })
     }, [onlyFavorites])
 
-    const [showQuote, setShowQuote] = useState(false);
-
     function onSymbolChange(event) {
         if (event.target.value !== '*') {
-            setShowQuote(false);
+            setQuote(false);
             props.onChange(event);
         }
         else {
-            setShowQuote(true);
+            setQuote(true);
             const quote = getDefaultQuote();
             props.onChange({ target: { id: 'symbol', value: '*' + quote } });
         }
@@ -102,14 +101,14 @@ function SelectSymbol(props) {
                         {symbols.map(s => (<option key={s} value={s}>{s}</option>))}
                     </select>
                     {
-                        showQuote
+                        quote
                             ? <SelectQuote value={props.symbol.replace('*', '')} disabled={props.disabled} noFavorites={true} onChange={onQuoteChange} />
                             : <React.Fragment></React.Fragment>
                     }
                 </div>
             </React.Fragment>
         )
-    }, [symbols, showQuote, isDisabled])
+    }, [symbols, quote, isDisabled])
 
     return (selectSymbol);
 }
