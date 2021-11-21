@@ -20,7 +20,7 @@ async function getBalance(req, res, next) {
         })
         .reduce((prev, curr) => prev + curr);
 
-    info.usdEstimate = usd.toFixed(2);
+    info.fiatEstimate = "~USD" + usd.toFixed(2);
 
     res.json(info);
 }
