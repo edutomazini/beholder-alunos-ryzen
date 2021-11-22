@@ -25,6 +25,28 @@ function insertOrder(newOrder) {
     return orderModel.create(newOrder);
 }
 
+async function getAveragePrices() {
+    const result = await orderModel.findAll({
+        where: { side: 'BUY', status: 'FILLED', net: { [Sequelize.Op.gt]: 0 } },
+        group: 'symbol',
+        attributes: [
+            [Sequelize.fn('max', Sequelize.col('symbol')), 'symbol'],
+            [Sequelize.fn('sum', Sequelize.col('net')), 'net'],
+            [Sequelize.fn('sum', Sequelize.col('quantity')), 'qty']
+        ],
+        raw: true
+    })
+
+    return result.map(r => {
+        return {
+            symbol: r.symbol,
+            net: parseFloat(r.net),
+            qty: parseFloat(r.qty),
+            avg: parseFloat(r.net) / parseFloat(r.qty)
+        }
+    })
+}
+
 function getOrders(symbol, page = 1) {
     const options = {
         where: {},
@@ -153,5 +175,6 @@ module.exports = {
     getLastFilledOrders,
     updateOrderByOrderId,
     getReportOrders,
-    removeAutomationFromOrders
+    removeAutomationFromOrders,
+    getAveragePrices
 }

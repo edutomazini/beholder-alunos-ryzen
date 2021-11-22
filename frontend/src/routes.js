@@ -10,6 +10,7 @@ import OrderTemplates from './private/OrderTemplates/OrderTemplates';
 import WithdrawTemplates from './private/WithdrawTemplates/WithdrawTemplates';
 import Reports from './private/Reports/Reports';
 import Symbols from './private/Symbols/Symbols';
+import Wallet from './private/Wallet/Wallet';
 
 function Routes() {
 
@@ -54,6 +55,9 @@ function Routes() {
             </PrivateRoute>
             <PrivateRoute path="/withdrawTemplates/:coin?">
                 <WithdrawTemplates />
+            </PrivateRoute>
+            <PrivateRoute path="/wallet">
+                <Wallet />
             </PrivateRoute>
         </BrowserRouter>
     )

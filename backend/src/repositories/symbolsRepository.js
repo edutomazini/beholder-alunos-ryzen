@@ -1,6 +1,12 @@
 const symbolModel = require('../models/symbolModel');
 const Sequelize = require('sequelize');
 
+function getManySymbols(symbols) {
+    return symbolModel.findAll({
+        where: { symbol: symbols }
+    })
+}
+
 function getSymbols() {
     return symbolModel.findAll();
 }
@@ -76,5 +82,6 @@ module.exports = {
     updateSymbol,
     deleteAll,
     bulkInsert,
-    searchSymbols
+    searchSymbols,
+    getManySymbols
 }

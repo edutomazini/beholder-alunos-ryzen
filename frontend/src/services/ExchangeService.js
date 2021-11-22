@@ -1,4 +1,5 @@
 import axios from './BaseService';
+import { getDefaultFiat } from '../components/SelectFiat/SelectFiat';
 
 const EXCHANGE_URL = `${process.env.REACT_APP_API_URL}/exchange/`;
 
@@ -8,7 +9,13 @@ export const FINISHED_STATUS = ["FILLED", "REJECTED", "CANCELED"];
 
 export async function getBalance(token) {
     const headers = { 'authorization': token };
-    const response = await axios.get(EXCHANGE_URL + 'balance', { headers });
+    const response = await axios.get(EXCHANGE_URL + 'balance/' + getDefaultFiat(), { headers });
+    return response.data;
+}
+
+export async function getFullBalance(fiat, token) {
+    const headers = { 'authorization': token };
+    const response = await axios.get(EXCHANGE_URL + 'balance/full/' + fiat, { headers });
     return response.data;
 }
 
