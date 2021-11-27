@@ -9,11 +9,11 @@ const agenda = require('./agenda');
 const logger = require('./utils/logger');
 
 (async () => {
-    const version = process.version.replace('v', '').split('.')[0];
-    if (parseInt(version) < 14) {
-        console.log(`Your Node.js version is ${process.version}. Beholder is compatible with Node 14+.`);
-        process.exit(0);
-    }
+    // const version = process.version.replace('v', '').split('.')[0];
+    // if (parseInt(version) < 14) {
+    //     console.log(`Your Node.js version is ${process.version}. Beholder is compatible with Node 14+.`);
+    //     process.exit(0);
+    // }
 
     logger('system', 'Getting the default settings...');
     const settings = await settingsRepository.getDefaultSettings()
