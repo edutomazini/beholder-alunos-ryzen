@@ -253,7 +253,7 @@ const EMPTY_REPORT = {
 function groupByAutomations(orders) {
     const automationsObj = {};
     orders.forEach(o => {
-        const automationId = o.automationId ?? 'M';
+        const automationId = o.automationId ? o.automationId : 'M';
         if (!automationsObj[automationId])
             automationsObj[automationId] = { name: o.automationId ? o['automation.name'] : 'Others', executions: 1, net: 0 };
         else
