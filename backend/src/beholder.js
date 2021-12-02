@@ -322,7 +322,7 @@ async function placeOrder(settings, automation, action) {
         quantity: order.quantity,
         type: order.options.type,
         side: order.side,
-        limitPrice: LIMIT_TYPES.includes(order.type) ? order.limitPrice : null,
+        limitPrice: LIMIT_TYPES.includes(order.options.type) ? order.limitPrice : null,
         stopPrice,
         icebergQty: order.type === 'ICEBERG' ? order.options.icebergQty : null,
         orderId: result.orderId,
@@ -591,6 +591,10 @@ function doAction(settings, action, automation) {
     }
 }
 
+function shouldntInvert(automation, memoryKey) {
+    return ['GRID', 'TRAILING'].includes(automation.actions[0].type) || automation.schedule || memoryKey.indexOf(':LAST_ORDER') !== -1;
+}
+
 async function evalDecision(memoryKey, automation) {
     if (!automation) return false;
 
@@ -601,7 +605,7 @@ async function evalDecision(memoryKey, automation) {
             const isChecked = indexes.every(ix => MEMORY[ix] !== null && MEMORY[ix] !== undefined);
             if (!isChecked) return false;
 
-            const invertedCondition = ['GRID', 'TRAILING'].includes(automation.actions[0].type) || automation.schedule ? '' : invertCondition(memoryKey, automation.conditions);
+            const invertedCondition = shouldntInvert(automation, memoryKey) ? '' : invertCondition(memoryKey, automation.conditions);
             const evalCondition = automation.conditions + (invertedCondition ? ' && ' + invertedCondition : '');
 
             if (LOGS) logger('A:' + automation.id, `Beholder trying to evaluate:\n${evalCondition}\n at ${automation.name}`);
