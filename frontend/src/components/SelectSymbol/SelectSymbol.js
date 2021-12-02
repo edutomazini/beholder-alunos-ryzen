@@ -21,6 +21,7 @@ function SelectSymbol(props) {
     const buttonRef = useRef('');
 
     function onFavoriteClick(event) {
+        setQuote(false);
         setOnlyFavorites(!onlyFavorites);
     }
 
