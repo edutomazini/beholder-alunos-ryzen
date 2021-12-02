@@ -640,7 +640,7 @@ async function evalDecision(memoryKey, automation) {
 }
 
 async function updateMemory(symbol, index, interval, value, executeAutomations = true) {
-    if (!value) return false;
+    if (value === undefined || value === null) return false;
     if (value.toJSON) value = value.toJSON();
     if (value.get) value = value.get({ plain: true });
 
