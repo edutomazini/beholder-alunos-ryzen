@@ -644,6 +644,7 @@ async function evalDecision(memoryKey, automation) {
 }
 
 async function updateMemory(symbol, index, interval, value, executeAutomations = true) {
+
     if (value === undefined || value === null) return false;
     if (value.toJSON) value = value.toJSON();
     if (value.get) value = value.get({ plain: true });
@@ -664,6 +665,7 @@ async function updateMemory(symbol, index, interval, value, executeAutomations =
     if (!executeAutomations) return false;
 
     const automations = findAutomations(memoryKey);
+    
     if (!automations || !automations.length || LOCK_BRAIN) {
         if (LOGS) console.log(`Beholder has no automations for memoryKey: ${memoryKey}`);
         return false;

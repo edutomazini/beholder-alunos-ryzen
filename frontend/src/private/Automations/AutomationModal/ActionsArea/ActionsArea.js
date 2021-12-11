@@ -72,6 +72,11 @@ function ActionsArea(props) {
     }, [props.symbol])
 
     useEffect(() => {
+        if(!props.actions) {
+            setActions([]);
+            setNewAction(DEFAULT_ACTION);
+            return;
+        }
 
         const actions = props.actions.sort((a, b) => {
             if (a.id > b.id) return 1;

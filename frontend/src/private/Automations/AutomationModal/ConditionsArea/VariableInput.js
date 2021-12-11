@@ -36,6 +36,9 @@ function VariableInput(props) {
             text: getExpressionText()
         }
         props.onAddClick({ target: { id: 'condition', value: condition } });
+
+        setOperator('==');
+        variableRef.current.value = '';
     }
 
     function onOperatorChange(event) {
