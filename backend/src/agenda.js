@@ -22,8 +22,8 @@ function verifyCron(schedule) {
 
 async function runSchedule(id) {
     try {
-        const automation = await automationsRepository.getAutomation(id);
-        let result = await beholder.evalDecision('', automation);
+        let automation = await automationsRepository.getAutomation(id);
+        let result = await beholder.evalDecision('', automation.get({ plain: true }));
 
         if (Array.isArray(result) && result.length)
             result = result.filter(r => r);
