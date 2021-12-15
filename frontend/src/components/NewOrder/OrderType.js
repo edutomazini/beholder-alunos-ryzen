@@ -8,6 +8,8 @@ import React, { useMemo } from 'react';
 function OrderType(props) {
 
     /**
+     * Binance sumiu com estes tipos:
+     * <option value="ICEBERG">Iceberg</option>
      * <option value="STOP_LOSS">Stop Loss</option>
      * <option value="TAKE_PROFIT">Take Profit</option>
      */
@@ -17,7 +19,6 @@ function OrderType(props) {
             <div className="form-group">
                 <label htmlFor="type">Type:</label>
                 <select id="type" className="form-select" value={props.type} onChange={props.onChange}>
-                    <option value="ICEBERG">Iceberg</option>
                     <option value="LIMIT">Limit</option>
                     <option value="MARKET">Market</option>
                     <option value="STOP_LOSS_LIMIT">Stop Loss Limit</option>

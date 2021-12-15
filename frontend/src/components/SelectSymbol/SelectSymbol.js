@@ -103,7 +103,7 @@ function SelectSymbol(props) {
                     </select>
                     {
                         quote
-                            ? <SelectQuote value={props.symbol.replace('*', '')} disabled={props.disabled} noFavorites={true} onChange={onQuoteChange} />
+                            ? <SelectQuote value={props.symbol ? props.symbol.replace('*', ''): ''} disabled={props.disabled} noFavorites={true} onChange={onQuoteChange} />
                             : <React.Fragment></React.Fragment>
                     }
                 </div>

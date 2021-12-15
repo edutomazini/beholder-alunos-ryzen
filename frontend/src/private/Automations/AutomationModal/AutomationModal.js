@@ -101,6 +101,20 @@ function AutomationModal(props) {
         setShowLogs(!showLogs);
     }
 
+    const [isVisible, setIsVisible] = useState(false);
+    useEffect(() => {
+
+        const modal = document.getElementById('modalAutomation');
+        modal.addEventListener('hidden.bs.modal', (event) => {
+            setIsVisible(false);
+            setAutomation({ ...DEFAULT_AUTOMATION });
+        })
+        modal.addEventListener('shown.bs.modal', (event) => {
+            setIsVisible(true);
+        })
+
+    }, [])
+
     return (
         <div className="modal fade" id="modalAutomation" tabIndex="-1" role="dialog" aria-labelledby="modalTitleNotify" aria-hidden="true">
             <div className="modal-dialog modal-dialog-centered" role="document">
