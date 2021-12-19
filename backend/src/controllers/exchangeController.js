@@ -13,6 +13,9 @@ async function loadBalance(settingsId, fiat) {
     let total = 0;
     await Promise.all(coins.map(async (coin) => {
         let available = parseFloat(info[coin].available);
+
+        beholder.updateMemory(coin, `WALLET`, null, available);
+
         if (available > 0) available = beholder.tryFiatConversion(coin, available, fiat);
 
         let onOrder = parseFloat(info[coin].onOrder);
