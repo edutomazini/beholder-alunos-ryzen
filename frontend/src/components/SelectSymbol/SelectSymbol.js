@@ -53,11 +53,8 @@ function SelectSymbol(props) {
                 if (onlyFavorites && !symbolNames.length)
                     setOnlyFavorites(false);
 
-                if (symbolNames.length) {
+                if (symbolNames.length)
                     setSymbols(symbolNames);
-                    selectRef.current.value = symbolNames[0];
-                    props.onChange({ target: { id: 'symbol', value: symbolNames[0] } });
-                }
                 else
                     setSymbols(["NO SYMBOLS"]);
             })

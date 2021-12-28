@@ -203,7 +203,7 @@ function GridModal(props) {
                                 </div>
                                 <div className="col-md-6 mb-3">
                                     {
-                                        isVisible
+                                        isVisible && automation.symbol
                                             ? <SymbolPrice symbol={automation.symbol} />
                                             : <React.Fragment></React.Fragment>
                                     }
@@ -234,7 +234,7 @@ function GridModal(props) {
                                                 <div className="col-md-6 mb-3">
                                                     <div className="form-group">
                                                         <label htmlFor="levels">Levels:</label>
-                                                        <input className="form-control" id="levels" type="number" placeholder="3" defaultValue={grid.levels || ''} onChange={onGridChange} />
+                                                        <input className="form-control" id="levels" type="number" placeholder="3" defaultValue={grid.levels || ''} onChange={onGridChange} disabled={automation.id > 0} />
                                                     </div>
                                                 </div>
                                                 <div className="col-md-6 mb-3">

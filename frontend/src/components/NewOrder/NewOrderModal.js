@@ -193,7 +193,7 @@ function NewOrderModal(props) {
                                 </div>
                                 <div className="col-md-6 mb-3">
                                     {
-                                        isVisible
+                                        isVisible && order.symbol
                                             ? <SymbolPrice symbol={order.symbol} onChange={onPriceChange} />
                                             : <React.Fragment></React.Fragment>
                                     }

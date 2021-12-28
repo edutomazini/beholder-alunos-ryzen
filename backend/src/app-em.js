@@ -180,18 +180,22 @@ async function processBalanceData(monitorId, broadcastLabel, logs, data) {
 async function startUserDataMonitor(monitorId, broadcastLabel, logs) {
     const [balanceBroadcast, executionBroadcast] = broadcastLabel ? broadcastLabel.split(',') : [null, null];
 
-    await loadWallet();
+    try {
+        await loadWallet();
 
-    if (!exchange) return new Error('Exchange Monitor not initialized yet.');
-    exchange.userDataStream(
-        balanceData => processBalanceData(monitorId, balanceBroadcast, logs, balanceData),
-        executionData => {
-            if (executionData.X === orderStatus.FILLED)
-                processBalanceData(monitorId, balanceBroadcast, logs, executionData);
-            processExecutionData(monitorId, executionData, executionBroadcast);
-        }
-    )
-    logger('M:' + monitorId, 'User Data Monitor has started!');
+        if (!exchange) return new Error('Exchange Monitor not initialized yet.');
+        exchange.userDataStream(
+            balanceData => processBalanceData(monitorId, balanceBroadcast, logs, balanceData),
+            executionData => {
+                if (executionData.X === orderStatus.FILLED)
+                    processBalanceData(monitorId, balanceBroadcast, logs, executionData);
+                processExecutionData(monitorId, executionData, executionBroadcast);
+            }
+        )
+        logger('M:' + monitorId, 'User Data Monitor has started!');
+    } catch (err) {
+        logger('M:' + monitorId, 'User Data Monitor has NOT started!\n' + err.message);
+    }
 }
 
 async function processChartData(monitorId, symbol, indexes, interval, ohlc, logs) {
@@ -205,7 +209,7 @@ async function processChartData(monitorId, symbol, indexes, interval, ohlc, logs
 
         try {
             const calc = execCalc(indexName, ohlc, ...params);
-            if (logs) logger('M:' + monitorId, `${index} calculated: ${JSON.stringify(calc.current ? calc.current : calc)}`);
+            if (logs) logger('M:' + monitorId, `${index}_${interval} calculated: ${JSON.stringify(calc.current ? calc.current : calc)}`);
             return beholder.updateMemory(symbol, index, interval, calc, !!calc.current);
         } catch (err) {
             logger('M:' + monitorId, `Exchange Monitor => Can't calc the index ${index}:`);
@@ -350,8 +354,10 @@ async function init(settings, wssInstance, beholderInstance) {
                     return startMiniTickerMonitor(m.id, m.broadcastLabel, m.logs);
                 case monitorTypes.BOOK:
                     return startBookMonitor(m.id, m.broadcastLabel, m.logs);
-                case monitorTypes.USER_DATA:
+                case monitorTypes.USER_DATA:{
+                    if (!settings.accessKey || !settings.secretKey) return;
                     return startUserDataMonitor(m.id, m.broadcastLabel, m.logs);
+                }
                 case monitorTypes.CANDLES:
                     return startChartMonitor(m.id, m.symbol, m.interval, m.indexes ? m.indexes.split(',') : [], m.broadcastLabel, m.logs);
                 case monitorTypes.TICKER:

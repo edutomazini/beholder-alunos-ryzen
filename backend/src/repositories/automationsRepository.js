@@ -1,4 +1,5 @@
 const automationModel = require('../models/automationModel');
+const Sequelize = require('sequelize');
 
 async function getActiveAutomations() {
     return automationModel.findAll({
@@ -69,6 +70,12 @@ function deleteAutomation(id, transaction) {
     })
 }
 
+async function gridExists(name) {
+    const gridName = name.split('#')[0];
+    const count = await automationModel.count({ where: { name: { [Sequelize.Op.like]: `${gridName}#%` }  } });
+    return count > 0;
+}
+
 module.exports = {
     getAutomations,
     insertAutomation,
@@ -76,5 +83,6 @@ module.exports = {
     getAutomation,
     updateAutomation,
     getActiveAutomations,
-    automationExists
+    automationExists,
+    gridExists
 }

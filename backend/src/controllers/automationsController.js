@@ -72,11 +72,17 @@ async function insertAutomation(req, res, next) {
         return res.status(400).json('You need to have at least one action per automation!');
 
     const isGrid = newAutomation.actions[0].type === actionsRepository.actionTypes.GRID;
-    if (isGrid && (!quantity || !levels))
-        return res.status(400).json('Invalid grid params!');
+    if (isGrid) {
+        if (!quantity || !levels)
+            return res.status(400).json('Invalid grid params!');
 
-    const exists = await automationsRepository.automationExists(newAutomation.name);
-    if (exists) return res.status(409).json(`The automation ${newAutomation.name} already exists!`);
+        const exists = await automationsRepository.gridExists(newAutomation.name);
+        if (exists) return res.status(409).json(`A grid for ${newAutomation.symbol} already exists!`);
+    }
+    else {
+        const exists = await automationsRepository.automationExists(newAutomation.name);
+        if (exists) return res.status(409).json(`The automation ${newAutomation.name} already exists!`);
+    }
 
     const transaction = await db.transaction();
     let savedAutomation, actions = [], grids = [];
