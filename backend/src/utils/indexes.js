@@ -601,7 +601,7 @@ function Stochastic(ohlc, period, signal) {
 }
 
 function TRIX(closes, period) {
-    const trixResult = technicalindicators.rsi({
+    const trixResult = technicalindicators.trix({
         period: parseInt(period) || 18,
         values: closes
     })
