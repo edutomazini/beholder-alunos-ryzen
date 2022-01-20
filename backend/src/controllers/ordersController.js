@@ -214,20 +214,20 @@ function calcVolume(orders, side, startTime, endTime) {
 
 function thirtyDaysAgo() {
     const date = new Date();
-    date.setDate(date.getDate() - 30);
-    date.setHours(0, 0, 0, 0);
+    date.setUTCDate(date.getUTCDate() - 30);
+    date.setUTCHours(0, 0, 0, 0);
     return date.getTime();
 }
 
 function getStartToday() {
     const date = new Date();
-    date.setHours(0, 0, 0, 0);
+    date.setUTCHours(0, 0, 0, 0);
     return date.getTime();
 }
 
 function getToday() {
     const date = new Date();
-    date.setHours(23, 59, 59, 999);
+    date.setUTCHours(23, 59, 59, 999);
     return date.getTime();
 }
 
@@ -284,11 +284,11 @@ async function getDayTradeReport(req, res, next) {
     const series = [];
     for (let i = 0; i < 24; i++) {
         const newDate = new Date(startDate);
-        newDate.setHours(i);
+        newDate.setUTCHours(i);
         subs.push(`${i}h`);
 
         const lastMoment = new Date(newDate.getTime())
-        lastMoment.setMinutes(59, 59, 999);
+        lastMoment.setUTCMinutes(59, 59, 999);
 
         const partialBuy = calcVolume(orders, 'BUY', newDate.getTime(), lastMoment.getTime());
         const partialSell = calcVolume(orders, 'SELL', newDate.getTime(), lastMoment.getTime());
@@ -338,11 +338,11 @@ async function getMonthReport(req, res, next) {
     const series = [];
     for (let i = 0; i < daysInRange; i++) {
         const newDate = new Date(startDate);
-        newDate.setDate(newDate.getDate() + i);
-        subs.push(`${newDate.getDate()}/${newDate.getMonth() + 1}`);
+        newDate.setUTCDate(newDate.getUTCDate() + i);
+        subs.push(`${newDate.getUTCDate()}/${newDate.getUTCMonth() + 1}`);
 
         const lastMoment = new Date(newDate.getTime())
-        lastMoment.setHours(23, 59, 59, 999);
+        lastMoment.setUTCHours(23, 59, 59, 999);
 
         const partialBuy = calcVolume(orders, 'BUY', newDate.getTime(), lastMoment.getTime());
         const partialSell = calcVolume(orders, 'SELL', newDate.getTime(), lastMoment.getTime());
