@@ -17,6 +17,7 @@ const settingsModel = database.define('settings', {
         allowNull: false
     },
     phone: Sequelize.STRING,
+    pushToken: Sequelize.STRING,
     apiUrl: Sequelize.STRING,
     streamUrl: Sequelize.STRING,
     accessKey: Sequelize.STRING,

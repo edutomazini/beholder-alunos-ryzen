@@ -53,6 +53,9 @@ async function updateSettings(id, newSettings) {
     if (newSettings.accessKey && newSettings.accessKey !== currentSettings.accessKey)
         currentSettings.accessKey = newSettings.accessKey;
 
+    if (newSettings.pushToken !== undefined && newSettings.pushToken !== currentSettings.pushToken)
+        currentSettings.pushToken = newSettings.pushToken;
+
     if (newSettings.secretKey) {
         currentSettings.secretKey = crypto.encrypt(newSettings.secretKey);
         clearSettingsCache(id);

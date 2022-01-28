@@ -16,7 +16,7 @@ async function doLogin(req, res, next) {
                 process.env.JWT_SECRET, {
                 expiresIn: parseInt(process.env.JWT_EXPIRES)
             })
-            return res.json({ token });
+            return res.json({ token, pushToken: settings.pushToken });
         }
     }
 
