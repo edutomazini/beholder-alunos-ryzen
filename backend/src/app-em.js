@@ -3,6 +3,8 @@ const { orderStatus } = require('./repositories/ordersRepository');
 const { monitorTypes, getActiveMonitors } = require('./repositories/monitorsRepository');
 const { execCalc, indexKeys } = require('./utils/indexes');
 const logger = require('./utils/logger');
+const push = require('./utils/push');
+const { getDefaultSettings } = require('./repositories/settingsRepository');
 
 let WSS, beholder, exchange;
 
@@ -20,10 +22,10 @@ function startMiniTickerMonitor(monitorId, broadcastLabel, logs) {
                 const converted = {};
                 Object.entries(mkt[1]).map(prop => converted[prop[0]] = parseFloat(prop[1]));
                 const results = await beholder.updateMemory(mkt[0], indexKeys.MINI_TICKER, null, converted);
-                if (results) results.map(r => WSS.broadcast({ notification: r }));
+                if (results) results.map(r => sendMessage({ notification: r }));
             })
 
-            if (broadcastLabel && WSS) WSS.broadcast({ [broadcastLabel]: markets });
+            if (broadcastLabel && WSS) sendMessage({ [broadcastLabel]: markets });
         } catch (err) {
             if (logs) logger('M:' + monitorId, err)
         }
@@ -39,7 +41,7 @@ function startBookMonitor(monitorId, broadcastLabel, logs) {
 
         try {
             if (book.length === 200) {
-                if (broadcastLabel && WSS) WSS.broadcast({ [broadcastLabel]: book });
+                if (broadcastLabel && WSS) sendMessage({ [broadcastLabel]: book });
                 book = [];
             }
             else book.push({ ...order });
@@ -60,7 +62,7 @@ function startBookMonitor(monitorId, broadcastLabel, logs) {
             newMemory.current = converted;
 
             const results = await beholder.updateMemory(order.symbol, indexKeys.BOOK, null, newMemory);
-            if (results) results.map(r => WSS.broadcast({ notification: r }));
+            if (results) results.map(r => sendMessage({ notification: r }));
         } catch (err) {
             if (logs) logger('M:' + monitorId, err);
         }
@@ -75,7 +77,7 @@ async function loadWallet() {
         const info = await exchange.balance();
         const wallet = Object.entries(info).map(async (item) => {
             const results = await beholder.updateMemory(item[0], indexKeys.WALLET, null, parseFloat(item[1].available));
-            if (results) results.map(r => WSS.broadcast({ notification: r }));
+            if (results) results.map(r => sendMessage({ notification: r }));
 
             return {
                 symbol: item[0],
@@ -121,7 +123,7 @@ function notifyOrderUpdate(order) {
         case 'EXPIRED': type = 'error'; break;
         default: type = 'info'; break;
     }
-    WSS.broadcast({ notification: { text: `Order #${order.orderId} was updated as ${order.status}`, type } });
+    sendMessage({ notification: { text: `Order #${order.orderId} was updated as ${order.status}`, type } });
 }
 
 function processExecutionData(monitorId, executionData, broadcastLabel) {
@@ -157,8 +159,8 @@ function processExecutionData(monitorId, executionData, broadcastLabel) {
 
                 const orderCopy = getLightOrder(updatedOrder.get({ plain: true }));
                 const results = await beholder.updateMemory(order.symbol, indexKeys.LAST_ORDER, null, orderCopy);
-                if (results) results.map(r => WSS.broadcast({ notification: r }));
-                if (broadcastLabel) WSS.broadcast({ [broadcastLabel]: order });
+                if (results) results.map(r => sendMessage({ notification: r }));
+                if (broadcastLabel) sendMessage({ [broadcastLabel]: order });
             }
         } catch (err) {
             logger('M:' + monitorId, err);
@@ -171,7 +173,7 @@ async function processBalanceData(monitorId, broadcastLabel, logs, data) {
 
     try {
         const wallet = await loadWallet();
-        if (broadcastLabel && WSS) WSS.broadcast({ [broadcastLabel]: wallet });
+        if (broadcastLabel && WSS) sendMessage({ [broadcastLabel]: wallet });
     } catch (err) {
         if (logs) logger('M:' + monitorId, err);
     }
@@ -239,15 +241,15 @@ function startChartMonitor(monitorId, symbol, interval, indexes, broadcastLabel,
 
             if (results && Array.isArray(results)) {
                 results = results.flat();
-                results.filter(r => r).map(r => WSS.broadcast({ notification: r }));
+                results.filter(r => r).map(r => sendMessage({ notification: r }));
             }
 
-            if (broadcastLabel && WSS) WSS.broadcast({ [broadcastLabel]: lastCandle });
+            if (broadcastLabel && WSS) sendMessage({ [broadcastLabel]: lastCandle });
             results = await processChartData(monitorId, symbol, indexes, interval, ohlc, logs);
 
             if (results) {
                 if (logs) logger('M:' + monitorId, `chartStream Results: ${results}`);
-                results.map(r => WSS.broadcast({ notification: r }));
+                results.map(r => sendMessage({ notification: r }));
             }
         } catch (err) {
             if (logs) logger('M:' + monitorId, err);
@@ -324,9 +326,9 @@ async function startTickerMonitor(monitorId, symbol, broadcastLabel, logs) {
             newMemory.current = ticker;
 
             const results = await beholder.updateMemory(data.symbol, indexKeys.TICKER, null, newMemory);
-            if (results) results.map(r => WSS.broadcast({ notification: r }));
+            if (results) results.map(r => sendMessage({ notification: r }));
 
-            if (WSS && broadcastLabel) WSS.broadcast({ [broadcastLabel]: data });
+            if (WSS && broadcastLabel) sendMessage({ [broadcastLabel]: data });
         }
         catch (err) {
             if (logs) logger('M:' + monitorId, err);
@@ -336,6 +338,15 @@ async function startTickerMonitor(monitorId, symbol, broadcastLabel, logs) {
 }
 
 function sendMessage(json) {
+    if (json.notification) {
+        getDefaultSettings()
+            .then(settings => {
+                if (settings.pushToken)
+                    push(settings, json.notification.text, 'Beholder Notification', json.notification)
+            })
+            .catch(err => logger('system', err.message));
+    }
+
     return WSS.broadcast(json);
 }
 
@@ -354,7 +365,7 @@ async function init(settings, wssInstance, beholderInstance) {
                     return startMiniTickerMonitor(m.id, m.broadcastLabel, m.logs);
                 case monitorTypes.BOOK:
                     return startBookMonitor(m.id, m.broadcastLabel, m.logs);
-                case monitorTypes.USER_DATA:{
+                case monitorTypes.USER_DATA: {
                     if (!settings.accessKey || !settings.secretKey) return;
                     return startUserDataMonitor(m.id, m.broadcastLabel, m.logs);
                 }
