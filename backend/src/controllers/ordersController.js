@@ -8,6 +8,12 @@ const logger = require('../utils/logger');
 const db = require('../db');
 const appEm = require('../app-em');
 
+async function getOrder(req, res, next) {
+    const { orderId, clientOrderId } = req.params;
+    const order = await ordersRepository.getOrder(orderId, clientOrderId);
+    res.json(order);
+}
+
 async function getOrders(req, res, next) {
     const symbol = req.params.symbol && req.params.symbol.toUpperCase();
     const page = parseInt(req.query.page);
@@ -379,5 +385,6 @@ module.exports = {
     getOrders,
     syncOrder,
     getLastOrders,
-    getOrdersReport
+    getOrdersReport,
+    getOrder
 }
