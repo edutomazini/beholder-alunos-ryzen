@@ -6,7 +6,7 @@ const LOGGERS = {};
 
 function createLogger(loggerKey) {
     loggerKey = loggerKey.replace(':', '');//fix para windows
-    if(!loggerKey.endsWith('.log')) loggerKey = loggerKey + ".log";
+    if (!loggerKey.endsWith('.log')) loggerKey = loggerKey + ".log";
 
     const logger = winston.createLogger({
         format: winston.format.combine(
@@ -15,7 +15,7 @@ function createLogger(loggerKey) {
         ),
         transports: [
             new winston.transports.File({
-                filename: path.resolve(__dirname, "..", "..", "logs", loggerKey), 
+                filename: path.resolve(__dirname, "..", "..", "logs", loggerKey),
                 maxsize: 1024 * 1024,
                 maxFiles: 1,
                 tailable: true
@@ -33,21 +33,25 @@ function createLogger(loggerKey) {
 }
 
 module.exports = (loggerKey, data) => {
-    loggerKey = loggerKey.replace(':', '').replace('.log', '')
+    try {
+        loggerKey = loggerKey.replace(':', '').replace('.log', '')
 
-    let logger = LOGGERS[loggerKey];
-    if (!logger) {
-        logger = createLogger(loggerKey);
-        LOGGERS[loggerKey] = logger;
-    }
+        let logger = LOGGERS[loggerKey];
+        if (!logger) {
+            logger = createLogger(loggerKey);
+            LOGGERS[loggerKey] = logger;
+        }
 
-    if (data instanceof Error) {
-        logger.info(new Date().toISOString());
-        return logger.error(data);
+        if (data instanceof Error) {
+            logger.info(new Date().toISOString());
+            return logger.error(data);
+        }
+        else if (typeof data === 'object') {
+            return logger.info(new Date().toISOString() + " - " + util.inspect(data));
+        }
+        else
+            return logger.info(new Date().toISOString() + " - " + data);
+    } catch (err) {
+        console.error(err, loggerKey, data);
     }
-    else if (typeof data === 'object') {
-        return logger.info(new Date().toISOString() + " - " + util.inspect(data));
-    }
-    else
-        return logger.info(new Date().toISOString() + " - " + data);
 }
