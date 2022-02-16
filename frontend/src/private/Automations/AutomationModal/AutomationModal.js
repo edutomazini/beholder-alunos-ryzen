@@ -4,6 +4,7 @@ import SwitchInput from '../../../components/SwitchInput/SwitchInput';
 import { saveAutomation } from '../../../services/AutomationsService';
 import ConditionsArea from './ConditionsArea/ConditionsArea';
 import { getIndexes } from '../../../services/BeholderService';
+import { getSymbol } from '../../../services/SymbolsService';
 import '../Automations.css';
 import ActionsArea from './ActionsArea/ActionsArea';
 import ScheduleArea from './ScheduleArea/ScheduleArea';
@@ -18,6 +19,7 @@ import LogView from '../../../components/Logs/LogView';
 function AutomationModal(props) {
 
     const [indexes, setIndexes] = useState([]);
+    const [symbol, setSymbol] = useState({});
     const [error, setError] = useState('');
 
     const DEFAULT_AUTOMATION = {
@@ -56,12 +58,23 @@ function AutomationModal(props) {
     useEffect(() => {
         if (!automation || !automation.symbol) return;
 
+        if (automation.symbol('*'))
+            setSymbol({ base: '*', quote: automation.symbol.replace('*', '') });
+        else {
+            const token = localStorage.getItem('token');
+            getSymbol(automation.symbol, token).then(symbolObj => setSymbol(symbolObj));
+        }
+    }, [automation.symbol])
+
+    useEffect(() => {
+        if (!symbol || !symbol.base) return;
+
         const token = localStorage.getItem('token');
         getIndexes(token)
             .then(indexes => {
-                const isWildcard = automation.symbol.startsWith('*');
+                const isWildcard = symbol.base === '*';
                 let filteredIndexes = isWildcard
-                    ? indexes.filter(k => k.symbol.endsWith(automation.symbol.replace('*', '')))
+                    ? indexes.filter(k => k.symbol.endsWith(symbol.quote))
                     : indexes.filter(k => k.symbol === automation.symbol);
 
                 if (isWildcard) {
@@ -77,10 +90,11 @@ function AutomationModal(props) {
                     })
                 }
                 else {
-                    const baseWallet = indexes.find(ix => ix.variable === 'WALLET' && automation.symbol.startsWith(ix.symbol));
+
+                    const baseWallet = indexes.find(ix => ix.variable === 'WALLET' && symbol.base === ix.symbol);
                     if (baseWallet) filteredIndexes.splice(0, 0, baseWallet);
 
-                    const quoteWallet = indexes.find(ix => ix.variable === 'WALLET' && automation.symbol.endsWith(ix.symbol));
+                    const quoteWallet = indexes.find(ix => ix.variable === 'WALLET' && symbol.quote === ix.symbol);
                     if (quoteWallet) filteredIndexes.splice(0, 0, quoteWallet);
                 }
 
@@ -94,7 +108,7 @@ function AutomationModal(props) {
                 console.error(err.response ? err.response.data : err.message);
                 setError(err.response ? err.response.data : err.message);
             })
-    }, [automation.symbol])
+    }, [symbol])
 
     const [showLogs, setShowLogs] = useState(false);
     function onLogClick(event) {
