@@ -58,7 +58,7 @@ function AutomationModal(props) {
     useEffect(() => {
         if (!automation || !automation.symbol) return;
 
-        if (automation.symbol('*'))
+        if (automation.symbol.startsWith('*'))
             setSymbol({ base: '*', quote: automation.symbol.replace('*', '') });
         else {
             const token = localStorage.getItem('token');
