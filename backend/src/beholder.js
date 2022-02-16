@@ -665,7 +665,7 @@ async function updateMemory(symbol, index, interval, value, executeAutomations =
     if (!executeAutomations) return false;
 
     const automations = findAutomations(memoryKey);
-    
+
     if (!automations || !automations.length || LOCK_BRAIN) {
         if (LOGS) console.log(`Beholder has no automations for memoryKey: ${memoryKey}`);
         return false;
@@ -823,9 +823,13 @@ function tryFiatConversion(baseAsset, baseQty, fiat) {
     const usd = tryUSDConversion(baseAsset, baseQty);
     if (fiat === 'USD' || !fiat) return usd;
 
-    const book = getMemory('USDT' + fiat, 'BOOK');
-    if (!book) return usd;
-    return usd * book.current.bestBid;
+    let book = getMemory('USDT' + fiat, 'BOOK');
+    if (book) return usd * book.current.bestBid;
+
+    book = getMemory(fiat + 'USDT', 'BOOK');
+    if (book) return usd / book.current.bestBid;
+
+    return usd;
 }
 
 function tryUSDConversion(baseAsset, baseQty) {
