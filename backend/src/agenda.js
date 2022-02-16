@@ -36,19 +36,23 @@ async function runSchedule(id) {
 
 function addSchedule(automation) {
     if (!automation.schedule) return;
+    let job;
 
     if (verifyCron(automation.schedule)) {
-        AGENDA[automation.id] = nodeSchedule.scheduleJob(automation.schedule, () => {
+        job = nodeSchedule.scheduleJob(automation.schedule, () => {
             runSchedule(automation.id);
         });
     }
     else {
         const date = Date.parse(automation.schedule);
-        AGENDA[automation.id] = nodeSchedule.scheduleJob(date, () => {
+        job = nodeSchedule.scheduleJob(date, () => {
             runSchedule(automation.id);
         });
     }
 
+    if (!job) throw new Error(`Cant schedule the job. Probably invalid date/cron. schedule: ${automation.schedule}`);
+
+    AGENDA[automation.id] = job;
     if (LOGS || automation.logs) logger('A:' + automation.id, `The Scheduled Automation #${automation.id} (${automation.schedule}) was added to agenda at ${new Date()}!`);
 }
 
