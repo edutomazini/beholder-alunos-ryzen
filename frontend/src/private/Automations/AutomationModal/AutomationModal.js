@@ -94,7 +94,7 @@ function AutomationModal(props) {
                     const baseWallet = indexes.find(ix => ix.variable === 'WALLET' && symbol.base === ix.symbol);
                     if (baseWallet) filteredIndexes.splice(0, 0, baseWallet);
 
-                    const quoteWallet = indexes.find(ix => ix.variable === 'WALLET' && symbol.quote === ix.symbol);
+                    const quoteWallet = indexes.find(ix => ix.variable === 'WALLET' && symbol.quote === ix.symbol.replace('*', ''));
                     if (quoteWallet) filteredIndexes.splice(0, 0, quoteWallet);
                 }
 
