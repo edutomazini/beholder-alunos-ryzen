@@ -19,8 +19,13 @@ async function startAutomation(req, res, next) {
 
     automation.isActive = true;
 
-    if (automation.schedule)
-        agenda.addSchedule(automation.get({ plain: true }));
+    if (automation.schedule) {
+        try {
+            agenda.addSchedule(automation.get({ plain: true }));
+        } catch (err) {
+            return res.status(422).json(err.message);
+        }
+    }
     else
         beholder.updateBrain(automation.get({ plain: true }));
 
@@ -112,8 +117,13 @@ async function insertAutomation(req, res, next) {
     savedAutomation = await automationsRepository.getAutomation(savedAutomation.id);
 
     if (savedAutomation.isActive) {
-        if (savedAutomation.schedule)
-            agenda.addSchedule(savedAutomation.get({ plain: true }));
+        if (savedAutomation.schedule) {
+            try {
+                agenda.addSchedule(savedAutomation.get({ plain: true }));
+            } catch (err) {
+                return res.status(422).json(err.message);
+            }
+        }
         else
             beholder.updateBrain(savedAutomation.get({ plain: true }));
     }
@@ -168,8 +178,12 @@ async function updateAutomation(req, res, next) {
 
     if (updatedAutomation.isActive) {
         if (updatedAutomation.schedule) {
-            agenda.cancelSchedule(updatedAutomation.id);
-            agenda.addSchedule(updatedAutomation.get({ plain: true }));
+            try {
+                agenda.cancelSchedule(updatedAutomation.id);
+                agenda.addSchedule(updatedAutomation.get({ plain: true }));
+            } catch (err) {
+                return res.status(422).json(err.message);
+            }
         } else {
             beholder.deleteBrain(currentAutomation);
             beholder.updateBrain(updatedAutomation.get({ plain: true }));

@@ -8,12 +8,16 @@ let AGENDA = {};
 const LOGS = process.env.AGENDA_LOGS === 'true';
 
 function init(automations) {
-    AGENDA = {};
-    automations.map(auto => {
-        if (auto.isActive && auto.schedule)
-            addSchedule(auto.get({ plain: true }));
-    });
-    if (LOGS) logger('system', 'Beholder Agenda has started!');
+    try {
+        AGENDA = {};
+        automations.map(auto => {
+            if (auto.isActive && auto.schedule)
+                addSchedule(auto.get({ plain: true }));
+        });
+        if (LOGS) logger('system', 'Beholder Agenda has started!');
+    } catch (err) {
+        throw new Error(`Can't start agenda! Err: ${err.message}`);
+    }
 }
 
 function verifyCron(schedule) {
