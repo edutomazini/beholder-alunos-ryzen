@@ -128,12 +128,12 @@ function invertCondition(memoryKey, conditions) {
     const condToInvert = conds.find(c => c.indexOf(memoryKey) !== -1 && c.indexOf('current') !== -1);
     if (!condToInvert) return false;
 
-    if (condToInvert.indexOf('>=') != -1) return condToInvert.replace('>=', '<').replace('current', 'previous');
-    if (condToInvert.indexOf('<=') != -1) return condToInvert.replace('<=', '>').replace('current', 'previous');
-    if (condToInvert.indexOf('>') != -1) return condToInvert.replace('>', '<').replace('current', 'previous');
-    if (condToInvert.indexOf('<') != -1) return condToInvert.replace('<', '>').replace('current', 'previous');
-    if (condToInvert.indexOf('!') != -1) return condToInvert.replace('!', '').replace('current', 'previous');
-    if (condToInvert.indexOf('==') != -1) return condToInvert.replace('==', '!==').replace('current', 'previous');
+    if (condToInvert.indexOf('>=') != -1) return condToInvert.replace('>=', '<').replace(/current/g, 'previous');
+    if (condToInvert.indexOf('<=') != -1) return condToInvert.replace('<=', '>').replace(/current/g, 'previous');
+    if (condToInvert.indexOf('>') != -1) return condToInvert.replace('>', '<').replace(/current/g, 'previous');
+    if (condToInvert.indexOf('<') != -1) return condToInvert.replace('<', '>').replace(/current/g, 'previous');
+    if (condToInvert.indexOf('!') != -1) return condToInvert.replace('!', '').replace(/current/g, 'previous');
+    if (condToInvert.indexOf('==') != -1) return condToInvert.replace('==', '!==').replace(/current/g, 'previous');
     return false;
 }
 

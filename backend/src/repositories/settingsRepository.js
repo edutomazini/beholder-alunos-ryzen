@@ -56,10 +56,8 @@ async function updateSettings(id, newSettings) {
     if (newSettings.pushToken !== undefined && newSettings.pushToken !== currentSettings.pushToken)
         currentSettings.pushToken = newSettings.pushToken;
 
-    if (newSettings.secretKey) {
+    if (newSettings.secretKey)
         currentSettings.secretKey = crypto.encrypt(newSettings.secretKey);
-        clearSettingsCache(id);
-    }
 
     if (newSettings.sendGridKey && newSettings.sendGridKey !== currentSettings.sendGridKey)
         currentSettings.sendGridKey = newSettings.sendGridKey;
@@ -80,6 +78,8 @@ async function updateSettings(id, newSettings) {
         currentSettings.telegramChat = newSettings.telegramChat;
 
     await currentSettings.save();
+
+    clearSettingsCache(id);
 }
 
 module.exports = {
