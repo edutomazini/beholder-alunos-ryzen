@@ -15,7 +15,7 @@ const logger = require('./utils/logger');
     //     process.exit(0);
     // }
 
-    logger('system', 'Getting the default settings...');
+    logger('system', `Getting the default settings with ID ${process.env.DEFAULT_SETTINGS_ID}...`);
     const settings = await settingsRepository.getDefaultSettings()
     if (!settings) throw new Error(`There is no settings.`);
 
