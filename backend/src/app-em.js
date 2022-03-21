@@ -337,15 +337,13 @@ async function startTickerMonitor(monitorId, symbol, broadcastLabel, logs) {
     logger('M:' + monitorId, `Ticker Monitor has started for ${symbol}`);
 }
 
-function sendMessage(json) {
-    if (json.notification) {
-        getDefaultSettings()
-            .then(settings => {
-                if (settings.pushToken)
-                    push(settings, json.notification.text, 'Beholder Notification', json.notification)
-            })
-            .catch(err => logger('system', err.message));
-    }
+async function sendMessage(json) {
+    try {
+        if (json.notification) {
+            const settings = await getDefaultSettings();
+            push.send(settings, json.notification.text, 'Beholder Notification', json.notification);
+        }
+    } catch (err) { }
 
     return WSS.broadcast(json);
 }

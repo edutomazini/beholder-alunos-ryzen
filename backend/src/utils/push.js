@@ -1,10 +1,30 @@
 const axios = require('axios');
 const settingsRepository = require('../repositories/settingsRepository');
 
-module.exports = async (settings, body, title = 'Beholder Notification', data = {}) => {
+let cache = [];
 
-    if (!settings) throw new Error(`The settings object is required to send push notifications!`);
-    if (!settings.pushToken) return false;
+function addToCache(data) {
+    if (cache && cache.length)
+        cache.push(data);
+    else
+        cache = [data];
+}
+
+function getFromCache() {
+    const messages = [...cache];
+    cache = [];
+    return messages;
+}
+
+async function send(settings, body, title = 'Beholder Notification', data = {}) {
+    if (typeof settings === 'number')
+        settings = await settingsRepository.getSettings(settings);
+
+    if (!settings || !settings.pushToken) return false;
+
+    data.date = new Date();
+
+    addToCache(data);
 
     const response = await axios.post('https://exp.host/--/api/v2/push/send', {
         to: settings.pushToken,
@@ -14,7 +34,14 @@ module.exports = async (settings, body, title = 'Beholder Notification', data = 
     })
 
     if (response.data.errors || response.data.data.status === 'error') {
-        await settingsRepository.updateSettings(settings.id, { pushToken: null });
-        throw new Error(`There was an error sending Push Notification for you.\n${JSON.stringify(response.data)}`);
+        settings.pushToken = null;
+        await settings.save();
+
+        throw new Error(`There was an error sending push notifications to ${settings.email}. The push token was cleaned!`);
     }
+}
+
+module.exports = {
+    send,
+    getFromCache
 }
