@@ -380,6 +380,8 @@ async function generateGrids(automation, levels, quantity, transaction) {
     await gridsRepository.deleteGrids(automation.id, transaction);
 
     const symbol = await getSymbol(automation.symbol);
+    if (!symbol.tickSize) throw new Error(`Tick Size not found for this symbol`);
+
     const tickSize = parseFloat(symbol.tickSize);
 
     const conditionSplit = automation.conditions.split(' && ');
@@ -643,30 +645,16 @@ async function evalDecision(memoryKey, automation) {
     }
 }
 
-async function updateMemory(symbol, index, interval, value, executeAutomations = true) {
-
-    if (value === undefined || value === null) return false;
-    if (value.toJSON) value = value.toJSON();
-    if (value.get) value = value.get({ plain: true });
-
-    if (LOCK_MEMORY) return false;
-
-    const indexKey = interval ? `${index}_${interval}` : index;
-    const memoryKey = `${symbol}:${indexKey}`;
-    MEMORY[memoryKey] = value;
-
-    if (LOGS) logger('beholder', `Beholder memory updated: ${memoryKey} => ${JSON.stringify(value)}, will exec autos? ${executeAutomations}`);
+async function testAutomations(memoryKey) {
 
     if (LOCK_BRAIN) {
         if (LOGS) logger('beholder', `Beholder brain is locked, sorry!`);
         return false;
     }
 
-    if (!executeAutomations) return false;
-
     const automations = findAutomations(memoryKey);
 
-    if (!automations || !automations.length || LOCK_BRAIN) {
+    if (!automations || !automations.length) {
         if (LOGS) console.log(`Beholder has no automations for memoryKey: ${memoryKey}`);
         return false;
     }
@@ -712,6 +700,34 @@ async function updateMemory(symbol, index, interval, value, executeAutomations =
         else
             LOCK_BRAIN = false;
     }
+}
+
+function parseMemoryKey(symbol, index, interval = null) {
+    const indexKey = interval ? `${index}_${interval}` : index;
+    return `${symbol}:${indexKey}`;
+}
+
+async function updateMemory(symbol, index, interval, value, executeAutomations = true) {
+
+    if (value === undefined || value === null) return false;
+    if (value.toJSON) value = value.toJSON();
+    if (value.get) value = value.get({ plain: true });
+
+    if (LOCK_MEMORY) return false;
+
+    const memoryKey = parseMemoryKey(symbol, index, interval);
+    MEMORY[memoryKey] = value;
+
+    if (LOGS) logger('beholder', `Beholder memory updated: ${memoryKey} => ${JSON.stringify(value)}, will exec autos? ${executeAutomations}`);
+
+    if (LOCK_BRAIN) {
+        if (LOGS) logger('beholder', `Beholder brain is locked, sorry!`);
+        return false;
+    }
+
+    if (!executeAutomations) return false;
+
+    return testAutomations(memoryKey);
 }
 
 function deleteMemory(symbol, index, interval) {
@@ -867,5 +883,7 @@ module.exports = {
     tryFiatConversion,
     generateGrids,
     evalDecision,
-    searchMemory
+    searchMemory,
+    testAutomations,
+    parseMemoryKey
 }
