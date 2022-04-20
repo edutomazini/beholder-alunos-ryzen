@@ -667,9 +667,9 @@ async function testAutomations(memoryKey) {
             let auto = { ...automation };
 
             if (auto.symbol.startsWith('*')) {
-                const regex = new RegExp(auto.symbol.replace('*', '\\*'));
-                auto.indexes = auto.indexes.replace(regex, symbol);
-                auto.conditions = auto.conditions.replace(regex, symbol);
+                const symbol = memoryKey.split(':')[0];
+                auto.indexes = auto.indexes.replaceAll(auto.symbol, symbol);
+                auto.conditions = auto.conditions.replaceAll(auto.symbol, symbol);
                 if (auto.actions) {
                     auto.actions.forEach(action => {
                         if (action.orderTemplate)
