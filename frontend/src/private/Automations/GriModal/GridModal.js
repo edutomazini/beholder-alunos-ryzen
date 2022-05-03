@@ -108,6 +108,7 @@ function GridModal(props) {
             setIsVisible(false);
             setGridView(false);
             setAutomation(DEFAULT_AUTOMATION);
+            setShowLogs(false);
         })
         modal.addEventListener('shown.bs.modal', (event) => {
             setIsVisible(true);

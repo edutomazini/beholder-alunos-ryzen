@@ -24,7 +24,6 @@ function MonitorModal(props) {
 
     function onSubmit(event) {
         const token = localStorage.getItem('token');
-        console.log(monitor);
         saveMonitor(monitor.id, monitor, token)
             .then(result => {
                 btnClose.current.click();

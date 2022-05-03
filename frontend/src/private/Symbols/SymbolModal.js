@@ -16,10 +16,6 @@ function SymbolModal(props) {
         setSymbol(props.data);
     }, [props.data])
 
-    function onInputChange(event) {
-        setSymbol(prevState => ({ ...prevState, [event.target.id]: event.target.value }));
-    }
-
     function getStarFillColor() {
         return symbol.isFavorite ? "yellow" : "white";
     }

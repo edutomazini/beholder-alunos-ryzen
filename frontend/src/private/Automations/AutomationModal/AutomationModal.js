@@ -122,6 +122,7 @@ function AutomationModal(props) {
         modal.addEventListener('hidden.bs.modal', (event) => {
             setIsVisible(false);
             setAutomation({ ...DEFAULT_AUTOMATION });
+            setShowLogs(false);
         })
         modal.addEventListener('shown.bs.modal', (event) => {
             setIsVisible(true);
