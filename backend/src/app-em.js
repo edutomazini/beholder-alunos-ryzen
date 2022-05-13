@@ -102,15 +102,16 @@ function getLightOrder(order) {
     delete orderCopy.isMaker;
     delete orderCopy.commission;
     delete orderCopy.obs;
-    delete orderCopy.Automation;
+    delete orderCopy.automation;
     delete orderCopy.createdAt;
     delete orderCopy.updatedAt;
-    orderCopy.limitPrice = parseFloat(orderCopy.limitPrice);
-    orderCopy.stopPrice = parseFloat(orderCopy.stopPrice);
-    orderCopy.avgPrice = parseFloat(orderCopy.avgPrice);
-    orderCopy.net = parseFloat(orderCopy.net);
-    orderCopy.quantity = parseFloat(orderCopy.quantity);
-    orderCopy.icebergQty = parseFloat(orderCopy.icebergQty);
+
+    orderCopy.limitPrice = orderCopy.limitPrice ? parseFloat(orderCopy.limitPrice) : null;
+    orderCopy.stopPrice = orderCopy.stopPrice ? parseFloat(orderCopy.stopPrice) : null;
+    orderCopy.avgPrice = orderCopy.avgPrice ? parseFloat(orderCopy.avgPrice) : null;
+    orderCopy.net = orderCopy.net ? parseFloat(orderCopy.net) : null;
+    orderCopy.quantity = orderCopy.quantity ? parseFloat(orderCopy.quantity) : null;
+    orderCopy.icebergQty = orderCopy.icebergQty ? parseFloat(orderCopy.icebergQty) : null;
     return orderCopy;
 }
 

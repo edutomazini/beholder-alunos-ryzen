@@ -13,7 +13,7 @@ const MEMORY = {};
 
 let BRAIN = {};
 
-let LOCK_BRAIN = false;
+let LOCK_BRAIN = {};
 
 let BRAIN_INDEX = {};
 
@@ -25,7 +25,7 @@ const INTERVAL = parseInt(process.env.AUTOMATION_INTERVAL || 0);
 function init(automations) {
 
     try {
-        LOCK_BRAIN = true;
+        setLocked(automations.map(a => a.id), true);
         LOCK_MEMORY = true;
 
         BRAIN = {};
@@ -36,10 +36,22 @@ function init(automations) {
                 updateBrain(auto)
         });
     } finally {
-        LOCK_BRAIN = false;
+        setLocked(automations.map(a => a.id), false);
         LOCK_MEMORY = false;
         logger('beholder', 'Beholder Brain has started!');
     }
+}
+
+function isLocked(automationId) {
+    if (Array.isArray(automationId))
+        return automationId.some(id => LOCK_BRAIN[id] === true);
+    return LOCK_BRAIN[automationId] === true;
+}
+
+function setLocked(automationId, value) {
+    if (Array.isArray(automationId))
+        return automationId.map(id => LOCK_BRAIN[id] = value);
+    LOCK_BRAIN[automationId] = value;
 }
 
 function updateBrainIndex(index, automationId) {
@@ -100,13 +112,13 @@ function updateBrain(automation) {
 
 function deleteBrain(automation) {
     try {
-        LOCK_BRAIN = true;
+        setLocked(automation.id, true);
         delete BRAIN[automation.id];
         deleteBrainIndex(automation.indexes.split(','), automation.id);
         if (automation.logs) logger('A:' + automation.id, `Automation removed from BRAIN #${automation.id}`);
     }
     finally {
-        LOCK_BRAIN = false;
+        setLocked(automation.id, false);
     }
 }
 
@@ -647,19 +659,14 @@ async function evalDecision(memoryKey, automation) {
 
 async function testAutomations(memoryKey) {
 
-    if (LOCK_BRAIN) {
-        if (LOGS) logger('beholder', `Beholder brain is locked, sorry!`);
-        return false;
-    }
-
     const automations = findAutomations(memoryKey);
 
-    if (!automations || !automations.length) {
-        if (LOGS) console.log(`Beholder has no automations for memoryKey: ${memoryKey}`);
+    if (!automations || !automations.length || isLocked(automations.map(a => a.id))) {
+        if (LOGS) console.log(`Beholder has no automations for memoryKey: ${memoryKey} or the brain is locked!`);
         return false;
     }
 
-    LOCK_BRAIN = true;
+    setLocked(automations.map(a => a.id));
     let results;
 
     try {
@@ -692,13 +699,9 @@ async function testAutomations(memoryKey) {
             return results;
     }
     finally {
-        if (results && results.length) {//se executou, segura a próxima
-            setTimeout(() => {
-                LOCK_BRAIN = false;
-            }, INTERVAL)
-        }
-        else
-            LOCK_BRAIN = false;
+        setTimeout(() => {
+            setLocked(automations.map(a => a.id), false);
+        }, results && results.length ? INTERVAL : 0)
     }
 }
 
@@ -719,11 +722,6 @@ async function updateMemory(symbol, index, interval, value, executeAutomations =
     MEMORY[memoryKey] = value;
 
     if (LOGS) logger('beholder', `Beholder memory updated: ${memoryKey} => ${JSON.stringify(value)}, will exec autos? ${executeAutomations}`);
-
-    if (LOCK_BRAIN) {
-        if (LOGS) logger('beholder', `Beholder brain is locked, sorry!`);
-        return false;
-    }
 
     if (!executeAutomations) return false;
 

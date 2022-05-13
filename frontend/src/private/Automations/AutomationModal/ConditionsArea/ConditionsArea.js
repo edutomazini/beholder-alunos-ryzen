@@ -23,6 +23,9 @@ function ConditionsArea(props) {
         const pos = conditions.findIndex(c => c.eval === id);
         conditions.splice(pos, 1);
         if (props.onChange) props.onChange({ target: { id: 'conditions', value: conditions.map(c => c.eval).join(' && ') } });
+
+        const conditionIndexes = parseIndexes(conditions);
+        props.onChange({ target: { id: 'indexes', value: conditionIndexes } });
     }
 
     function onKeySelectChange(event) {
