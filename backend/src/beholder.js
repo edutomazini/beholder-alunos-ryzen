@@ -666,7 +666,7 @@ async function testAutomations(memoryKey) {
         return false;
     }
 
-    setLocked(automations.map(a => a.id));
+    setLocked(automations.map(a => a.id), true);
     let results;
 
     try {
