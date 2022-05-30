@@ -7,7 +7,7 @@ module.exports = (settings) => {
 
     if (!settings) throw new Error(`The settings object is required to connect on exchange!`);
 
-    const binance = new Binance({
+    const binance = new Binance().options({
         APIKEY: settings.accessKey,
         APISECRET: settings.secretKey,
         recvWindow: 60000,
@@ -144,10 +144,10 @@ module.exports = (settings) => {
         logger('system', `Chart Stream ${symbol.toLowerCase()}@kline_${interval} terminated!`);
     }
 
-    function userDataStream(balanceCallback, executionCallback, listStatusCallback) {
+    function userDataStream(updateCallback, listStatusCallback) {
         binance.websockets.userData(
-            balance => balanceCallback(balance),
-            executionData => executionCallback(executionData),
+            data => updateCallback(data),
+            true,
             subscribedData => logger('system', `userDataStream:subscribeEvent: ${JSON.stringify(subscribedData)}`),
             listStatusData => listStatusCallback(listStatusData));
     }

@@ -575,7 +575,7 @@ async function trailingEval(settings, automation, action) {
     const newStopPrice = isBuy ? currentPrice * (1 + (parseFloat(action.orderTemplate.stopPriceMultiplier) / 100))
         : currentPrice * (1 - (parseFloat(action.orderTemplate.stopPriceMultiplier) / 100));
 
-    if ((isBuy && newStopPrice < stopPrice) || (!isBuy && newStopPrice > stopPrice)) {
+    if (!stopPrice || (isBuy && newStopPrice < stopPrice) || (!isBuy && newStopPrice > stopPrice)) {
         if (LOGS)
             logger('A:' + automation.id, `Stop price changed to ${newStopPrice} at ${automation.name}`);
 

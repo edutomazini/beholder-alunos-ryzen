@@ -187,14 +187,13 @@ async function startUserDataMonitor(monitorId, broadcastLabel, logs) {
         await loadWallet();
 
         if (!exchange) return new Error('Exchange Monitor not initialized yet.');
-        exchange.userDataStream(
-            balanceData => processBalanceData(monitorId, balanceBroadcast, logs, balanceData),
-            executionData => {
-                if (executionData.X === orderStatus.FILLED)
-                    processBalanceData(monitorId, balanceBroadcast, logs, executionData);
-                processExecutionData(monitorId, executionData, executionBroadcast);
-            }
-        )
+        exchange.userDataStream(data => {
+            if (data.e === 'executionReport')
+                processExecutionData(monitorId, data, executionBroadcast);
+            else if (data.e === 'balanceUpdate')
+                processBalanceData(monitorId, balanceBroadcast, logs, data)
+        })
+
         logger('M:' + monitorId, 'User Data Monitor has started!');
     } catch (err) {
         logger('M:' + monitorId, 'User Data Monitor has NOT started!\n' + err.message);
