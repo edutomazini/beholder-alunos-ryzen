@@ -116,6 +116,9 @@ async function updateOrder(currentOrder, newOrder) {
     if (newOrder.net && newOrder.net !== currentOrder.net)
         currentOrder.net = newOrder.net;
 
+    if (newOrder.quantity && newOrder.quantity !== currentOrder.quantity)
+        currentOrder.quantity = newOrder.quantity;
+
     await currentOrder.save();
     return currentOrder;
 }

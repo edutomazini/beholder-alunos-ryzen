@@ -196,7 +196,7 @@ function calcPrice(orderTemplate, symbol, isStopPrice) {
     return (factor * tickSize).toFixed(symbol.quotePrecision);
 }
 
-function calcQty(orderTemplate, price, symbol, isIceberg) {
+function calcQty(orderTemplate, price, symbol) {
     let asset;
 
     if (orderTemplate.side === 'BUY') {
@@ -208,12 +208,10 @@ function calcQty(orderTemplate, price, symbol, isIceberg) {
         if (!asset) throw new Error(`There is no ${symbol.base} in your wallet to place a sell.`);
     }
 
-    let qty = isIceberg ? orderTemplate.icebergQty : orderTemplate.quantity;
-    qty = qty.replace(',', '.');
-
+    let qty = orderTemplate.quantity.replace(',', '.');
     if (parseFloat(qty)) return qty;
 
-    const multiplier = isIceberg ? orderTemplate.icebergQtyMultiplier : orderTemplate.quantityMultiplier;
+    const multiplier = orderTemplate.quantityMultiplier;
     const stepSize = parseFloat(symbol.stepSize);
 
     let newQty, factor;
@@ -240,11 +238,32 @@ function calcQty(orderTemplate, price, symbol, isIceberg) {
 }
 
 function hasEnoughAssets(symbol, order, price) {
-    const qty = order.type === 'ICEBERG' ? parseFloat(order.options.icebergQty) : parseFloat(order.quantity);
+    const qty = parseFloat(order.quantity);
     if (order.side === 'BUY')
         return parseFloat(MEMORY[`${symbol.quote}:WALLET`]) >= (price * qty);
     else
         return parseFloat(MEMORY[`${symbol.base}:WALLET`]) >= qty;
+}
+
+function calcQuoteQty(orderTemplate, symbol) {
+    if (orderTemplate.type !== 'MARKET' || parseFloat(orderTemplate.quantity))
+        throw new Error(`Only MARKET orders can cal quote qty.`);
+
+    const multiplier = orderTemplate.quantityMultiplier;
+
+    if (orderTemplate.quantity === 'MAX_WALLET') {
+        if (orderTemplate.side !== 'BUY') throw new Error(`Only MARKET BUY orders can calc quote qty with MAX_WALLET`);
+
+        const asset = MEMORY[`${symbol.quote}:WALLET`];
+        if (!asset) throw new Error(`There is no ${symbol.quote} in your wallet to place a buy.`);
+
+        return (parseFloat(asset) * (multiplier > 1 ? 1 : multiplier)).toFixed(symbol.quotePrecision);
+    }
+    else if (orderTemplate.quantity === 'MIN_NOTIONAL') {
+        return (parseFloat(symbol.minNotional) * (multiplier < 1 ? 1 : multiplier)).toFixed(symbol.quotePrecision);
+    }
+
+    throw new Error(`Invalid order template quantity ${orderTemplate.quantity}`);
 }
 
 async function placeOrder(settings, automation, action) {
@@ -272,40 +291,38 @@ async function placeOrder(settings, automation, action) {
         }
     }
 
-    const price = calcPrice(orderTemplate, symbol, false);
+    const isDynamicBuy = order.side === 'BUY' && ['MIN_NOTIONAL', 'MAX_WALLET'].includes(orderTemplate.quantity);
+    if (order.options.type === 'MARKET'
+        && (isDynamicBuy || orderTemplate.quantity === 'MIN_NOTIONAL')) {
+        order.options.quoteOrderQty = calcQuoteQty(orderTemplate, symbol);
+    } else {
+        const price = calcPrice(orderTemplate, symbol, false);
 
-    if (!isFinite(price) || !price)
-        throw new Error(`Error in calcPrice function, params: OTID ${orderTemplate.id}, $: ${price}, stop: false`);
+        if (!isFinite(price) || !price)
+            throw new Error(`Error in calcPrice function, params: OTID ${orderTemplate.id}, $: ${price}, stop: false`);
 
-    if (LIMIT_TYPES.includes(order.options.type))
-        order.limitPrice = price;
+        if (LIMIT_TYPES.includes(order.options.type))
+            order.limitPrice = price;
 
-    const quantity = calcQty(orderTemplate, price, symbol, false);
+        const quantity = calcQty(orderTemplate, price, symbol, false);
 
-    if (!isFinite(quantity) || !quantity)
-        throw new Error(`Error in calcQty function, params: OTID ${orderTemplate.id}, $: ${price}, qty: ${quantity} iceberg: false`);
+        if (!isFinite(quantity) || !quantity)
+            throw new Error(`Error in calcQty function, params: OTID ${orderTemplate.id}, $: ${price}, qty: ${quantity}`);
 
-    order.quantity = quantity;
+        order.quantity = quantity;
 
-    if (order.options.type === 'ICEBERG') {
-        const icebergQty = calcQty(orderTemplate, price, symbol, true);
+        if (STOP_TYPES.includes(order.options.type)) {
+            const stopPrice = calcPrice(orderTemplate, symbol, true);
 
-        if (!isFinite(icebergQty) || !icebergQty)
-            throw new Error(`Error in calcQty function, params: OTID ${orderTemplate.id}, $: ${price}, qty: ${icebergQty}, iceberg: true`);
+            if (!isFinite(stopPrice) || !stopPrice)
+                throw new Error(`Error in calcPrice function, params: OTID ${orderTemplate.id}, $: ${stopPrice}, stop: true`);
 
-        order.options.icebergQty = icebergQty;
+            order.options.stopPrice = stopPrice;
+        }
+
+        if (!hasEnoughAssets(symbol, order, price))
+            throw new Error(`You wanna ${order.side} ${order.quantity} ${order.symbol} but you haven't enough assets.`);
     }
-    else if (STOP_TYPES.includes(order.options.type)) {
-        const stopPrice = calcPrice(orderTemplate, symbol, true);
-
-        if (!isFinite(stopPrice) || !stopPrice)
-            throw new Error(`Error in calcPrice function, params: OTID ${orderTemplate.id}, $: ${stopPrice}, stop: true`);
-
-        order.options.stopPrice = stopPrice;
-    }
-
-    if (!hasEnoughAssets(symbol, order, price))
-        throw new Error(`You wanna ${order.side} ${order.quantity} ${order.symbol} but you haven't enough assets.`);
 
     let result;
     const exchange = require('./utils/exchange')(settings);
@@ -331,12 +348,12 @@ async function placeOrder(settings, automation, action) {
     const savedOrder = await insertOrder({
         automationId: automation.id,
         symbol: order.symbol,
-        quantity: order.quantity,
+        quantity: order.quantity || result.executedQty,
         type: order.options.type,
         side: order.side,
         limitPrice: LIMIT_TYPES.includes(order.options.type) ? order.limitPrice : null,
         stopPrice,
-        icebergQty: order.type === 'ICEBERG' ? order.options.icebergQty : null,
+        icebergQty: null,
         orderId: result.orderId,
         clientOrderId: result.clientOrderId,
         transactTime: result.transactTime,

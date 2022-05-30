@@ -145,6 +145,7 @@ function processExecutionData(monitorId, executionData, broadcastLabel) {
         const quoteAmount = parseFloat(executionData.Z);
         order.avgPrice = quoteAmount / parseFloat(executionData.z);
         order.commission = executionData.n;
+        order.quantity = executionData.q;
         const isQuoteCommission = executionData.N && order.symbol.endsWith(executionData.N);
         order.net = isQuoteCommission ? quoteAmount - parseFloat(order.commission) : quoteAmount;
     }
