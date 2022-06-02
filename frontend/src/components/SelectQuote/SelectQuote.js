@@ -24,7 +24,7 @@ function SelectQuote(props) {
     }, [props.disabled])
 
     return (
-        <select id="selectQuote" className="form-select" disabled={isDisabled} defaultValue={quote} onChange={props.onChange}>
+        <select id="selectQuote" className="form-select" disabled={isDisabled} value={quote} onChange={props.onChange}>
             {
                 props.noFavorites
                     ? <React.Fragment></React.Fragment>

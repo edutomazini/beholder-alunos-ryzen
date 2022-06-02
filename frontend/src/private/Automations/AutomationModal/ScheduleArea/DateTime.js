@@ -21,9 +21,9 @@ function DateTime(props) {
         const dt = new Date(props.date);
         setDateTime({
             date: new Intl.DateTimeFormat('en-GB').format(dt),
-            hours: dt.getHours() > 9 ? `${dt.getHours()}` : `0${dt.getHours()}`,
-            minutes: dt.getMinutes() > 9 ? `${dt.getMinutes()}` : `0${dt.getMinutes()}`,
-            seconds: dt.getSeconds() > 9 ? `${dt.getSeconds()}` : `0${dt.getSeconds()}`,
+            hours: `${dt.getHours()}`,
+            minutes: `${dt.getMinutes()}`,
+            seconds: `${dt.getSeconds()}`
         })
     }, [props.date])
 

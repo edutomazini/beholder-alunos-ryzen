@@ -55,7 +55,7 @@ function Reports() {
                         <h2 className="h4">Reports</h2>
                     </div>
                     <div className="col-md-2 mb-2">
-                        <SelectQuote onChange={onQuoteChange} noFavorites={true} />
+                        <SelectQuote onChange={onQuoteChange} noFavorites={true} value={filter.symbol} />
                     </div>
                     <div className="col-md-5 mb-2">
                         <DateFilter onClick={onDateChange} />

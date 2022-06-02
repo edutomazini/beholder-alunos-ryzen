@@ -101,7 +101,7 @@ function Symbols() {
                         <h2 className="h4">Symbols</h2>
                     </div>
                     <div className="col-2">
-                        <SelectQuote onChange={onQuoteChange} />
+                        <SelectQuote onChange={onQuoteChange} value={quote} />
                     </div>
                     <div className="col-2">
                         <button className="btn btn-primary animate-up-2" type="button" onClick={onSyncClick}>

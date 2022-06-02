@@ -36,7 +36,7 @@ function BookTicker(props) {
                             <h2 className="fs-5 fw-bold mb-0">Order Book</h2>
                         </div>
                         <div className="col offset-md-3">
-                            <SelectQuote onChange={onQuoteChange} />
+                            <SelectQuote onChange={onQuoteChange} value={quote} />
                         </div>
                     </div>
                 </div>

@@ -12,7 +12,7 @@ function init(automations) {
         AGENDA = {};
         automations.map(auto => {
             if (auto.isActive && auto.schedule)
-                addSchedule(auto.get({ plain: true }));
+                addSchedule(auto.get ? auto.get({ plain: true }) : auto);
         });
         if (LOGS) logger('system', 'Beholder Agenda has started!');
     } catch (err) {
@@ -31,6 +31,9 @@ async function runSchedule(id) {
 
         if (Array.isArray(result) && result.length)
             result = result.filter(r => r);
+
+        if (!verifyCron(automation.schedule))
+            await automationsRepository.updateAutomation(id, { isActive: false });//só executa uma vez
 
         if (LOGS || automation.logs) logger('A:' + id, `The Scheduled Automation #${id} has fired at ${new Date()}!\n${JSON.stringify(result)}`);
     } catch (err) {

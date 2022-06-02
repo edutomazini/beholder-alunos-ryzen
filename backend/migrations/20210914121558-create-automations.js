@@ -22,7 +22,7 @@ module.exports = {
           allowNull: false
       },
       conditions: {
-          type: Sequelize.STRING,
+          type: Sequelize.STRING(1000),
           allowNull: false
       },
       isActive: {

@@ -37,7 +37,7 @@ function MiniTicker(props) {
                             <h2 className="fs-5 fw-bold mb-0">Market 24h</h2>
                         </div>
                         <div className="col offset-md-3">
-                            <SelectQuote onChange={onQuoteChange} />
+                            <SelectQuote onChange={onQuoteChange} value={quote} />
                         </div>
                     </div>
                 </div>
