@@ -75,7 +75,7 @@ function Dashboard() {
           </div>
           <div className="btn-toolbar mb-md-0">
             <div className="d-inline-flex align-items-center">
-              <SelectSymbol onChange={onChangeSymbol} />
+              <SelectSymbol onChange={onChangeSymbol} symbol={chartSymbol} />
             </div>
             <div className="ms-2 ms-lg-3">
               <NewOrderButton />

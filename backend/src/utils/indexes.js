@@ -128,7 +128,7 @@ function getAnalysisIndexes() {
         [indexKeys.BULLISH_HAMMER]: { params: 'none', name: 'Bullish Hammer' },
         [indexKeys.BEARISH_HAMMER]: { params: 'none', name: 'Bearish Hammer' },
         [indexKeys.BULLISH_INVERTED_HAMMER]: { params: 'none', name: 'Bullish Inverted Hammer' },
-        [indexKeys.BEARISH_INVERTED_HAMMER]: { params: 'none', name: 'Bullish Inverted Hammer' },
+        [indexKeys.BEARISH_INVERTED_HAMMER]: { params: 'none', name: 'Bearish Inverted Hammer' },
         [indexKeys.HAMMER]: { params: 'none', name: 'Hammer' },
         [indexKeys.HAMMER_UNCONFIRMED]: { params: 'none', name: 'Hammer (Unconf.)' },
         [indexKeys.HANGING_MAN]: { params: 'none', name: 'Hanging Man' },
@@ -170,7 +170,7 @@ function execCalc(indexName, ohlc, ...params) {
         case indexKeys.BULLISH_INVERTED_HAMMER: return bullishInvertedHammer(ohlc);
         case indexKeys.BEARISH_INVERTED_HAMMER: return bearishInvertedHammer(ohlc);
         case indexKeys.HAMMER: return hammer(ohlc);
-        case indexKeys.HAMMER_UNCONFIRMED: return hammer(ohlc);
+        case indexKeys.HAMMER_UNCONFIRMED: return hammerUnconfirmed(ohlc);
         case indexKeys.HANGING_MAN: return hangingMan(ohlc);
         case indexKeys.HANGING_MAN_UNCONFIRMED: return hangingManUnconfirmed(ohlc);
         case indexKeys.SHOOTING_STAR: return shootingStar(ohlc);
