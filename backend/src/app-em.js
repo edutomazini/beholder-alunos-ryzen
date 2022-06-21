@@ -191,7 +191,7 @@ async function startUserDataMonitor(monitorId, broadcastLabel, logs) {
         exchange.userDataStream(data => {
             if (data.e === 'executionReport')
                 processExecutionData(monitorId, data, executionBroadcast);
-            else if (data.e === 'balanceUpdate')
+            else if (data.e === 'balanceUpdate' || data.e === 'outboundAccountPosition')
                 processBalanceData(monitorId, balanceBroadcast, logs, data)
         })
 
