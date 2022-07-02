@@ -235,7 +235,7 @@ function bullishEngulfing(ohlc) {
 
 function bearishEngulfing(ohlc) {
     const input = getTwoCandles(ohlc);
-    return technicalindicators.bearishEngulfing(input);
+    return technicalindicators.bearishengulfingpattern(input);
 }
 
 function darkCloudCover(ohlc) {
