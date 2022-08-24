@@ -450,12 +450,15 @@ function ADL(ohlc) {
     }
 }
 
-function ADX(ohlc, period) {
+function ADX(ohlc, period = 14) {
+    period = parseInt(period);
+    if (ohlc.close.length <= period) return { current: false, previous: false };
+
     const adxResult = technicalindicators.adx({
         high: ohlc.high,
         low: ohlc.low,
         close: ohlc.close,
-        period: parseInt(period) || 14
+        period
     })
     return {
         current: adxResult[adxResult.length - 1],
@@ -463,12 +466,15 @@ function ADX(ohlc, period) {
     }
 }
 
-function ATR(ohlc, period) {
+function ATR(ohlc, period = 14) {
+    period = parseInt(period);
+    if (ohlc.close.length <= period) return { current: false, previous: false };
+
     const atrResult = technicalindicators.atr({
         high: ohlc.high,
         low: ohlc.low,
         close: ohlc.close,
-        period: parseInt(period) || 14
+        period
     })
     return {
         current: atrResult[atrResult.length - 1],
@@ -476,12 +482,16 @@ function ATR(ohlc, period) {
     }
 }
 
-function AO(ohlc, fast, slow) {
+function AO(ohlc, fastPeriod = 5, slowPeriod = 34) {
+    fastPeriod = parseInt(fastPeriod);
+    slowPeriod = parseInt(slowPeriod);
+    if ([fastPeriod, slowPeriod].some(p => p >= ohlc.high.length)) return { current: false, previous: false };
+
     const aoResult = technicalindicators.awesomeoscillator({
         high: ohlc.high,
         low: ohlc.low,
-        fastPeriod: parseInt(fast) || 5,
-        slowPeriod: parseInt(slow) || 34
+        fastPeriod,
+        slowPeriod
     })
     return {
         current: aoResult[aoResult.length - 1],
@@ -489,13 +499,16 @@ function AO(ohlc, fast, slow) {
     }
 }
 
-function CCI(ohlc, period) {
+function CCI(ohlc, period = 20) {
+    period = parseInt(period);
+    if (ohlc.close.length <= period) return { current: false, previous: false };
+
     const cciResult = technicalindicators.cci({
         open: ohlc.open,
         high: ohlc.high,
         low: ohlc.low,
         close: ohlc.close,
-        period: parseInt(period) || 20
+        period
     })
     return {
         current: cciResult[cciResult.length - 1],
@@ -503,14 +516,17 @@ function CCI(ohlc, period) {
     }
 }
 
-function FI(ohlc, period) {
+function FI(ohlc, period = 1) {
+    period = parseInt(period);
+    if (ohlc.close.length <= period) return { current: false, previous: false };
+
     const fiResult = technicalindicators.forceindex({
         open: ohlc.open,
         high: ohlc.high,
         low: ohlc.low,
         close: ohlc.close,
         volume: ohlc.volume,
-        period: parseInt(period) || 1
+        period
     })
     return {
         current: fiResult[fiResult.length - 1],
@@ -518,18 +534,30 @@ function FI(ohlc, period) {
     }
 }
 
-function KST(closes, rocPer1, rocPer2, rocPer3, rocPer4, smarocPer1, smarocPer2, smarocPer3, smarocPer4, signal) {
+function KST(closes, ROCPer1 = 10, ROCPer2 = 15, ROCPer3 = 20, ROCPer4 = 30, SMAROCPer1 = 10, SMAROCPer2 = 10, SMAROCPer3 = 10, SMAROCPer4 = 15, signal = 3) {
+    ROCPer1 = parseInt(ROCPer1);
+    ROCPer2 = parseInt(ROCPer2);
+    ROCPer3 = parseInt(ROCPer3);
+    ROCPer4 = parseInt(ROCPer4);
+    SMAROCPer1 = parseInt(SMAROCPer1);
+    SMAROCPer2 = parseInt(SMAROCPer2);
+    SMAROCPer3 = parseInt(SMAROCPer3);
+    SMAROCPer4 = parseInt(SMAROCPer4);
+
+    if ([ROCPer1, ROCPer2, ROCPer3, ROCPer4, SMAROCPer1, SMAROCPer2, SMAROCPer3, SMAROCPer4].some(p => p >= closes.length))
+        return { current: false, previous: false };
+
     const kstResult = technicalindicators.kst({
         values: closes,
-        ROCPer1: parseInt(rocPer1) || 10,
-        ROCPer2: parseInt(rocPer2) || 15,
-        ROCPer3: parseInt(rocPer3) || 20,
-        ROCPer4: parseInt(rocPer4) || 30,
-        SMAROCPer1: parseInt(smarocPer1) || 10,
-        SMAROCPer2: parseInt(smarocPer2) || 10,
-        SMAROCPer3: parseInt(smarocPer3) || 10,
-        SMAROCPer4: parseInt(smarocPer4) || 15,
-        signalPeriod: parseInt(signal) || 3,
+        ROCPer1,
+        ROCPer2,
+        ROCPer3,
+        ROCPer4,
+        SMAROCPer1,
+        SMAROCPer2,
+        SMAROCPer3,
+        SMAROCPer4,
+        signalPeriod: parseInt(signal),
     })
     return {
         current: kstResult[kstResult.length - 1],
@@ -537,13 +565,16 @@ function KST(closes, rocPer1, rocPer2, rocPer3, rocPer4, smarocPer1, smarocPer2,
     }
 }
 
-function MFI(ohlc, period) {
+function MFI(ohlc, period = 14) {
+    period = parseInt(period);
+    if (ohlc.close.length <= period) return { current: false, previous: false };
+
     const mfiResult = technicalindicators.mfi({
         high: ohlc.high,
         low: ohlc.low,
         close: ohlc.close,
         volume: ohlc.volume,
-        period: parseInt(period) || 14
+        period
     })
     return {
         current: mfiResult[mfiResult.length - 1],
@@ -575,9 +606,12 @@ function PSAR(ohlc, step, max) {
     }
 }
 
-function ROC(closes, period) {
+function ROC(closes, period = 12) {
+    period = parseInt(period);
+    if (closes.length <= period) return { current: false, previous: false };
+
     const rocResult = technicalindicators.roc({
-        period: parseInt(period) || 12,
+        period,
         values: closes
     })
     return {
@@ -586,13 +620,16 @@ function ROC(closes, period) {
     }
 }
 
-function Stochastic(ohlc, period, signal) {
+function Stochastic(ohlc, period = 14, signal = 3) {
+    period = parseInt(period);
+    if (ohlc.close.length <= period) return { current: false, previous: false };
+
     const stochResult = technicalindicators.stochastic({
         high: ohlc.high,
         low: ohlc.low,
         close: ohlc.close,
-        period: parseInt(period) || 14,
-        signalPeriod: signal || 3
+        period,
+        signalPeriod: signal
     })
     return {
         current: stochResult[stochResult.length - 1],
@@ -600,9 +637,12 @@ function Stochastic(ohlc, period, signal) {
     }
 }
 
-function TRIX(closes, period) {
+function TRIX(closes, period = 18) {
+    period = parseInt(period);
+    if (closes.length <= period) return { current: false, previous: false };
+
     const trixResult = technicalindicators.trix({
-        period: parseInt(period) || 18,
+        period,
         values: closes
     })
     return {
@@ -619,14 +659,17 @@ function VWAP(ohlc) {
     }
 }
 
-function VP(ohlc, bars) {
+function VP(ohlc, bars = 14) {
+    bars = parseInt(bars);
+    if (ohlc.close.length <= bars) return { current: false, previous: false };
+
     const vpResult = technicalindicators.volumeprofile({
         open: ohlc.open,
         high: ohlc.high,
         low: ohlc.low,
         close: ohlc.close,
         volume: ohlc.volume,
-        noOfBars: parseInt(bars) || 14
+        noOfBars: bars
     })
     return {
         current: vpResult[vpResult.length - 1],
@@ -634,13 +677,16 @@ function VP(ohlc, bars) {
     }
 }
 
-function williamsR(ohlc, period) {
+function williamsR(ohlc, period = 14) {
+    period = parseInt(period);
+    if (ohlc.close.length <= period) return { current: false, previous: false };
+
     const wrResult = technicalindicators.williamsr({
         open: ohlc.open,
         high: ohlc.high,
         low: ohlc.low,
         close: ohlc.close,
-        period: parseInt(period) || 14
+        period
     })
     return {
         current: wrResult[wrResult.length - 1],
@@ -648,14 +694,22 @@ function williamsR(ohlc, period) {
     }
 }
 
-function ichimoku(ohlc, conversion, base, span, displacement) {
+function ichimoku(ohlc, conversionPeriod = 9, basePeriod = 26, span = 52, displacement = 26) {
+    conversionPeriod = parseInt(conversionPeriod);
+    basePeriod = parseInt(basePeriod);
+    span = parseInt(span);
+    displacement = parseInt(displacement);
+
+    if ([conversionPeriod, basePeriod, span, displacement].some(p => p >= ohlc.high.length))
+        return { current: false, previous: false };
+
     const ichimokuResult = technicalindicators.ichimokucloud({
         high: ohlc.high,
         low: ohlc.low,
-        conversionPeriod: parseInt(conversion) || 9,
-        basePeriod: parseInt(base) || 26,
-        span: parseInt(span) || 52,
-        displacement: parseInt(displacement) || 26
+        conversionPeriod,
+        basePeriod,
+        span,
+        displacement
     })
     return {
         current: ichimokuResult[ichimokuResult.length - 1],
@@ -663,9 +717,12 @@ function ichimoku(ohlc, conversion, base, span, displacement) {
     }
 }
 
-function WMA(closes, period) {
+function WMA(closes, period = 8) {
+    period = parseInt(period);
+    if (closes.length <= period) return { current: false, previous: false };
+
     const wmaResult = technicalindicators.wma({
-        period: parseInt(period) || 8,
+        period,
         values: closes
     })
     return {
@@ -674,9 +731,12 @@ function WMA(closes, period) {
     }
 }
 
-function WEMA(closes, period) {
+function WEMA(closes, period = 5) {
+    period = parseInt(period);
+    if (closes.length <= period) return { current: false, previous: false };
+
     const wemaResult = technicalindicators.wema({
-        period: parseInt(period) || 5,
+        period,
         values: closes
     })
     return {
@@ -686,8 +746,11 @@ function WEMA(closes, period) {
 }
 
 function RSI(closes, period = 14) {
+    period = parseInt(period);
+    if (closes.length <= period) return { current: false, previous: false };
+
     const rsiResult = technicalindicators.rsi({
-        period: parseInt(period),
+        period,
         values: closes
     })
     return {
@@ -697,13 +760,19 @@ function RSI(closes, period = 14) {
 }
 
 function MACD(closes, fastPeriod = 12, slowPeriod = 26, signalPeriod = 9) {
+    fastPeriod = parseInt(fastPeriod);
+    slowPeriod = parseInt(slowPeriod);
+    signalPeriod = parseInt(signalPeriod);
+
+    if ([fastPeriod, slowPeriod, signalPeriod].some(p => p >= closes.length)) return { current: false, previous: false };
+
     const macdResult = technicalindicators.macd({
         values: closes,
         SimpleMAOscillator: false,
         SimpleMASignal: false,
-        fastPeriod: parseInt(fastPeriod),
-        slowPeriod: parseInt(slowPeriod),
-        signalPeriod: parseInt(signalPeriod)
+        fastPeriod,
+        slowPeriod,
+        signalPeriod
     });
     return {
         current: macdResult[macdResult.length - 1],
@@ -712,11 +781,18 @@ function MACD(closes, fastPeriod = 12, slowPeriod = 26, signalPeriod = 9) {
 }
 
 function StochRSI(closes, dPeriod = 3, kPeriod = 3, rsiPeriod = 14, stochasticPeriod = 14) {
+    dPeriod = parseInt(dPeriod);
+    kPeriod = parseInt(kPeriod);
+    rsiPeriod = parseInt(rsiPeriod);
+    stochasticPeriod = parseInt(stochasticPeriod);
+
+    if ([dPeriod, kPeriod, rsiPeriod, stochasticPeriod].some(p => p >= closes.length)) return { current: false, previous: false };
+
     const stochResult = technicalindicators.stochasticrsi({
-        dPeriod: parseInt(dPeriod),
-        kPeriod: parseInt(kPeriod),
-        rsiPeriod: parseInt(rsiPeriod),
-        stochasticPeriod: parseInt(stochasticPeriod),
+        dPeriod,
+        kPeriod,
+        rsiPeriod,
+        stochasticPeriod,
         values: closes
     });
     return {
@@ -726,8 +802,11 @@ function StochRSI(closes, dPeriod = 3, kPeriod = 3, rsiPeriod = 14, stochasticPe
 }
 
 function bollingerBands(closes, period = 20, stdDev = 2) {
+    period = parseInt(period);
+    if (closes.length <= period) return { current: false, previous: false };
+
     const bbResult = technicalindicators.bollingerbands({
-        period: parseInt(period),
+        period,
         stdDev: parseInt(stdDev),
         values: closes
     })
@@ -738,9 +817,12 @@ function bollingerBands(closes, period = 20, stdDev = 2) {
 }
 
 function SMA(closes, period = 10) {
+    period = parseInt(period);
+    if (closes.length <= period) return { current: false, previous: false };
+
     const smaResult = technicalindicators.sma({
         values: closes,
-        period: parseInt(period)
+        period
     });
     return {
         current: smaResult[smaResult.length - 1],
@@ -749,9 +831,12 @@ function SMA(closes, period = 10) {
 }
 
 function EMA(closes, period = 10) {
+    period = parseInt(period);
+    if (closes.length <= period) return { current: false, previous: false };
+
     const emaResult = technicalindicators.ema({
         values: closes,
-        period: parseInt(period)
+        period
     });
     return {
         current: emaResult[emaResult.length - 1],
