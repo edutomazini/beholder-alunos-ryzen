@@ -29,12 +29,19 @@ async function getSymbol(req, res, next) {
 
 async function syncSymbols(req, res, next) {
 
+    const useBlvt = process.env.BINANCE_BLVT === 'true';
+    const ignoredCoins = process.env.IGNORED_COINS ? process.env.IGNORED_COINS.split(',') : [];
+
     const favoriteSymbols = (await symbolsRepository.getSymbols()).filter(s => s.isFavorite).map(s => s.symbol);
 
     const settingsRepository = require('../repositories/settingsRepository');
     const settings = await settingsRepository.getSettingsDecrypted(res.locals.token.id);
     const exchange = require('../utils/exchange')(settings);
-    const symbols = (await exchange.exchangeInfo()).symbols.map(item => {
+    let symbols = (await exchange.exchangeInfo()).symbols.map(item => {
+
+        if(!useBlvt && (item.baseAsset.endsWith("UP") || item.baseAsset.endsWith("DOWN"))) return false;
+        if(ignoredCoins.includes(item.quoteAsset) || ignoredCoins.includes(item.baseAsset)) return false;
+
         const minNotionalFilter = item.filters.find(filter => filter.filterType === 'MIN_NOTIONAL');
         const minLotSizeFilter = item.filters.find(filter => filter.filterType === 'LOT_SIZE');
         const priceFilter = item.filters.find(filter => filter.filterType === 'PRICE_FILTER');
@@ -52,6 +59,8 @@ async function syncSymbols(req, res, next) {
             isFavorite: favoriteSymbols.some(s => s === item.symbol)
         }
     });
+
+    symbols = symbols.filter(s => s);
 
     await symbolsRepository.deleteAll();
     await symbolsRepository.bulkInsert(symbols);
