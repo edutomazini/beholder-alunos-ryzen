@@ -111,6 +111,7 @@ function ActionsArea(props) {
 
         actions.push(newAction);
         setActions(actions);
+        setNewAction(DEFAULT_ACTION);
         if (props.onChange) props.onChange({ target: { id: 'actions', value: actions } });
     }
 

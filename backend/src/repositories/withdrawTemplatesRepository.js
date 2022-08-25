@@ -46,7 +46,8 @@ async function updateWithdrawTemplate(id, newWithdrawTemplate) {
     if (newWithdrawTemplate.address && newWithdrawTemplate.address !== currentWithdrawTemplate.address)
         currentWithdrawTemplate.address = newWithdrawTemplate.address;
 
-    if (newWithdrawTemplate.addressTag && newWithdrawTemplate.addressTag !== currentWithdrawTemplate.addressTag)
+    if (newWithdrawTemplate.addressTag !== null && newWithdrawTemplate.addressTag !== undefined
+        && newWithdrawTemplate.addressTag !== currentWithdrawTemplate.addressTag)
         currentWithdrawTemplate.addressTag = newWithdrawTemplate.addressTag;
 
     if (newWithdrawTemplate.network !== currentWithdrawTemplate.network)

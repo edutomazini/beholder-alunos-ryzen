@@ -104,16 +104,19 @@ async function updateOrder(currentOrder, newOrder) {
     if (newOrder.isMaker !== null && newOrder.isMaker !== undefined && newOrder.isMaker !== currentOrder.isMaker)
         currentOrder.isMaker = newOrder.isMaker;
 
-    if (newOrder.obs && newOrder.obs !== currentOrder.obs)
+    if (newOrder.obs !== null && newOrder.obs !== undefined
+        && newOrder.obs !== currentOrder.obs)
         currentOrder.obs = newOrder.obs;
 
     if (newOrder.transactTime && newOrder.transactTime !== currentOrder.transactTime)
         currentOrder.transactTime = newOrder.transactTime;
 
-    if (newOrder.commission && newOrder.commission !== currentOrder.commission)
+    if (newOrder.commission !== null && newOrder.commission !== undefined
+        && newOrder.commission !== currentOrder.commission)
         currentOrder.commission = newOrder.commission;
 
-    if (newOrder.net && newOrder.net !== currentOrder.net)
+    if (newOrder.net !== null && newOrder.net !== undefined
+        && newOrder.net !== currentOrder.net)
         currentOrder.net = newOrder.net;
 
     if (newOrder.quantity && newOrder.quantity !== currentOrder.quantity)

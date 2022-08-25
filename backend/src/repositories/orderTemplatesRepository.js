@@ -75,12 +75,6 @@ async function updateOrderTemplate(id, newOrderTemplate) {
     if (newOrderTemplate.quantityMultiplier && newOrderTemplate.quantityMultiplier !== currentOrderTemplate.quantityMultiplier)
         currentOrderTemplate.quantityMultiplier = newOrderTemplate.quantityMultiplier;
 
-    if (newOrderTemplate.icebergQty && newOrderTemplate.icebergQty !== currentOrderTemplate.icebergQty)
-        currentOrderTemplate.icebergQty = newOrderTemplate.icebergQty;
-
-    if (newOrderTemplate.icebergQtyMultiplier && newOrderTemplate.icebergQtyMultiplier !== currentOrderTemplate.icebergQtyMultiplier)
-        currentOrderTemplate.icebergQtyMultiplier = newOrderTemplate.icebergQtyMultiplier;
-
     await currentOrderTemplate.save();
     return currentOrderTemplate;
 }
