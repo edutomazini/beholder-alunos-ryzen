@@ -39,11 +39,11 @@ function PriceTemplate(props) {
         <div className="form-group">
             <label htmlFor={props.id}>{props.text} <span data-bs-toggle="tooltip" data-bs-placement="top" title="Specify a price or choose an index. Multiplying by 1 = 100%." className="badge bg-warning py-1">?</span></label>
             <div className="input-group">
-                <input id={props.id} list="variables" type="text" className="form-control w-50" onChange={onPriceChange} placeholder="0" defaultValue={priceTemplate.price} />
+                <input id={props.id} list="variables" type="text" className="form-control w-50" onChange={onPriceChange} placeholder="0" value={priceTemplate.price || ""} />
                 <span className="input-group-text bg-secondary">
                     X
                 </span>
-                <input id={props.id + "Multiplier"} type="number" className="form-control" onChange={props.onChange} placeholder="1" defaultValue={priceTemplate.multiplier} />
+                <input id={props.id + "Multiplier"} type="number" className="form-control" onChange={props.onChange} placeholder="1" value={priceTemplate.multiplier || ""} />
                 <datalist id="variables">
                     {
                         indexes && Array.isArray(indexes)   

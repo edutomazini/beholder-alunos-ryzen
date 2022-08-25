@@ -221,13 +221,13 @@ function GridModal(props) {
                                                 <div className="col-md-6 mb-3">
                                                     <div className="form-group">
                                                         <label htmlFor="lowerLimit">Lower Limit:</label>
-                                                        <input className="form-control" id="lowerLimit" type="number" placeholder="0" defaultValue={grid.lowerLimit || ''} onChange={onGridChange} />
+                                                        <input className="form-control" id="lowerLimit" type="number" placeholder="0" value={grid.lowerLimit || ''} onChange={onGridChange} />
                                                     </div>
                                                 </div>
                                                 <div className="col-md-6 mb-3">
                                                     <div className="form-group">
                                                         <label htmlFor="upperLimit">Upper Limit:</label>
-                                                        <input className="form-control" id="upperLimit" type="number" placeholder="0" defaultValue={grid.upperLimit || ''} onChange={onGridChange} />
+                                                        <input className="form-control" id="upperLimit" type="number" placeholder="0" value={grid.upperLimit || ''} onChange={onGridChange} />
                                                     </div>
                                                 </div>
                                             </div>
@@ -235,13 +235,13 @@ function GridModal(props) {
                                                 <div className="col-md-6 mb-3">
                                                     <div className="form-group">
                                                         <label htmlFor="levels">Levels:</label>
-                                                        <input className="form-control" id="levels" type="number" placeholder="3" defaultValue={grid.levels || ''} onChange={onGridChange} disabled={automation.id > 0} />
+                                                        <input className="form-control" id="levels" type="number" placeholder="3" value={grid.levels || ''} onChange={onGridChange} disabled={automation.id > 0} />
                                                     </div>
                                                 </div>
                                                 <div className="col-md-6 mb-3">
                                                     <div className="form-group">
                                                         <label htmlFor="quantity">Quantity:</label>
-                                                        <input className="form-control" id="quantity" type="text" list="gridQtyList" placeholder={symbol.minLotSize} defaultValue={grid.quantity || ''} onChange={onGridChange} />
+                                                        <input className="form-control" id="quantity" type="text" list="gridQtyList" placeholder={symbol.minLotSize} value={grid.quantity || ''} onChange={onGridChange} />
                                                         <datalist id="gridQtyList">
                                                             <option>Min. Notional</option>
                                                         </datalist>

@@ -10,15 +10,17 @@ import { FINISHED_STATUS } from '../../services/ExchangeService';
  */
 function ViewOrderModal(props) {
 
+    const DEFAULT_ORDER = {
+        symbol: ''
+    }
+
     const history = useHistory();
 
     const btnClose = useRef('');
     const btnCancel = useRef('');
     const btnSync = useRef('');
 
-    const [order, setOrder] = useState({
-        symbol: ''
-    });
+    const [order, setOrder] = useState(DEFAULT_ORDER);
 
     const [error, setError] = useState('');
 
@@ -27,6 +29,13 @@ function ViewOrderModal(props) {
     function onSyncClick(event) {
         setIsSyncing(true);
     }
+
+    useEffect(() => {
+        const modal = document.getElementById('modalViewOrder');
+        modal.addEventListener('hidden.bs.modal', (event) => {
+            setOrder({ ...DEFAULT_ORDER });
+        })
+    }, [])
 
     useEffect(() => {
         if (!isSyncing) return;

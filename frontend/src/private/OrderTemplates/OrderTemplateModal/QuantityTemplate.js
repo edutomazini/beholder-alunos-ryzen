@@ -38,11 +38,11 @@ function QuantityTemplate(props) {
         <div className="form-group">
             <label htmlFor={props.id}>{props.text} <span data-bs-toggle="tooltip" data-bs-placement="top" title="Max. Wallet trades the maximum you have. Min. Notional trades the minimum allowed. Multiplying by 1 = 100%." className="badge bg-warning py-1">?</span></label>
             <div className="input-group">
-                <input id={props.id} list="qtyOptions" type="text" className="form-control w-50" onChange={onQuantityChange} placeholder="0" defaultValue={quantityTemplate.quantity} />
+                <input id={props.id} list="qtyOptions" type="text" className="form-control w-50" onChange={onQuantityChange} placeholder="0" value={quantityTemplate.quantity || ""} />
                 <span className="input-group-text bg-secondary">
                     X
                 </span>
-                <input id={props.id + "Multiplier"} type="number" className="form-control" onChange={props.onChange} placeholder="1" defaultValue={quantityTemplate.multiplier} />
+                <input id={props.id + "Multiplier"} type="number" className="form-control" onChange={props.onChange} placeholder="1" value={quantityTemplate.multiplier || ""} />
                 <datalist id="qtyOptions">
                     <option>Last Order Qty.</option>
                     <option>Max. Wallet</option>

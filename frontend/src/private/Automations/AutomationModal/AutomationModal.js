@@ -23,6 +23,9 @@ function AutomationModal(props) {
     const [error, setError] = useState('');
 
     const DEFAULT_AUTOMATION = {
+        name: '',
+        symbol: '',
+        indexes: [],
         conditions: '',
         schedule: '',
         actions: []
@@ -115,19 +118,13 @@ function AutomationModal(props) {
         setShowLogs(!showLogs);
     }
 
-    const [isVisible, setIsVisible] = useState(false);
     useEffect(() => {
-
         const modal = document.getElementById('modalAutomation');
         modal.addEventListener('hidden.bs.modal', (event) => {
-            setIsVisible(false);
             setAutomation({ ...DEFAULT_AUTOMATION });
             setShowLogs(false);
+            setIndexes([]);
         })
-        modal.addEventListener('shown.bs.modal', (event) => {
-            setIsVisible(true);
-        })
-
     }, [])
 
     return (
@@ -152,7 +149,7 @@ function AutomationModal(props) {
                                 <div className="col-12 mb-3">
                                     <div className="form-group">
                                         <label htmlFor="symbol">Name:</label>
-                                        <input className="form-control" id="name" type="text" placeholder="My strategy name" defaultValue={automation.name} required onChange={onInputChange} />
+                                        <input className="form-control" id="name" type="text" placeholder="My strategy name" value={automation.name} required onChange={onInputChange} />
                                     </div>
                                 </div>
                             </div>

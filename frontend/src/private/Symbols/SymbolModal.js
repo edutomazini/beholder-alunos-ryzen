@@ -7,9 +7,26 @@ import { updateSymbol } from '../../services/SymbolsService';
  */
 function SymbolModal(props) {
 
+    const DEFAULT_SYMBOL = {
+        basePrecision: '',
+        quotePrecision: '',
+        symbol: '',
+        minNotional: '',
+        minLotSize: '',
+        stepSize: '',
+        tickSize: ''
+    }
+
     const btnClose = useRef('');
     const [error, setError] = useState('');
-    const [symbol, setSymbol] = useState({});
+    const [symbol, setSymbol] = useState(DEFAULT_SYMBOL);
+
+    useEffect(() => {
+        const modal = document.getElementById('modalSymbol');
+        modal.addEventListener('hidden.bs.modal', (event) => {
+            setSymbol({ ...DEFAULT_SYMBOL });
+        })
+    }, [])
 
     useEffect(() => {
         if (!props.data) return;

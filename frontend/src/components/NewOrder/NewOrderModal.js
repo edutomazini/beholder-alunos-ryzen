@@ -39,6 +39,7 @@ function NewOrderModal(props) {
         const modal = document.getElementById('modalOrder');
         modal.addEventListener('hidden.bs.modal', (event) => {
             setIsVisible(false);
+            setOrder({ ...DEFAULT_ORDER });
         })
         modal.addEventListener('shown.bs.modal', (event) => {
             setIsVisible(true);
@@ -188,7 +189,7 @@ function NewOrderModal(props) {
                                 <div className="col-md-6 mb-3">
                                     <div className="form-group">
                                         <label htmlFor="symbol">Symbol</label>
-                                        <SelectSymbol onChange={onSymbolChange} />
+                                        <SelectSymbol onChange={onSymbolChange} symbol={order.symbol} />
                                     </div>
                                 </div>
                                 <div className="col-md-6 mb-3">
@@ -215,12 +216,12 @@ function NewOrderModal(props) {
                             <div className={getTrailingStopClasses(order.type)}>
                                 <div className="col-md-6 mb-3">
                                     <label htmlFor="limitPrice">Activation Price:</label>
-                                    <input id="limitPrice" type="number" className="form-control" placeholder="0" onChange={onInputChange} />
+                                    <input id="limitPrice" type="number" className="form-control" placeholder="0" onChange={onInputChange} value={order.limitPrice} />
                                 </div>
                                 <div className="col-md-6 mb-3">
                                     <label htmlFor="stopPriceMultiplier">Callback Rate:</label>
                                     <div className="input-group">
-                                        <input id="stopPriceMultiplier" type="number" className="form-control" placeholder="1" onChange={onInputChange} />
+                                        <input id="stopPriceMultiplier" type="number" className="form-control" placeholder="1" onChange={onInputChange} value={order.stopPriceMultiplier} />
                                         <span className="input-group-text bg-secondary">
                                             %
                                         </span>
@@ -232,7 +233,7 @@ function NewOrderModal(props) {
                                 <div className={getPriceClasses(order.type)}>
                                     <div className="form-group">
                                         <label htmlFor="limitPrice">Unit Price:</label>
-                                        <input type="number" className="form-control" id="limitPrice" placeholder="0" onChange={onInputChange} />
+                                        <input type="number" className="form-control" id="limitPrice" placeholder="0" onChange={onInputChange} value={order.limitPrice} />
                                     </div>
                                 </div>
                                 <div className="col-md-6 mb-3">
@@ -246,7 +247,7 @@ function NewOrderModal(props) {
                                 <div className={getStopPriceClasses(order.type)}>
                                     <div className="form-group">
                                         <label htmlFor="stopPrice">Stop Price:</label>
-                                        <input className="form-control" id="stopPrice" type="number" onChange={onInputChange} placeholder={order.stopPrice} />
+                                        <input className="form-control" id="stopPrice" type="number" onChange={onInputChange} value={order.stopPrice} placeholder={order.stopPrice} />
                                     </div>
                                 </div>
                                 <div className="col-md-6 mb-3">

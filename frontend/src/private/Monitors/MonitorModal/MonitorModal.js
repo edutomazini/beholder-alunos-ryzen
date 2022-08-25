@@ -15,9 +15,21 @@ import LogView from '../../../components/Logs/LogView';
  */
 function MonitorModal(props) {
 
+    const DEFAULT_MONITOR = {
+        id: 0,
+        symbol: '',
+        type: 'CANDLES',
+        broadcastLabel: '',
+        interval: '1m',
+        indexes: '',
+        isActive: false,
+        isSystemMon: false,
+        logs: false
+    }
+
     const [error, setError] = useState('');
 
-    const [monitor, setMonitor] = useState({});
+    const [monitor, setMonitor] = useState(DEFAULT_MONITOR);
 
     const btnClose = useRef('');
     const btnSave = useRef('');
@@ -47,6 +59,14 @@ function MonitorModal(props) {
     function onLogClick(event) {
         setShowLogs(!showLogs);
     }
+
+    useEffect(() => {
+        const modal = document.getElementById('modalMonitor');
+        modal.addEventListener('hidden.bs.modal', (event) => {
+            setMonitor({ ...DEFAULT_MONITOR });
+            setShowLogs(false);
+        })
+    }, [])
 
     return (
         <div className="modal fade" id="modalMonitor" tabIndex="-1" role="dialog" aria-labelledby="modalTitleNotify" aria-hidden="true">
@@ -84,7 +104,7 @@ function MonitorModal(props) {
                                                 <div className="col-md-6 mb-3">
                                                     <div className="form-group mb-4">
                                                         <label htmlFor="symbol">Broadcast Label: <span data-bs-toggle="tooltip" data-bs-placement="top" title="Label to broadcast the info via WebSockets" className="badge bg-warning py-1">?</span></label>
-                                                        <input type="text" id="broadcastLabel" className="form-control" onChange={onInputChange} defaultValue={monitor.broadcastLabel} placeholder="none" />
+                                                        <input type="text" id="broadcastLabel" className="form-control" onChange={onInputChange} value={monitor.broadcastLabel} placeholder="none" />
                                                     </div>
                                                 </div>
                                                 {

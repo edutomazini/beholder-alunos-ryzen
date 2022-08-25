@@ -29,6 +29,13 @@ function WithdrawTemplateModal(props) {
     const btnSave = useRef('');
 
     useEffect(() => {
+        const modal = document.getElementById('modalWithdrawTemplate');
+        modal.addEventListener('hidden.bs.modal', (event) => {
+            setWithdrawTemplate({ ...DEFAULT_WITHDRAW_TEMPLATE });
+        })
+    }, [])
+
+    useEffect(() => {
         setError('');
         setWithdrawTemplate(props.data);
     }, [props.data])
@@ -85,7 +92,7 @@ function WithdrawTemplateModal(props) {
                                 <div className="col-12 mb-3">
                                     <div className="form-group">
                                         <label htmlFor="name">Name:</label>
-                                        <input type="text" id="name" defaultValue={withdrawTemplate.name} className="form-control" placeholder="My template name" onChange={onInputChange} />
+                                        <input type="text" id="name" value={withdrawTemplate.name} className="form-control" placeholder="My template name" onChange={onInputChange} />
                                     </div>
                                 </div>
                             </div>
@@ -93,7 +100,7 @@ function WithdrawTemplateModal(props) {
                                 <div className="col-12 mb-3">
                                     <div className="form-group">
                                         <label htmlFor="address">Wallet Address:</label>
-                                        <input type="text" id="address" defaultValue={withdrawTemplate.address} className="form-control" placeholder="..." onChange={onInputChange} />
+                                        <input type="text" id="address" value={withdrawTemplate.address} className="form-control" placeholder="..." onChange={onInputChange} />
                                     </div>
                                 </div>
                             </div>
@@ -104,7 +111,7 @@ function WithdrawTemplateModal(props) {
                                             <div className="col-12 mb-3">
                                                 <div className="form-group">
                                                     <label htmlFor="addressTag">Address Tag:</label>
-                                                    <input type="text" id="addressTag" defaultValue={withdrawTemplate.addressTag} className="form-control" placeholder="..." onChange={onInputChange} />
+                                                    <input type="text" id="addressTag" value={withdrawTemplate.addressTag} className="form-control" placeholder="..." onChange={onInputChange} />
                                                 </div>
                                             </div>
                                         </div>

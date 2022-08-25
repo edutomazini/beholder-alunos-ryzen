@@ -90,6 +90,13 @@ function OrderTemplateModal(props) {
         return STOP_TYPES.indexOf(orderType) !== -1 ? "col-md-6 mb-3" : "col-md-6 mb-3 d-none";
     }
 
+    useEffect(() => {
+        const modal = document.getElementById('modalOrderTemplate');
+        modal.addEventListener('hidden.bs.modal', (event) => {
+            setOrderTemplate({ ...DEFAULT_ORDER_TEMPLATE });
+        })
+    }, [])
+
     return (
         <div className="modal fade" id="modalOrderTemplate" tabIndex="-1" role="dialog" aria-labelledby="modalTitleNotify" aria-hidden="true">
             <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
@@ -118,7 +125,7 @@ function OrderTemplateModal(props) {
                                 <div className="col-12 mb-3">
                                     <div className="form-group">
                                         <label htmlFor="name">Name:</label>
-                                        <input id="name" type="text" className="form-control" defaultValue={orderTemplate.name} placeholder="My Template Name" onChange={onInputChange} />
+                                        <input id="name" type="text" className="form-control" value={orderTemplate.name} placeholder="My Template Name" onChange={onInputChange} />
                                     </div>
                                 </div>
                             </div>
