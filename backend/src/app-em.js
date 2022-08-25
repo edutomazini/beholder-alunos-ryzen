@@ -242,16 +242,34 @@ function startChartMonitor(monitorId, symbol, interval, indexes, broadcastLabel,
             volume: ohlc.volume[ohlc.volume.length - 1],
         };
 
+        const previousCandle = {
+            open: ohlc.open[ohlc.open.length - 2],
+            close: ohlc.close[ohlc.close.length - 2],
+            high: ohlc.high[ohlc.high.length - 2],
+            low: ohlc.low[ohlc.low.length - 2],
+            volume: ohlc.volume[ohlc.volume.length - 2],
+        };
+
+        const previousPreviousCandle = {
+            open: ohlc.open[ohlc.open.length - 3],
+            close: ohlc.close[ohlc.close.length - 3],
+            high: ohlc.high[ohlc.high.length - 3],
+            low: ohlc.low[ohlc.low.length - 3],
+            volume: ohlc.volume[ohlc.volume.length - 3],
+        };
+
         if (logs) logger('M:' + monitorId, lastCandle);
 
         try {
-            beholder.updateMemory(symbol, indexKeys.LAST_CANDLE, interval, lastCandle, false);
+            beholder.updateMemory(symbol, indexKeys.LAST_CANDLE, interval, { current: lastCandle, previous: previousCandle }, false);
+            beholder.updateMemory(symbol, indexKeys.PREVIOUS_CANDLE, interval, { current: previousCandle, previous: previousPreviousCandle }, false);
 
             if (broadcastLabel && WSS) sendMessage({ [broadcastLabel]: lastCandle });
 
             let results = await processChartData(monitorId, symbol, indexes, interval, ohlc, logs);
 
             results.push(await beholder.testAutomations(beholder.parseMemoryKey(symbol, indexKeys.LAST_CANDLE, interval)));
+            results.push(await beholder.testAutomations(beholder.parseMemoryKey(symbol, indexKeys.PREVIOUS_CANDLE, interval)));
 
             if (results) {
                 if (logs) logger('M:' + monitorId, `chartStream Results: ${results}`);
@@ -271,6 +289,7 @@ function stopChartMonitor(monitorId, symbol, interval, indexes, logs) {
     if (logs) logger('M:' + monitorId, `Chart Monitor ${symbol}_${interval} stopped!`);
 
     beholder.deleteMemory(symbol, indexKeys.LAST_CANDLE, interval);
+    beholder.deleteMemory(symbol, indexKeys.PREVIOUS_CANDLE, interval);
 
     if (indexes && Array.isArray(indexes))
         indexes.map(ix => beholder.deleteMemory(symbol, ix, interval));

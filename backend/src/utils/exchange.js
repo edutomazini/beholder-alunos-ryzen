@@ -130,10 +130,13 @@ module.exports = (settings) => {
     function chartStream(symbol, interval, callback) {
         const streamUrl = binance.websockets.chart(symbol, interval, (symbol, interval, chart) => {
             const tick = binance.last(chart);
-            if (tick && chart[tick] && chart[tick].isFinal === false)
+            const isIncomplete = tick && chart[tick] && chart[tick].isFinal === false;
+            if ((!process.env.INCOMPLETE_CANDLES || process.env.INCOMPLETE_CANDLES === 'false') && isIncomplete)
                 return;
 
             const ohlc = binance.ohlc(chart);
+            ohlc.isComplete = !isIncomplete;
+
             callback(ohlc);
         });
         if (LOGS) logger('system', `Chart Stream connected at ${streamUrl}`);
