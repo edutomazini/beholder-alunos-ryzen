@@ -268,10 +268,10 @@ function startChartMonitor(monitorId, symbol, interval, indexes, broadcastLabel,
 
             let results = await processChartData(monitorId, symbol, indexes, interval, ohlc, logs);
 
-            results.push(await beholder.testAutomations(beholder.parseMemoryKey(symbol, indexKeys.LAST_CANDLE, interval)));
-            results.push(await beholder.testAutomations(beholder.parseMemoryKey(symbol, indexKeys.PREVIOUS_CANDLE, interval)));
-
             if (results) {
+                results.push(await beholder.testAutomations(beholder.parseMemoryKey(symbol, indexKeys.LAST_CANDLE, interval)));
+                results.push(await beholder.testAutomations(beholder.parseMemoryKey(symbol, indexKeys.PREVIOUS_CANDLE, interval)));
+
                 if (logs) logger('M:' + monitorId, `chartStream Results: ${results}`);
                 results.flat().map(r => sendMessage({ notification: r }));
             }
