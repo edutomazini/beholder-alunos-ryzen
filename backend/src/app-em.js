@@ -24,9 +24,9 @@ function startMiniTickerMonitor(monitorId, broadcastLabel, logs) {
 
                 const results = await beholder.updateMemory(mkt[0], indexKeys.MINI_TICKER, null, converted);
                 if (results) results.map(r => sendMessage({ notification: r }));
-
-                if (broadcastLabel && WSS) sendMessage({ [broadcastLabel]: markets });
             })
+
+            if (broadcastLabel && WSS) sendMessage({ [broadcastLabel]: markets });
 
             //simulação de book
             const books = Object.entries(markets).map(mkt => {
