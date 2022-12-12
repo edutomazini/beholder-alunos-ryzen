@@ -683,7 +683,7 @@ async function testAutomations(memoryKey) {
 
     const automations = findAutomations(memoryKey);
 
-    if (!automations || !automations.length || isLocked(automations.map(a => a.id))) {
+    if (!automations || !automations.length || isLocked(automations.filter(a => a).map(a => a.id))) {
         if (LOGS) console.log(`Beholder has no automations for memoryKey: ${memoryKey} or the brain is locked!`);
         return false;
     }

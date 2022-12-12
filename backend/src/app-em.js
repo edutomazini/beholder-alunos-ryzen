@@ -21,11 +21,33 @@ function startMiniTickerMonitor(monitorId, broadcastLabel, logs) {
                 delete mkt[1].eventTime;
                 const converted = {};
                 Object.entries(mkt[1]).map(prop => converted[prop[0]] = parseFloat(prop[1]));
+
                 const results = await beholder.updateMemory(mkt[0], indexKeys.MINI_TICKER, null, converted);
                 if (results) results.map(r => sendMessage({ notification: r }));
+
+                if (broadcastLabel && WSS) sendMessage({ [broadcastLabel]: markets });
             })
 
-            if (broadcastLabel && WSS) sendMessage({ [broadcastLabel]: markets });
+            //simulação de book
+            const books = Object.entries(markets).map(mkt => {
+                const book = { symbol: mkt[0], bestAsk: mkt[1].close, bestBid: mkt[1].close };
+                const currentMemory = beholder.getMemory(mkt[0], indexKeys.BOOK);
+
+                const newMemory = {};
+                newMemory.previous = currentMemory ? currentMemory.current : book;
+                newMemory.current = book;
+
+                beholder.updateMemory(mkt[0], indexKeys.BOOK, null, newMemory)
+                    .then(results => {
+                        if (results)
+                            results.map(r => sendMessage({ notification: r }));
+                    })
+
+                return book;
+            })
+            if (WSS) sendMessage({ book: books });
+            //fim da simulação de book
+
         } catch (err) {
             if (logs) logger('M:' + monitorId, err)
         }

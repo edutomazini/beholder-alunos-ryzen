@@ -24,7 +24,7 @@ module.exports = {
           broadcastLabel: 'book',
           symbol: '*',
           interval: null,
-          isActive: true,
+          isActive: false,
           isSystemMon: true,
           indexes: null,
           logs: false,
