@@ -148,7 +148,13 @@ function GridModal(props) {
     }
 
     function onGridChange(event) {
-        const value = event.target.value === 'Min. Notional' ? 'MIN_NOTIONAL' : parseFloat(event.target.value.replace(',', '.'));
+        let value = event.target.value;
+
+        if (value === 'Min. Notional')
+            value = 'MIN_NOTIONAL';
+        else if (parseFloat(event.target.value.replace(',', '.')) > 0)
+            value = parseFloat(event.target.value.replace(',', '.'));
+
         grid[event.target.id] = value;
 
         setGrid(prevState => ({ ...prevState, [event.target.id]: value }));
@@ -241,7 +247,7 @@ function GridModal(props) {
                                                 <div className="col-md-6 mb-3">
                                                     <div className="form-group">
                                                         <label htmlFor="quantity">Quantity:</label>
-                                                        <input className="form-control" id="quantity" type="text" list="gridQtyList" placeholder={symbol.minLotSize} value={grid.quantity || ''} onChange={onGridChange} />
+                                                        <input className="form-control" id="quantity" type="text" list="gridQtyList" placeholder={symbol.minLotSize} value={grid.quantity} onChange={onGridChange} />
                                                         <datalist id="gridQtyList">
                                                             <option>Min. Notional</option>
                                                         </datalist>
