@@ -79,14 +79,6 @@ function NewOrderModal(props) {
             return setError('Min Lot Size ' + symbol.minLotSize);
         }
 
-        if (order.type === 'ICEBERG') {
-            const icebergQty = parseFloat(order.icebergQty);
-            if (icebergQty && icebergQty < parseFloat(symbol.minLotSize)) {
-                btnSend.current.disabled = true;
-                return setError('Min Lot Size (I) ' + symbol.minLotSize);
-            }
-        }
-
         if (!quantity) return;
 
         const price = parseFloat(order.limitPrice);
@@ -148,7 +140,8 @@ function NewOrderModal(props) {
             }
         }
 
-        setOrder(prevState => ({ ...prevState, limitPrice: parseFloat(book.bid) }));
+        //se quiser deixar o activation price automático, descomente essa linha
+        //setOrder(prevState => ({ ...prevState, limitPrice: parseFloat(book.bid) }));
     }
 
     const [wallet, setWallet] = useState({ base: { symbol: '', qty: 0 }, quote: { symbol: '', qty: 0 } });
