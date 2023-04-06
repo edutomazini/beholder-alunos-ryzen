@@ -57,11 +57,6 @@ function WithdrawTemplateModal(props) {
         setWithdrawTemplate(prevState => ({ ...prevState, [event.target.id]: event.target.value }));
     }
 
-    useEffect(() => {
-        setError('');
-        setWithdrawTemplate(props.data);
-    }, [props.data])
-
     const COINS_WITH_TAG = ["XRP"];
 
     return (
