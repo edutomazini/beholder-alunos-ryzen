@@ -42,8 +42,8 @@ async function syncSymbols(req, res, next) {
         if(!useBlvt && (item.baseAsset.endsWith("UP") || item.baseAsset.endsWith("DOWN"))) return false;
         if(ignoredCoins.includes(item.quoteAsset) || ignoredCoins.includes(item.baseAsset)) return false;
 
-        const minNotionalFilter = item.filters.find(filter => filter.filterType === 'MIN_NOTIONAL');
-        const minLotSizeFilter = item.filters.find(filter => filter.filterType === 'LOT_SIZE');
+        const notionalFilter = item.filters.find(filter => filter.filterType === 'NOTIONAL');
+        const lotSizeFilter = item.filters.find(filter => filter.filterType === 'LOT_SIZE');
         const priceFilter = item.filters.find(filter => filter.filterType === 'PRICE_FILTER');
 
         return {
@@ -52,9 +52,9 @@ async function syncSymbols(req, res, next) {
             quotePrecision: item.quoteAssetPrecision,
             base: item.baseAsset,
             quote: item.quoteAsset,
-            minNotional: minNotionalFilter ? minNotionalFilter.minNotional : '1',
-            minLotSize: minLotSizeFilter ? minLotSizeFilter.minQty : '1',
-            stepSize: minLotSizeFilter ? minLotSizeFilter.stepSize : '1',
+            minNotional: notionalFilter ? notionalFilter.minNotional : '1',
+            minLotSize: lotSizeFilter ? lotSizeFilter.minQty : '1',
+            stepSize: lotSizeFilter ? lotSizeFilter.stepSize : '1',
             tickSize: priceFilter ? priceFilter.tickSize : '1',
             isFavorite: favoriteSymbols.some(s => s === item.symbol)
         }
