@@ -623,7 +623,7 @@ function doAction(settings, action, automation) {
 }
 
 function shouldntInvert(automation, memoryKey) {
-    //return false;//descomente para desabilitar 'double check' (teste de condição invertida)
+    //return true;//descomente para desabilitar 'double check' (teste de condição invertida)
     return ['GRID', 'TRAILING'].includes(automation.actions[0].type)
         || automation.schedule
         || memoryKey.indexOf(':LAST_ORDER') !== -1
