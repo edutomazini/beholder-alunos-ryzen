@@ -19,7 +19,13 @@ function Reports() {
     const [report, setReport] = useState({});
 
     useEffect(() => {
-        if (!filter || !filter.symbol) return setFilter({ symbol: getDefaultQuote() });
+        if (!filter || !filter.symbol) {
+            const defaultQuote = getDefaultQuote();
+            if (defaultQuote !== "FAVORITES")
+                return setFilter({ symbol: defaultQuote });
+            else
+                return setFilter({ symbol: "BTCUSDT" });
+        }
 
         const token = localStorage.getItem("token");
 
