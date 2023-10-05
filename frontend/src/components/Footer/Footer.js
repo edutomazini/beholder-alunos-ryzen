@@ -6,8 +6,8 @@ function Footer() {
             <footer className="bg-white rounded shadow p-5 mb-4 mt-4">
                 <div className="row">
                     <div className="col-12 col-md-4 col-xl-6 mb-4 mb-md-0">
-                        <p className="mb-0 text-center text-lg-start">© 2010-<span className="current-year">2021</span> <a
-                            className="text-primary fw-normal" href="https://www.luiztools.com.br">LuizTools</a></p>
+                        <p className="mb-0 text-center text-lg-start">© 2010-<span className="current-year">2023</span> <a
+                            className="text-primary fw-normal" href="https://www.luiztools.com.br">LuizTools</a>. Beholder 2.1</p>
                     </div>
                     <div className="col-12 col-md-8 col-xl-6 text-center text-lg-start">
 

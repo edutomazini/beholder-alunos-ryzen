@@ -41,7 +41,7 @@ function SideBar() {
                             <span className="sidebar-icon">
                                 <img src="/img/favicon/favicon-32x32.png" height="32" width="32" alt="Beholder Logo" />
                             </span>
-                            <span className="mt-1 ms-1 sidebar-text">Beholder 2.0</span>
+                            <span className="mt-1 ms-1 sidebar-text">Beholder 2.1</span>
                         </Link>
                     </li>
                     <li className="nav-item">

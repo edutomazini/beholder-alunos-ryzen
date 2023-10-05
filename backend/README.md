@@ -1,5 +1,5 @@
 # backend
-The Beholder 2.0 backend.
+The Beholder 2.1 backend.
 
 ## How to Run
 https://cursos.luiztools.com.br/licoes/licao-04-executando-o-projeto/
