@@ -327,7 +327,6 @@ async function getDayTradeReport(req, res, next) {
 }
 
 async function getMonthReport(req, res, next) {
-
     const quote = req.params.quote;
 
     let startDate = req.query.startDate ? parseInt(req.query.startDate) : thirtyDaysAgo();

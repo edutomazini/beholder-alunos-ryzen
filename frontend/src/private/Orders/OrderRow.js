@@ -9,7 +9,7 @@ function OrderRow(props) {
 
     function getDate(timestamp) {
         const date = new Date(timestamp);
-        const frm = new Intl.DateTimeFormat('en-US', { dateStyle: 'short', timeStyle: 'short' }).format(date);
+        const frm = new Intl.DateTimeFormat('en-GB', { dateStyle: 'short', timeStyle: 'short' }).format(date);
         return frm;
     }
 
