@@ -8,7 +8,7 @@ const sequelize = new Sequelize(
         dialect: process.env.DB_DIALECT || 'mysql',
         host: process.env.DB_HOST || 'localhost',
         port: process.env.DB_PORT || 3006,
-        logging: process.env.DB_LOGS === 'true'
+        logging: process.env.DB_LOGS === 'true' ? console.log : false
     });
 
 module.exports = sequelize;
