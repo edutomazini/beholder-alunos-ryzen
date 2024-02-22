@@ -1,8 +1,8 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Beholder backend",
+  "main": "server.js",
   "scripts": {
     "start": "node -r dotenv/config ./src/server",
     "dev": "npx nodemon --trace-warnings -r dotenv/config ./src/server",
@@ -27,7 +27,7 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "mysql2": "^3.9.1",
-    "node-binance-api": "^0.13.1",
+    "node-binance-api": "github:luiztools/node-binance-api",
     "node-schedule": "^2.1.1",
     "sequelize": "^6.37.0",
     "technicalindicators": "^3.1.0",
