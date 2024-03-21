@@ -151,7 +151,7 @@ module.exports = (settings) => {
     function userDataStream(updateCallback, listStatusCallback) {
         binance.websockets.userData(
             data => updateCallback(data),
-            true,
+            false,
             subscribedData => logger('system', `userDataStream:subscribeEvent: ${JSON.stringify(subscribedData)}`),
             listStatusData => listStatusCallback(listStatusData));
     }
