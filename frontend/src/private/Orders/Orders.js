@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory, useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import Menu from '../../components/Menu/Menu';
 import Footer from '../../components/Footer/Footer';
 import SearchSymbol from '../../components/SearchSymbol/SearchSymbol';
@@ -20,13 +20,9 @@ function Orders() {
         return new URLSearchParams(location.search).get('page');
     }
 
-    const history = useHistory();
-
     useEffect(() => {
-        return history.listen((location) => {
-            setPage(getPage(location));
-        })
-    }, [history])
+        setPage(getPage(defaultLocation));
+    }, [defaultLocation])
 
     const { symbol } = useParams();
 
@@ -69,7 +65,7 @@ function Orders() {
     }
 
     function onOrderSubmit(order) {
-        history.go(0);
+        window.location.reload();
     }
 
     return (

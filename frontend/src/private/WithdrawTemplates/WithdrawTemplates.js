@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import Menu from '../../components/Menu/Menu';
 import Footer from '../../components/Footer/Footer';
 import NewWithdrawTemplateButton from './NewWithdrawTemplateButton';
@@ -24,13 +24,9 @@ function WithdrawTemplates() {
         return new URLSearchParams(location.search).get('page');
     }
 
-    const history = useHistory();
-
     useEffect(() => {
-        return history.listen((location) => {
-            setPage(getPage(location));
-        })
-    }, [history])
+        setPage(getPage(defaultLocation));
+    }, [defaultLocation])
 
     const [withdrawTemplates, setWithdrawTemplates] = useState([]);
 
@@ -68,7 +64,7 @@ function WithdrawTemplates() {
         const id = event.target.id.replace('delete', '');
         const token = localStorage.getItem('token');
         deleteWithdrawTemplate(id, token)
-            .then(result => history.go(0))
+            .then(result => window.location.reload())
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message);
                 setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
@@ -87,7 +83,7 @@ function WithdrawTemplates() {
     }
 
     function onWithdrawTemplateSubmit(template) {
-        history.go(0);
+        window.location.reload();
     }
 
     function onNewWithdrawTemplateClick(event) {

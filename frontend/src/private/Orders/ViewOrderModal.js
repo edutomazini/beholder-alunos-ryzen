@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { cancelOrder, syncOrder } from '../../services/OrdersService';
 import { FINISHED_STATUS } from '../../services/ExchangeService';
 
@@ -14,7 +14,7 @@ function ViewOrderModal(props) {
         symbol: ''
     }
 
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const btnClose = useRef('');
     const btnCancel = useRef('');
@@ -74,7 +74,7 @@ function ViewOrderModal(props) {
             .then(result => {
                 btnClose.current.click();
                 if (props.onCancel) props.onCancel({ target: { id: 'order', value: order.oderId } });
-                return history.push('/orders/' + order.symbol);
+                return navigate('/orders/' + order.symbol);
             })
             .catch(err => errorHandling(err))
     }

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
 import Menu from '../../components/Menu/Menu';
 import Footer from '../../components/Footer/Footer';
 import WalletRow from './WalletRow';
@@ -10,8 +9,6 @@ import NewOrderModal from '../../components/NewOrder/NewOrderModal';
 import SelectFiat, { setDefaultFiat, getDefaultFiat } from '../../components/SelectFiat/SelectFiat';
 
 function Wallet() {
-
-    const history = useHistory();
 
     const [balances, setBalances] = useState([]);
     const [total, setTotal] = useState("");
@@ -52,7 +49,7 @@ function Wallet() {
     }, [fiat])
 
     function onOrderSubmit(event) {
-        history.go(0);
+        window.location.reload();
     }
 
     function onFiatChange(event) {

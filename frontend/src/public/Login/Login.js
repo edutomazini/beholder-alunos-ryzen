@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { doLogin } from '../../services/AuthService';
 
 function Login() {
 
-    const history = useHistory();
+    const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -22,7 +22,7 @@ function Login() {
         doLogin(email, password)
             .then(response => {
                 localStorage.setItem('token', response.token);
-                history.push('/dashboard');
+                navigate('/dashboard');
             })
             .catch(err => {
                 console.error(err);

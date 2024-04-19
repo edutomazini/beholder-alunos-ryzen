@@ -1,14 +1,14 @@
 import React from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { doLogout } from '../../services/AuthService';
 import SideBarItem from './SideBarItem';
 
 function SideBar() {
-    const history = useHistory();
+    const navigate = useNavigate();
 
     function cleanAndRedirect() {
         localStorage.removeItem('token');
-        history.push('/');
+        navigate('/');
     }
 
     function onLogoutClick(event) {
@@ -41,7 +41,7 @@ function SideBar() {
                             <span className="sidebar-icon">
                                 <img src="/img/favicon/favicon-32x32.png" height="32" width="32" alt="Beholder Logo" />
                             </span>
-                            <span className="mt-1 ms-1 sidebar-text">Beholder 2.1</span>
+                            <span className="mt-1 ms-1 sidebar-text">Beholder 2.2</span>
                         </Link>
                     </li>
                     <li className="nav-item">

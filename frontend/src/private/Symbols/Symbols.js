@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { searchSymbols, syncSymbols } from '../../services/SymbolsService';
 import SymbolModal from './SymbolModal';
 import SymbolRow from './SymbolRow';
@@ -11,8 +11,6 @@ import Toast from '../../components/Toast/Toast';
 
 function Symbols() {
 
-    const history = useHistory();
-
     const defaultLocation = useLocation();
 
     function getPage(location) {
@@ -21,10 +19,8 @@ function Symbols() {
     }
 
     useEffect(() => {
-        return history.listen((location) => {
-            setPage(getPage(location));
-        })
-    }, [history])
+        setPage(getPage(defaultLocation));
+    }, [defaultLocation])
 
     const [symbols, setSymbols] = useState([]);
 

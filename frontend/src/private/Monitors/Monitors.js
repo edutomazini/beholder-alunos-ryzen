@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import Menu from '../../components/Menu/Menu';
 import Footer from '../../components/Footer/Footer';
 import MonitorRow from './MonitorRow';
@@ -21,13 +21,9 @@ function Monitors() {
         return new URLSearchParams(location.search).get('page');
     }
 
-    const history = useHistory();
-
     useEffect(() => {
-        return history.listen((location) => {
-            setPage(getPage(location));
-        })
-    }, [history])
+        setPage(getPage(defaultLocation));
+    }, [defaultLocation])
 
     const [monitors, setMonitors] = useState([]);
 
@@ -75,7 +71,7 @@ function Monitors() {
         const id = event.target.id.replace('stop', '');
         const token = localStorage.getItem('token');
         stopMonitor(id, token)
-            .then(monitor => { history.go(0) })
+            .then(monitor => { window.location.reload() })
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message);
                 setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
@@ -86,7 +82,7 @@ function Monitors() {
         const id = event.target.id.replace('start', '');
         const token = localStorage.getItem('token');
         startMonitor(id, token)
-            .then(monitor => { history.go(0) })
+            .then(monitor => { window.location.reload() })
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message)
                 setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
@@ -97,7 +93,7 @@ function Monitors() {
         const id = event.target.id.replace('delete', '');
         const token = localStorage.getItem('token');
         deleteMonitor(id, token)
-            .then(monitor => { history.go(0) })
+            .then(monitor => { window.location.reload() })
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message);
                 setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
@@ -105,7 +101,7 @@ function Monitors() {
     }
 
     function onMonitorSubmit(order) {
-        history.go(0);
+        window.location.reload();
     }
 
     function onNewMonitorClick(event) {

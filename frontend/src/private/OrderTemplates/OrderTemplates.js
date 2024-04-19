@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory, useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import Menu from '../../components/Menu/Menu';
 import Footer from '../../components/Footer/Footer';
 import SearchSymbol from '../../components/SearchSymbol/SearchSymbol';
@@ -19,13 +19,9 @@ function OrderTemplates() {
         return new URLSearchParams(location.search).get('page');
     }
 
-    const history = useHistory();
-
     useEffect(() => {
-        return history.listen((location) => {
-            setPage(getPage(location));
-        })
-    }, [history])
+        setPage(getPage(defaultLocation));
+    }, [defaultLocation])
 
     const { symbol } = useParams();
 
@@ -70,7 +66,7 @@ function OrderTemplates() {
         const id = event.target.id.replace('delete', '');
         const token = localStorage.getItem('token');
         deleteOrderTemplate(id, token)
-            .then(template => { history.go(0) })
+            .then(template => { window.location.reload() })
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message)
                 setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
@@ -78,7 +74,7 @@ function OrderTemplates() {
     }
 
     function onOrderTemplateSubmit(template) {
-        history.go(0);
+        window.location.reload();
     }
 
     function onNewOrderTemplateClick(event) {

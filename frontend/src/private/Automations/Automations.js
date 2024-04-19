@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import Menu from '../../components/Menu/Menu';
 import Footer from '../../components/Footer/Footer';
 import AutomationModal from './AutomationModal/AutomationModal';
@@ -19,13 +19,9 @@ function Automations() {
         return new URLSearchParams(location.search).get('page');
     }
 
-    const history = useHistory();
-
     useEffect(() => {
-        return history.listen((location) => {
-            setPage(getPage(location));
-        })
-    }, [history])
+        setPage(getPage(defaultLocation));
+    }, [defaultLocation])
 
     const [automations, setAutomations] = useState([]);
 
@@ -69,7 +65,7 @@ function Automations() {
         const id = event.target.id.replace('stop', '');
         const token = localStorage.getItem('token');
         stopAutomation(id, token)
-            .then(automation => { history.go(0) })
+            .then(automation => { window.location.reload() })
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message)
                 setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
@@ -80,7 +76,7 @@ function Automations() {
         const id = event.target.id.replace('start', '');
         const token = localStorage.getItem('token');
         startAutomation(id, token)
-            .then(automation => { history.go(0) })
+            .then(automation => { window.location.reload() })
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message)
                 setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
@@ -91,7 +87,7 @@ function Automations() {
         const id = event.target.id.replace('delete', '');
         const token = localStorage.getItem('token');
         deleteAutomation(id, token)
-            .then(automation => { history.go(0) })
+            .then(automation => { window.location.reload() })
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message)
                 setNotification({ type: 'error', text: err.response ? err.response.data : err.message });
@@ -99,7 +95,7 @@ function Automations() {
     }
 
     function onAutomationSubmit(automation) {
-        history.go(0);
+        window.location.reload();
     }
 
     function onNewAutomationClick(event) {

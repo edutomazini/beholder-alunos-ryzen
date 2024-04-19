@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Menu from '../../components/Menu/Menu';
 import MiniTicker from './MiniTicker/MiniTicker';
 import BookTicker from './BookTicker/BookTicker';
@@ -14,7 +14,7 @@ import Toast from '../../components/Toast/Toast';
 
 function Dashboard() {
 
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [tickerState, setTickerState] = useState({});
 
@@ -58,7 +58,7 @@ function Dashboard() {
   }
 
   function onSubmitOrder(order) {
-    history.push('/orders/' + order.symbol);
+    navigate('/orders/' + order.symbol);
   }
 
   function onChangeSymbol(event) {
