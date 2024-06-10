@@ -3,10 +3,12 @@ import NavBar from './NavBar';
 import SideBar from './SideBar';
 
 function Menu() {
-    return (<React.Fragment>
-        <NavBar />
-        <SideBar />
-    </React.Fragment>)
+    return (
+        <>
+            <NavBar />
+            <SideBar />
+        </>
+    )
 }
 
 export default Menu;

@@ -63,15 +63,15 @@ function VariableInput(props) {
                 {
                     typeof index.example === 'number'
                         ? (
-                            <React.Fragment>
+                            <>
                                 <option value=">">greater than</option>
                                 <option value=">=">greater or equals</option>
                                 <option value="<">less than</option>
                                 <option value="<=">less or equals</option>
-                            </React.Fragment>
+                            </>
                         )
                         : (
-                            <React.Fragment></React.Fragment>
+                            <></>
                         )
                 }
                 <option value="==">equals</option>

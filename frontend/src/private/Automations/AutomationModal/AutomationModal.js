@@ -156,12 +156,12 @@ function AutomationModal(props) {
                             {
                                 !showLogs && automation.schedule
                                     ? <ScheduleArea schedule={automation.schedule} onChange={onInputChange} />
-                                    : <React.Fragment></React.Fragment>
+                                    : <></>
                             }
                             {
                                 !showLogs
                                     ? (
-                                        <React.Fragment>
+                                        <>
                                             <ul className="nav nav-tabs" id="tabs" role="tablist">
                                                 <li className="nav-item" role="presentation">
                                                     <button className="nav-link active" id="conditions-tab" data-bs-toggle="tab" data-bs-target="#conditions" type="button" role="tab" aria-controls="home" aria-selected="true">
@@ -194,7 +194,7 @@ function AutomationModal(props) {
                                                     </div>
                                                 </div>
                                             </div>
-                                        </React.Fragment>
+                                        </>
                                     )
                                     : <LogView file={"A:" + automation.id} />
                             }
@@ -205,7 +205,7 @@ function AutomationModal(props) {
                         {
                             error
                                 ? <div className="alert alert-danger mt-1 col-9 py-1">{error}</div>
-                                : <React.Fragment></React.Fragment>
+                                : <></>
                         }
                         <LogButton id={automation.id} onClick={onLogClick} />
                         <button ref={btnSave} type="button" className="btn btn-sm btn-primary" onClick={onSubmit}>Save</button>

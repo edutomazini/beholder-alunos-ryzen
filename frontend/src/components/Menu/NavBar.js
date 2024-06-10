@@ -1,9 +1,9 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 function NavBar() {
   return (
-    <React.Fragment>
+    <>
       <nav className="navbar navbar-dark navbar-theme-primary px-4 col-12 d-lg-none">
         <Link className="navbar-brand me-lg-5" to="/">
           <img className="navbar-brand-light" src="/img/brand/light.svg" alt="Beholder logo" />
@@ -15,7 +15,7 @@ function NavBar() {
           </button>
         </div>
       </nav>
-    </React.Fragment>
+    </>
   );
 }
 

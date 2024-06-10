@@ -82,7 +82,7 @@ function OrderTemplates() {
     }
 
     return (
-        <React.Fragment>
+        <>
             <Menu />
             <main className="content">
                 <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
@@ -113,7 +113,7 @@ function OrderTemplates() {
                             {
                                 orderTemplates && orderTemplates.length
                                     ? orderTemplates.map(ot => (<OrderTemplateRow key={ot.id} data={ot} onEditClick={onEditClick} onDeleteClick={onDeleteClick} />))
-                                    : <React.Fragment></React.Fragment>
+                                    : <></>
                             }
                         </tbody>
                     </table>
@@ -123,7 +123,7 @@ function OrderTemplates() {
             </main>
             <OrderTemplateModal data={editOrderTemplate} onSubmit={onOrderTemplateSubmit} />
             <Toast type={notification.type} text={notification.text} />
-        </React.Fragment>
+        </>
     );
 }
 

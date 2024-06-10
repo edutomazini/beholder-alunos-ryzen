@@ -109,7 +109,7 @@ function Monitors() {
     }
 
     return (
-        <React.Fragment>
+        <>
             <Menu />
             <main className="content">
                 <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
@@ -137,7 +137,7 @@ function Monitors() {
                             {
                                 monitors && monitors.length
                                     ? monitors.map(monitor => (<MonitorRow key={monitor.id} data={monitor} onEditClick={onEditClick} onStartClick={onStartClick} onStopClick={onStopClick} onDeleteClick={onDeleteClick} onLogsClick={onLogsClick} />))
-                                    : <React.Fragment></React.Fragment>
+                                    : <></>
                             }
                         </tbody>
                     </table>
@@ -149,7 +149,7 @@ function Monitors() {
             <LogModal file={editMonitor.id > 0 ? "M:" + editMonitor.id : ""} />
             <BeholderModal />
             <Toast type={notification.type} text={notification.text} />
-        </React.Fragment>
+        </>
     );
 }
 

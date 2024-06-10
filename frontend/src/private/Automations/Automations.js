@@ -106,7 +106,7 @@ function Automations() {
     }
 
     return (
-        <React.Fragment>
+        <>
             <Menu />
             <main className="content">
                 <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
@@ -133,7 +133,7 @@ function Automations() {
                             {
                                 automations && automations.length
                                     ? automations.map(automation => (<AutomationRow key={automation.id} data={automation} onEditClick={onEditClick} onStartClick={onStartClick} onStopClick={onStopClick} onDeleteClick={onDeleteClick} />))
-                                    : <React.Fragment></React.Fragment>
+                                    : <></>
                             }
                         </tbody>
                     </table>
@@ -144,7 +144,7 @@ function Automations() {
             <AutomationModal data={editAutomation} onSubmit={onAutomationSubmit} />
             <GridModal data={editAutomation} onSubmit={onAutomationSubmit} />
             <Toast type={notification.type} text={notification.text} />
-        </React.Fragment>
+        </>
     );
 }
 

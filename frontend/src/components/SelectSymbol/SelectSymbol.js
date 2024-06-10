@@ -82,7 +82,7 @@ function SelectSymbol(props) {
 
     const selectSymbol = useMemo(() => {
         return (
-            <React.Fragment>
+            <>
                 <div className="input-group mb-3">
                     <button ref={buttonRef} type="button" className="btn btn-secondary d-inline-flex align-items-center" onClick={onFavoriteClick}>
                         <svg className="icon icon-xs" fill={getStarFillColor()} viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" onClick={onFavoriteClick}>
@@ -94,17 +94,17 @@ function SelectSymbol(props) {
                         {
                             props.showAny
                                 ? <option value="*">Any</option>
-                                : <React.Fragment></React.Fragment>
+                                : <></>
                         }
                         {symbols.map(s => (<option key={s} value={s}>{s}</option>))}
                     </select>
                     {
                         quote
                             ? <SelectQuote value={props.symbol ? props.symbol.replace('*', ''): ''} disabled={props.disabled} noFavorites={true} onChange={onQuoteChange} />
-                            : <React.Fragment></React.Fragment>
+                            : <></>
                     }
                 </div>
-            </React.Fragment>
+            </>
         )
     }, [symbols, quote, isDisabled])
 

@@ -92,14 +92,14 @@ function MonitorModal(props) {
                                                 <SelectSymbol onChange={onInputChange} symbol={monitor.symbol} onlyFavorites={false} />
                                             </div>
                                         </div>
-                                        : <React.Fragment></React.Fragment>
+                                        : <></>
                                 }
                             </div>
                             {
                                 showLogs
                                     ? <LogView file={"M:" + monitor.id} />
                                     : (
-                                        <React.Fragment>
+                                        <>
                                             <div className="row">
                                                 <div className="col-md-6 mb-3">
                                                     <div className="form-group mb-4">
@@ -114,13 +114,13 @@ function MonitorModal(props) {
                                                                 <SelectInterval onChange={onInputChange} interval={monitor.interval} />
                                                             </div>
                                                         </div>
-                                                        : <React.Fragment></React.Fragment>
+                                                        : <></>
                                                 }
                                             </div>
                                             {
                                                 monitor.type === 'CANDLES'
                                                     ? <MonitorIndex onChange={onInputChange} indexes={monitor.indexes} />
-                                                    : <React.Fragment></React.Fragment>
+                                                    : <></>
                                             }
                                             <div className="row">
                                                 <div className="col-md-6 mb-3">
@@ -134,7 +134,7 @@ function MonitorModal(props) {
                                                     </div>
                                                 </div>
                                             </div>
-                                        </React.Fragment>
+                                        </>
                                     )
                             }
                         </div>
@@ -143,7 +143,7 @@ function MonitorModal(props) {
                         {
                             error
                                 ? <div className="alert alert-danger mt-1 col-9 py-1">{error}</div>
-                                : <React.Fragment></React.Fragment>
+                                : <></>
                         }
                         <LogButton id={monitor.id} onClick={onLogClick} />
                         <button ref={btnSave} type="button" className="btn btn-sm btn-primary" onClick={onSubmit}>Save</button>

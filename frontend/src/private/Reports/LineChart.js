@@ -58,7 +58,7 @@ function LineChart(props) {
     }
 
     return (
-        <React.Fragment>
+        <>
             <div className="row">
                 <div className="col-12 mb-4">
                     <div className="card bg-yellow-100 border-0 shadow">
@@ -78,7 +78,7 @@ function LineChart(props) {
                     </div>
                 </div>
             </div>
-        </React.Fragment>
+        </>
     );
 }
 

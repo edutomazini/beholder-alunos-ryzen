@@ -58,7 +58,7 @@ function Wallet() {
     }
 
     return (
-        <React.Fragment>
+        <>
             <Menu />
             <main className="content">
                 <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
@@ -89,7 +89,7 @@ function Wallet() {
                             {
                                 balances && balances.length
                                     ? balances.filter(b => parseFloat(b.available) > 0 || parseFloat(b.onOrder) > 0).map(item => (<WalletRow key={item.symbol} data={item} />))
-                                    : <React.Fragment></React.Fragment>
+                                    : <></>
                             }
                         </tbody>
                         <tfoot>
@@ -106,7 +106,7 @@ function Wallet() {
             </main>
             <Toast type={notification.type} text={notification.text} />
             <NewOrderModal onSubmit={onOrderSubmit} />
-        </React.Fragment>
+        </>
     );
 }
 

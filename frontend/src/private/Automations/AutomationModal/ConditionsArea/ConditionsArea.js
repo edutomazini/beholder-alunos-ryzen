@@ -94,7 +94,7 @@ function ConditionsArea(props) {
     }, [props.symbol])
 
     return (
-        <React.Fragment>
+        <>
             <div className="row">
                 <div className="col-12 mb-3">
                     <IndexSelect indexes={indexes} onChange={onKeySelectChange} />
@@ -112,9 +112,9 @@ function ConditionsArea(props) {
                             }
                         </div>
                     </div>
-                    : <React.Fragment></React.Fragment>
+                    : <></>
             }
-        </React.Fragment>
+        </>
     )
 }
 

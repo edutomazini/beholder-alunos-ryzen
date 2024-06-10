@@ -31,7 +31,7 @@ function SelectCoin(props) {
             {
                 coins
                     ? coins.map(c => (<option key={c}>{c}</option>))
-                    : <React.Fragment></React.Fragment>
+                    : <></>
             }
         </select>
     )

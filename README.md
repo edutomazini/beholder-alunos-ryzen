@@ -1,11 +1,11 @@
-# Beholder 2.1
+# Beholder 2.2
 A multicoin traderbot for Binance Spot. Evolved.
 
 ## backend
-The Beholder 2.1 backend.
+The Beholder 2.2 backend.
 
 ## frontend
-The Beholder 2.1 frontend.
+The Beholder 2.2 frontend.
 
 See each README for more info.
 

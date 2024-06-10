@@ -66,7 +66,7 @@ function Dashboard() {
   }
 
   return (
-    <React.Fragment>
+    <>
       <Menu />
       <main className="content">
         <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
@@ -96,7 +96,7 @@ function Dashboard() {
       </main>
       <NewOrderModal wallet={wallet} onSubmit={onSubmitOrder} />
       <Toast type={notification.type} text={notification.text} />
-    </React.Fragment>
+    </>
   );
 }
 

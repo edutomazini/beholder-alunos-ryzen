@@ -122,7 +122,7 @@ function ActionsArea(props) {
     }
 
     return (
-        <React.Fragment>
+        <>
             <div className="row">
                 <div className="col-12 my-3">
                     <div className="input-group input-group-merge">
@@ -136,7 +136,7 @@ function ActionsArea(props) {
                                         orderTemplates.filter(ot => ot.type !== 'TRAILING_STOP').map(ot => (<option key={ot.id} value={ot.id}>{ot.name}</option>))
                                     }
                                 </select>
-                                : <React.Fragment></React.Fragment>
+                                : <></>
                         }
                         {
                             newAction.type === 'TRAILING' && orderTemplates
@@ -147,7 +147,7 @@ function ActionsArea(props) {
                                         orderTemplates.filter(ot => ot.type === 'TRAILING_STOP').map(ot => (<option key={ot.id} value={ot.id}>{ot.name}</option>))
                                     }
                                 </select>
-                                : <React.Fragment></React.Fragment>
+                                : <></>
                         }
                         {
                             newAction.type === 'WITHDRAW' && withdrawTemplates
@@ -158,7 +158,7 @@ function ActionsArea(props) {
                                         withdrawTemplates.map(wt => (<option key={wt.id} value={wt.id}>{wt.name}</option>))
                                     }
                                 </select>
-                                : <React.Fragment></React.Fragment>
+                                : <></>
                         }
                         <button type="button" className="btn btn-secondary" onClick={onAddClick}>
                             <svg className="icon icon-xs" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -179,9 +179,9 @@ function ActionsArea(props) {
                             </div>
                         </div>
                     )
-                    : <React.Fragment></React.Fragment>
+                    : <></>
             }
-        </React.Fragment >
+        </>
     )
 }
 

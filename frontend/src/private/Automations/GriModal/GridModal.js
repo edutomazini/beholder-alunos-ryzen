@@ -212,7 +212,7 @@ function GridModal(props) {
                                     {
                                         isVisible && automation.symbol
                                             ? <SymbolPrice symbol={automation.symbol} />
-                                            : <React.Fragment></React.Fragment>
+                                            : <></>
                                     }
                                 </div>
                             </div>
@@ -220,7 +220,7 @@ function GridModal(props) {
                         {
                             !gridView && !showLogs
                                 ? (
-                                    <React.Fragment>
+                                    <>
                                         <div className="form-group">
                                             <WalletSummary wallet={wallet} />
                                             <div className="row">
@@ -275,9 +275,9 @@ function GridModal(props) {
                                                 </div>
                                             </div>
                                         </div>
-                                    </React.Fragment>
+                                    </>
                                 )
-                                : <React.Fragment></React.Fragment>
+                                : <></>
                         }
                         {
                             gridView && !showLogs
@@ -286,19 +286,19 @@ function GridModal(props) {
                                         <GridTable data={automation.grids} />
                                     </div>
                                 )
-                                : <React.Fragment></React.Fragment>
+                                : <></>
                         }
                         {
                             showLogs
                                 ? <LogView file={"A:" + automation.id} />
-                                : <React.Fragment></React.Fragment>
+                                : <></>
                         }
                     </div>
                     <div className="modal-footer">
                         {
                             error
                                 ? <div className="alert alert-danger mt-1 py-1 col-9">{error}</div>
-                                : <React.Fragment></React.Fragment>
+                                : <></>
                         }
                         <GridButton id={automation.id} onClick={onViewGridsClick} />
                         <LogButton id={automation.id} onClick={onLogClick} />

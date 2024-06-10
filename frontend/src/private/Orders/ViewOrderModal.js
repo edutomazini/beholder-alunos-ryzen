@@ -117,7 +117,7 @@ function ViewOrderModal(props) {
                                         {
                                             order.isMaker
                                                 ? <span className="badge bg-warning" title="MAKER">M</span>
-                                                : <React.Fragment></React.Fragment>
+                                                : <></>
                                         }
                                     </div>
                                 </div>
@@ -132,7 +132,7 @@ function ViewOrderModal(props) {
                                                     <b>Automation:</b> {order.automation.name}
                                                 </div>
                                             )
-                                            : <React.Fragment></React.Fragment>
+                                            : <></>
                                     }
                                 </div>
                                 <div className="row">
@@ -164,7 +164,7 @@ function ViewOrderModal(props) {
                                                     <b>Iceberg Qty:</b> {order.icebergQty}
                                                 </div>
                                             )
-                                            : <React.Fragment></React.Fragment>
+                                            : <></>
                                     }
                                     {
                                         order.stopPrice
@@ -173,7 +173,7 @@ function ViewOrderModal(props) {
                                                     <b>Stop Price:</b> {order.stopPrice}
                                                 </div>
                                             )
-                                            : <React.Fragment></React.Fragment>
+                                            : <></>
                                     }
                                     <div className="col-md-6 mb-3">
                                         <b>Avg Price:</b> {order.avgPrice}
@@ -201,7 +201,7 @@ function ViewOrderModal(props) {
                                                 </div>
                                             </div>
                                         )
-                                        : <React.Fragment></React.Fragment>
+                                        : <></>
                                 }
                             </div>
                         </div>
@@ -209,7 +209,7 @@ function ViewOrderModal(props) {
                             {
                                 error ?
                                     <div className="alert alert-danger mt-1 col-7 py-1">{error}</div>
-                                    : <React.Fragment></React.Fragment>
+                                    : <></>
                             }
                             <button type="button" className="btn btn-sm btn-info" onClick={onSyncClick}>
                                 <svg className="icon icon-xs" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

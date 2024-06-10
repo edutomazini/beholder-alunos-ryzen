@@ -6,7 +6,7 @@ import React from 'react';
  */
 function NewAutomationButton(props) {
     return (
-        <React.Fragment>
+        <>
             <button id="btnNewAutomation" className="btn btn-primary dropdown-toggle" id="dropdownMenuButton1" data-bs-toggle="dropdown">
                 <svg className="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
                     xmlns="http://www.w3.org/2000/svg">
@@ -20,7 +20,7 @@ function NewAutomationButton(props) {
                 <li><a id="linkGrid" className="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalGrid" onClick={props.onClick}>Grid</a></li>
                 <li><a id="linkSchedule" className="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalAutomation" onClick={props.onClick}>Schedule</a></li>
             </ul>
-        </React.Fragment>
+        </>
     )
 }
 

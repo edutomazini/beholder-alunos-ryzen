@@ -15,7 +15,7 @@ function GridButton(props) {
     }
 
     return (
-        <React.Fragment>
+        <>
             {
                 props.id > 0
                     ? (
@@ -35,9 +35,9 @@ function GridButton(props) {
                             }
                         </button>
                     )
-                    : <React.Fragment></React.Fragment>
+                    : <></>
             }
-        </React.Fragment >
+        </ >
     )
 }
 

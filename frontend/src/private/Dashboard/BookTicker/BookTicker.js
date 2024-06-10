@@ -27,7 +27,7 @@ function BookTicker(props) {
             })
     }, [quote]);
 
-    return (<React.Fragment>
+    return (<>
         <div className="col-sm-12 col-md-6 mb-4">
             <div className="card border-0 shadow">
                 <div className="card-header">
@@ -55,14 +55,14 @@ function BookTicker(props) {
                                     ? symbols.map(item => (
                                         <BookRow key={item} symbol={item} data={props.data[item]} />
                                     ))
-                                    : <React.Fragment></React.Fragment>
+                                    : <></>
                             }
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
-    </React.Fragment>);
+    </>);
 }
 
 export default BookTicker;

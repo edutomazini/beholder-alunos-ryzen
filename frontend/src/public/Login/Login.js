@@ -82,7 +82,7 @@ function Login() {
                                 {
                                     error ?
                                         <div className="alert alert-danger mt-2">{error}</div>
-                                        : <React.Fragment></React.Fragment>
+                                        : <></>
                                 }
                             </form>
                         </div>

@@ -46,7 +46,7 @@ function ScheduleArea(props) {
                     {
                         isCron
                             ? (
-                                <React.Fragment>
+                                <>
                                     <label htmlFor="lowerLimit">Schedule by CRON:</label>
                                     <div className="input-group input-group-merge">
                                         <button type="button" onClick={onScheduleByClick} className="btn btn-secondary">
@@ -54,13 +54,13 @@ function ScheduleArea(props) {
                                         </button>
                                         <input className="form-control" id="schedule" type="text" placeholder="* * * * * *" defaultValue={verifyCron(schedule) ? schedule : ''} onChange={onInputChange} />
                                     </div>
-                                </React.Fragment>
+                                </>
                             )
                             : (
-                                <React.Fragment>
+                                <>
                                     <label htmlFor="upperLimit">Schedule by Date &amp; Time:</label>
                                     <DateTime date={Date.parse(schedule) ? schedule : ''} onChange={onInputChange} onClick={onScheduleByClick} />
-                                </React.Fragment>
+                                </>
                             )
                     }
                 </div>

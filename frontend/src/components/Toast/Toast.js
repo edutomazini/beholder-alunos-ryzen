@@ -73,7 +73,7 @@ function Toast(props) {
     });
 
     return (
-        <React.Fragment></React.Fragment>
+        <></>
     )
 }
 

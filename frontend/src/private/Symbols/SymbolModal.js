@@ -104,7 +104,7 @@ function SymbolModal(props) {
                     {
                         error
                             ? <div className="alert alert-danger">{error}</div>
-                            : <React.Fragment></React.Fragment>
+                            : <></>
                     }
                 </div>
             </div>

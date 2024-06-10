@@ -22,7 +22,7 @@ function IndexSelect(props) {
     }, [props.indexes])
 
     return (
-        <React.Fragment>
+        <>
             <div className="input-group input-group-merge mb-2">
                 <span className="input-group-text bg-secondary">
                     When
@@ -39,7 +39,7 @@ function IndexSelect(props) {
                     }
                 </select>
             </div>
-        </React.Fragment>
+        </>
     )
 }
 

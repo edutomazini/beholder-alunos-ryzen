@@ -132,7 +132,7 @@ function OrderTemplateModal(props) {
                             {
                                 orderTemplate.type === 'TRAILING_STOP'
                                     ? <TrailingTemplate data={orderTemplate} onChange={onInputChange} />
-                                    : <React.Fragment></React.Fragment>
+                                    : <></>
                             }
 
                             <div className="row">
@@ -157,7 +157,7 @@ function OrderTemplateModal(props) {
                         {
                             error
                                 ? <div className="alert alert-danger mt-1 col-9 py-1">{error}</div>
-                                : <React.Fragment></React.Fragment>
+                                : <></>
                         }
                         <button ref={btnSave} type="button" className="btn btn-sm btn-primary" onClick={onSubmit}>Save</button>
                     </div>

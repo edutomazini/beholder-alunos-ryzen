@@ -53,7 +53,7 @@ function Reports() {
     }
 
     return (
-        <React.Fragment>
+        <>
             <Menu />
             <main className="content">
                 <div className="row py-4">
@@ -95,7 +95,7 @@ function Reports() {
                 <Footer />
             </main>
             <Toast type={notification.type} text={notification.text} />
-        </React.Fragment>
+        </>
     )
 }
 

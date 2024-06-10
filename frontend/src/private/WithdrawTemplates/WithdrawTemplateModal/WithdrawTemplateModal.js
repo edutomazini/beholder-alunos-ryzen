@@ -111,7 +111,7 @@ function WithdrawTemplateModal(props) {
                                             </div>
                                         </div>
                                     )
-                                    : <React.Fragment></React.Fragment>
+                                    : <></>
                             }
                             <div className="row">
                                 <div className="col-md-7 mb-3">
@@ -124,7 +124,7 @@ function WithdrawTemplateModal(props) {
                         {
                             error
                                 ? <div className="alert alert-danger mt-1 col-9 py-1">{error}</div>
-                                : <React.Fragment></React.Fragment>
+                                : <></>
                         }
                         <button ref={btnSave} type="button" className="btn btn-sm btn-primary" onClick={onSubmit}>Save</button>
                     </div>

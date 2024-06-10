@@ -62,7 +62,7 @@ function MonitorIndex(props) {
     }
 
     return (
-        <React.Fragment>
+        <>
             <div className="row">
                 <div className="col-12 mb-3">
                     <div className="form-group">
@@ -99,7 +99,7 @@ function MonitorIndex(props) {
                     }
                 </div>
             </div>
-        </React.Fragment>
+        </>
     );
 }
 

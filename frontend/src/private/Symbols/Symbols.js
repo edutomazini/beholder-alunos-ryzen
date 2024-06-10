@@ -89,7 +89,7 @@ function Symbols() {
     }
 
     return (
-        <React.Fragment>
+        <>
             <Menu />
             <main className="content">
                 <div className="row py-4">
@@ -130,7 +130,7 @@ function Symbols() {
             </main>
             <Toast text={notification.text} type={notification.type} />
             <SymbolModal data={viewSymbol} />
-        </React.Fragment>
+        </>
     );
 }
 

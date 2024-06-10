@@ -34,7 +34,7 @@ function SymbolRow(props) {
                 {
                     symbol.base
                         ? <img src={`/img/icons/black/${symbol.base.toLowerCase()}.svg`} className="me-2" width={16} />
-                        : <React.Fragment></React.Fragment>
+                        : <></>
                 }
                 {symbol.symbol}
             </td>

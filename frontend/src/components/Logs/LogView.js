@@ -18,7 +18,7 @@ function LogView(props) {
     }, [props.file])
 
     return (
-        <React.Fragment>
+        <>
             <div className="row">
                 <div className="col-12 mb-3">
                     <div className="form-group">
@@ -27,7 +27,7 @@ function LogView(props) {
                     </div>
                 </div>
             </div>
-        </React.Fragment>
+        </>
     )
 }
 

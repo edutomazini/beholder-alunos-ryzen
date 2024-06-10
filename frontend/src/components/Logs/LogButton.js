@@ -15,7 +15,7 @@ function LogButton(props) {
     }
 
     return (
-        <React.Fragment>
+        <>
             {
                 props.id > 0
                     ? (
@@ -31,9 +31,9 @@ function LogButton(props) {
                             }
                         </button>
                     )
-                    : <React.Fragment></React.Fragment>
+                    : <></>
             }
-        </React.Fragment >
+        </>
     )
 }
 

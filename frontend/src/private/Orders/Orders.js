@@ -69,7 +69,7 @@ function Orders() {
     }
 
     return (
-        <React.Fragment>
+        <>
             <Menu />
             <main className="content">
                 <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
@@ -101,7 +101,7 @@ function Orders() {
                             {
                                 orders && orders.length
                                 ? orders.map(order => (<OrderRow key={order.clientOrderId} data={order} onClick={onViewClick} />))
-                                : <React.Fragment></React.Fragment>
+                                : <></>
                             }
                         </tbody>
                     </table>
@@ -112,7 +112,7 @@ function Orders() {
             <ViewOrderModal data={viewOrder} onCancel={onOrderSubmit} />
             <NewOrderModal onSubmit={onOrderSubmit} />
             <Toast type={notification.type} text={notification.text} />
-        </React.Fragment>
+        </>
     );
 }
 

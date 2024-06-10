@@ -91,7 +91,7 @@ function WithdrawTemplates() {
     }
 
     return (
-        <React.Fragment>
+        <>
             <Menu />
             <main className="content">
                 <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
@@ -118,7 +118,7 @@ function WithdrawTemplates() {
                             {
                                 withdrawTemplates && withdrawTemplates.length
                                     ? withdrawTemplates.map(ot => (<WithdrawTemplateRow key={ot.id} data={ot} onEditClick={onEditClick} onDeleteClick={onDeleteClick} onRunClick={onRunClick} />))
-                                    : <React.Fragment></React.Fragment>
+                                    : <></>
                             }
                         </tbody>
                     </table>
@@ -128,7 +128,7 @@ function WithdrawTemplates() {
             </main>
             <WithdrawTemplateModal data={editWithdrawTemplate} onSubmit={onWithdrawTemplateSubmit} />
             <Toast type={notification.type} text={notification.text} />
-        </React.Fragment>
+        </>
     );
 }
 

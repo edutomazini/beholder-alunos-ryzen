@@ -27,7 +27,7 @@ function SelectQuote(props) {
         <select id="selectQuote" className="form-select" disabled={isDisabled} value={quote} onChange={props.onChange}>
             {
                 props.noFavorites
-                    ? <React.Fragment></React.Fragment>
+                    ? <></>
                     : <option value="FAVORITES">Favorites</option>
             }
             <option value="BNB">BNB</option>
@@ -56,7 +56,7 @@ export function filterSymbolNames(symbols, quote) {
 }
 
 export function getDefaultQuote() {
-    return localStorage.getItem(DEFAULT_QUOTE_PROPERTY) ? localStorage.getItem(DEFAULT_QUOTE_PROPERTY) : "USD";
+    return localStorage.getItem(DEFAULT_QUOTE_PROPERTY) ? localStorage.getItem(DEFAULT_QUOTE_PROPERTY) : "USDT";
 }
 
 export function setDefaultQuote(quote) {

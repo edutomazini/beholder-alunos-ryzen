@@ -48,17 +48,17 @@ function SelectNetwork(props) {
     }
 
     return (
-        <React.Fragment>
+        <>
             <select id="network" onChange={onNetworkChange} className="form-select" value={props.network}>
                 <option value="">Default</option>
                 {
                     networks
                         ? networks.map(n => (<option key={n.network}>{n.network}</option>))
-                        : <React.Fragment></React.Fragment>
+                        : <></>
                 }
             </select>
             <small className="badge bg-secondary text-wrap">{getTip()}</small>
-        </React.Fragment>
+        </>
     )
 }
 
