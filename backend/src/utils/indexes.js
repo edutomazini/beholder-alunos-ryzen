@@ -40,11 +40,13 @@ const indexKeys = {
     TWEEZER_BOTTOM: 'TWEEZER-BOTTOM',
     //TECHNICAL INDICATORS
     RSI: 'RSI',
+    PREVIOUS_RSI: 'PREVIOUS-RSI',
     MACD: 'MACD',
     SMA: 'SMA',
     EMA: 'EMA',
     STOCH_RSI: 'S-RSI',
     BOLLINGER_BANDS: 'BB',
+    PREVIOUS_BOLLINGER_BANDS: 'PREVIOUS-BB',
     ADL: 'ADL',
     ADX: 'ADX',
     ATR: 'ATR',
@@ -72,17 +74,20 @@ const indexKeys = {
     LAST_ORDER: 'LAST_ORDER',
     LAST_CANDLE: 'LAST_CANDLE',
     PREVIOUS_CANDLE: 'PREVIOUS_CANDLE',
+    P_PREVIOUS_CANDLE: 'P_PREVIOUS_CANDLE',
     TICKER: 'TICKER'
 }
 
 function getAnalysisIndexes() {
     return {
         [indexKeys.RSI]: { params: 'period', name: 'RSI' },
+        [indexKeys.PREVIOUS_RSI]: { params: 'period', name: 'PREVIOUS RSI' },
         [indexKeys.MACD]: { params: 'fast,slow,signal', name: 'MACD' },
         [indexKeys.SMA]: { params: 'period', name: 'SMA' },
         [indexKeys.EMA]: { params: 'period', name: 'EMA' },
         [indexKeys.STOCH_RSI]: { params: 'd,k,rsi,stoch', name: 'Stochastic RSI' },
         [indexKeys.BOLLINGER_BANDS]: { params: 'period,stdDev', name: 'Bollinger Bands (BB)' },
+        [indexKeys.PREVIOUS_BOLLINGER_BANDS]: { params: 'period,stdDev', name: 'PREVIOUS Bollinger Bands (BB)' },
         [indexKeys.ADL]: { params: 'none', name: 'ADL' },
         [indexKeys.ADX]: { params: 'period', name: 'ADX' },
         [indexKeys.ATR]: { params: 'period', name: 'ATR' },
@@ -143,6 +148,8 @@ function getAnalysisIndexes() {
 }
 
 function execCalc(indexName, ohlc, ...params) {
+    //console.log('aquiohlc')
+    //console.log(ohlc)
     switch (indexName) {
         case indexKeys.INSIDE_CANDLE: return insideCandle(ohlc, ...params);
         case indexKeys.ABANDONED_BABY: return abandonedBaby(ohlc);
@@ -179,6 +186,7 @@ function execCalc(indexName, ohlc, ...params) {
         case indexKeys.TWEEZER_TOP: return tweezerTop(ohlc);
         case indexKeys.TWEEZER_BOTTOM: return tweezerBottom(ohlc);
         case indexKeys.BOLLINGER_BANDS: return bollingerBands(ohlc.close, ...params);
+        case indexKeys.PREVIOUS_BOLLINGER_BANDS: return previousBollingerBands(ohlc.close, ...params);
         case indexKeys.BULLISH_ENGULFING: return bullishEngulfing(ohlc);
         case indexKeys.CCI: return CCI(ohlc, ...params);
         case indexKeys.DARK_CLOUD_COVER: return darkCloudCover(ohlc);
@@ -196,6 +204,7 @@ function execCalc(indexName, ohlc, ...params) {
         case indexKeys.PSAR: return PSAR(ohlc, ...params);
         case indexKeys.ROC: return ROC(ohlc.close, ...params);
         case indexKeys.RSI: return RSI(ohlc.close, ...params);
+        case indexKeys.PREVIOUS_RSI: return PREVIOUSRSI(ohlc.close, ...params);
         case indexKeys.SMA: return SMA(ohlc.close, ...params);
         case indexKeys.STOCH: return Stochastic(ohlc, ...params);
         case indexKeys.STOCH_RSI: return StochRSI(ohlc.close, ...params);
@@ -746,6 +755,20 @@ function WEMA(closes, period = 5) {
     }
 }
 
+function PREVIOUSRSI(closes, period = 14) {
+    period = parseInt(period);
+    if (closes.length <= period) return { current: false, previous: false };
+
+    const rsiResult = technicalindicators.rsi({
+        period,
+        values: closes
+    })
+    return {
+        current: parseFloat(rsiResult[rsiResult.length - 2]),
+        previous: parseFloat(rsiResult[rsiResult.length - 3]),
+    }
+}
+
 function RSI(closes, period = 14) {
     period = parseInt(period);
     if (closes.length <= period) return { current: false, previous: false };
@@ -766,6 +789,7 @@ function MACD(closes, fastPeriod = 12, slowPeriod = 26, signalPeriod = 9) {
     signalPeriod = parseInt(signalPeriod);
 
     if ([fastPeriod, slowPeriod, signalPeriod].some(p => p >= closes.length)) return { current: false, previous: false };
+    //console.log(closes)
 
     const macdResult = technicalindicators.macd({
         values: closes,
@@ -811,9 +835,28 @@ function bollingerBands(closes, period = 20, stdDev = 2) {
         stdDev: parseInt(stdDev),
         values: closes
     })
+    console.log(`BB current: ${JSON.stringify(bbResult[bbResult.length - 1])}`)
+    console.log(`BB previous: ${JSON.stringify(bbResult[bbResult.length - 2])}`)
     return {
         current: bbResult[bbResult.length - 1],
         previous: bbResult[bbResult.length - 2]
+    }
+}
+
+function previousBollingerBands(closes, period = 20, stdDev = 2) {
+    period = parseInt(period);
+    if (closes.length <= period) return { current: false, previous: false };
+
+    const bbResult = technicalindicators.bollingerbands({
+        period,
+        stdDev: parseInt(stdDev),
+        values: closes
+    })
+    console.log(`P-BB current: ${JSON.stringify(bbResult[bbResult.length - 2])}`)
+    console.log(`P-BB previous: ${JSON.stringify(bbResult[bbResult.length - 3])}`)
+    return {
+        current: bbResult[bbResult.length - 2],
+        previous: bbResult[bbResult.length - 3]
     }
 }
 

@@ -52,7 +52,7 @@ function DateTime(props) {
                     </button>
                     : <></>
             }
-            <input className="form-control" id="date" defaultValue={dateTime.date} type="text" placeholder="dd/mm/yyyy" onChange={onInputChange} />
+            <input type="text" data-datepicker="" className="form-control datepicker-input" id="date" defaultValue={dateTime.date} placeholder="dd/mm/yyyy" onChange={onInputChange} />
             <span className="input-group-text bg-secondary">at</span>
             <input className="form-control hourPart" id="hours" type="number" placeholder="00" defaultValue={dateTime.hours} onChange={onInputChange} maxLength="2" />
             <span className="input-group-text bg-secondary">:</span>

@@ -9,6 +9,9 @@ const monitorTypes = {
 }
 
 async function monitorExists(type, symbol, interval) {
+  //  console.log(type)
+   // console.log(symbol)
+   // console.log(interval)
     const count = await monitorModel.count({ where: { type, symbol, interval } });
     return count > 0;
 }

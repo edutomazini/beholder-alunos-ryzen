@@ -1,0 +1,94 @@
+{
+    "id": 34,
+    "name": "compra btc e bnb",
+    "symbol": "*USDT",
+    "indexes": "*USDT:MACD_12_26_9_5m,*USDT:RSI_14_5m,*USDT:LAST_ORDER",
+    "conditions": "MEMORY['*USDT:MACD_12_26_9_5m'].current.MACD>=MEMORY['*USDT:MACD_12_26_9_5m'].current.signal && MEMORY['*USDT:RSI_14_5m'].current<=50 && MEMORY['*USDT:LAST_ORDER'].side=='SELL'",
+    "schedule": null,
+    "isActive": true,
+    "logs": true,
+    "actions": [
+        {
+            "id": 176,
+            "automationId": 34,
+            "orderTemplateId": null,
+            "withdrawTemplateId": null,
+            "type": "ALERT_TELEGRAM",
+            "orderTemplate": null,
+            "withdrawTemplate": null
+        },
+        {
+            "id": 177,
+            "automationId": 34,
+            "orderTemplateId": 30,
+            "withdrawTemplateId": null,
+            "type": "ORDER",
+            "orderTemplate": {
+                "id": 30,
+                "name": "compra usdt any",
+                "symbol": "*USDT",
+                "type": "MARKET",
+                "side": "BUY",
+                "limitPrice": "",
+                "limitPriceMultiplier": "1.00",
+                "stopPrice": "",
+                "stopPriceMultiplier": "1.00",
+                "quantity": "MIN_NOTIONAL",
+                "quantityMultiplier": "2.00",
+                "icebergQty": "",
+                "icebergQtyMultiplier": "1.00",
+                "createdAt": "2024-12-06T02:15:41.000Z",
+                "updatedAt": "2024-12-06T02:15:41.000Z"
+            },
+            "withdrawTemplate": null
+        }
+    ],
+    "grids": []
+}
+{
+    "id": 35,
+    "name": "venda btc e bnb",
+    "symbol": "*USDT",
+    "indexes": "*USDT:MACD_12_26_9_5m,*USDT:RSI_14_5m,*USDT:LAST_ORDER",
+    "conditions": "MEMORY['*USDT:MACD_12_26_9_5m'].current.MACD<MEMORY['*USDT:MACD_12_26_9_5m'].current.signal && MEMORY['*USDT:RSI_14_5m'].current>50 && MEMORY['*USDT:LAST_ORDER'].side=='BUY'",
+    "schedule": null,
+    "isActive": true,
+    "logs": true,
+    "actions": [
+        {
+            "id": 178,
+            "automationId": 35,
+            "orderTemplateId": null,
+            "withdrawTemplateId": null,
+            "type": "ALERT_TELEGRAM",
+            "orderTemplate": null,
+            "withdrawTemplate": null
+        },
+        {
+            "id": 179,
+            "automationId": 35,
+            "orderTemplateId": 31,
+            "withdrawTemplateId": null,
+            "type": "ORDER",
+            "orderTemplate": {
+                "id": 31,
+                "name": "venda usd any",
+                "symbol": "*USDT",
+                "type": "MARKET",
+                "side": "SELL",
+                "limitPrice": "",
+                "limitPriceMultiplier": "1.00",
+                "stopPrice": "",
+                "stopPriceMultiplier": "1.00",
+                "quantity": "MIN_NOTIONAL",
+                "quantityMultiplier": "2.00",
+                "icebergQty": "",
+                "icebergQtyMultiplier": "1.00",
+                "createdAt": "2024-12-06T02:16:03.000Z",
+                "updatedAt": "2024-12-06T02:16:03.000Z"
+            },
+            "withdrawTemplate": null
+        }
+    ],
+    "grids": []
+}

@@ -9,7 +9,7 @@ function WalletRow(props) {
     return (
         <tr>
             <td>
-                <img src={`/img/icons/black/${props.data.symbol.toLowerCase()}.svg`} className="me-2" width={16} />
+                <img src={`/img/icons/color/${props.data.symbol.toLowerCase()}.svg`} className="me-2" width={16} />
                 {props.data.symbol}
             </td>
             <td>

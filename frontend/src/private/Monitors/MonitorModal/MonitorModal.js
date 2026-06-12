@@ -43,7 +43,7 @@ function MonitorModal(props) {
             })
             .catch(err => {
                 console.error(err.response ? err.response.data : err.message);
-                setError(err.message);
+                setError(err.response ? err.response.data : err.message);
             })
     }
 

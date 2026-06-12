@@ -25,7 +25,7 @@ function verifyCron(schedule) {
 }
 
 async function runSchedule(id) {
-    try {
+    /*try {
         let automation = await automationsRepository.getAutomation(id);
         let result = await beholder.evalDecision('', automation.get({ plain: true }));
 
@@ -38,7 +38,7 @@ async function runSchedule(id) {
         if (LOGS || automation.logs) logger('A:' + id, `The Scheduled Automation #${id} has fired at ${new Date()}!\n${JSON.stringify(result)}`);
     } catch (err) {
         console.error(err);
-    }
+    }*/
 }
 
 function addSchedule(automation) {

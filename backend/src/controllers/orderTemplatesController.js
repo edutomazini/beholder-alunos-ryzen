@@ -5,6 +5,10 @@ const { orderTypes } = require('../repositories/ordersRepository')
 function validatePrice(price) {
     if (!price) return true;
     if (parseFloat(price)) return true;
+    //return true;
+    //console.log('price: ')
+    //console.log(price)
+    //console.log(/^(MEMORY\[\'.+?\'\](\..+)*)$/i.test(price))
     return /^(MEMORY\[\'.+?\'\](\..+)*)$/i.test(price);
 }
 
@@ -37,7 +41,7 @@ async function insertOrderTemplate(req, res, next) {
 
     if (newOrderTemplate.type === orderTypes.TRAILING_STOP)
         newOrderTemplate.stopPrice = calcTrailingStop(newOrderTemplate);
-
+//console.log(newOrderTemplate)
     if (!validatePrice(newOrderTemplate.limitPrice) || !validatePrice(newOrderTemplate.stopPrice))
         return res.status(400).json(`Invalid price.`);
 

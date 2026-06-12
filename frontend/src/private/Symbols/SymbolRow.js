@@ -33,7 +33,7 @@ function SymbolRow(props) {
             <td className="text-gray-900">
                 {
                     symbol.base
-                        ? <img src={`/img/icons/black/${symbol.base.toLowerCase()}.svg`} className="me-2" width={16} />
+                        ? <img src={`/img/icons/color/${symbol.base.toLowerCase()}.svg`} className="me-2" width={16} />
                         : <></>
                 }
                 {symbol.symbol}

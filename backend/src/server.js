@@ -36,4 +36,16 @@ const logger = require('./utils/logger');
 
     appEm.init(settings, wss, beholder);
 
+    // const telegram = require('./utils/telegram');
+    // telegram(settings, 'Segundo Teste da aula');
+
+   /* setTimeout(async() => {
+        try {
+            const result = await beholder.placeOrder(settings, automations[0], automations[0].actions[0])
+            console.log(result);
+        } catch (err) {
+            console.error(err);
+        }
+    }, 5000);*/
+
 })();

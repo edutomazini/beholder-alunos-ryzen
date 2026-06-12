@@ -9,13 +9,13 @@ function CandleChart(props) {
 
     // eslint-disable-next-line
     const [widget, setWidget] = useState({});
-
+//https://br.tradingview.com/widget/advanced-chart/
     useEffect(() => {
         const w = new window.TradingView.widget({
             symbol: "BINANCE:" + props.symbol,
             autosize: true,
-            interval: "1",
-            timezone: "Etc/UTC",
+            interval: "5",
+            timezone: "America/Sao_Paulo",
             theme: "dark",
             style: "1",
             locale: "en",
@@ -25,8 +25,13 @@ function CandleChart(props) {
             details: true,
             withdateranges: true,
             hide_side_toolbar: false,
-            studies: [
-                "RSI@tv-basicstudies"
+            studies: [{ id: "BB@tv-basicstudies", inputs: { length: 20, stddev: 2 } },
+              {
+                id: "RSI@tv-basicstudies",
+                inputs: {
+                 length: 14
+                }
+              }
             ],
             container_id: "tradingview_d34df"
         });

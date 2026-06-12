@@ -100,6 +100,8 @@ async function placeTrailingStop(req, res, next) {
 }
 
 async function placeOrder(req, res, next) {
+   // console.log(req)
+    
     if (req.body.options.type === 'TRAILING_STOP') return placeTrailingStop(req, res, next);
 
     const id = res.locals.token.id;
@@ -111,15 +113,20 @@ async function placeOrder(req, res, next) {
     let result;
 
     try {
-        if (side === 'BUY')
+        if (side === 'BUY'){
             result = await exchange.buy(symbol, quantity, limitPrice, options);
+//console.log('quantity ' + quantity)       
+//console.log('limitPrice ' + limitPrice) 
+//console.log('optionZ ' + JSON.stringify(options)) 
+        }
         else if (side === 'SELL')
+//console.log('SELL')            
             result = await exchange.sell(symbol, quantity, limitPrice, options);
     }
     catch (err) {
         return res.status(400).json(err.body);
     }
-
+//console.log('result: ' + JSON.stringify(result))
     const order = await ordersRepository.insertOrder({
         automationId,
         symbol,
@@ -307,7 +314,12 @@ async function getDayTradeReport(req, res, next) {
     const profit = sellVolume - buyVolume;
 
     const wallet = beholder.getMemory(quote, 'WALLET');
-    const profitPerc = (profit * 100) / (parseFloat(wallet) - profit);
+    //console.log (`quote=${quote} wallet=${wallet}`)
+    //const profitPerc = (profit * 100) / (parseFloat(wallet) - profit);
+    const profitPercAntigo = (profit * 100) / (parseFloat(wallet) - profit);
+    const profitPerc = ((profit)/buyVolume)*100
+   // console.log (`sellVolume2=${sellVolume} buyVolume=${buyVolume} profit=${profit}`)
+   // console.log(`profitPercAntigo=${profitPercAntigo} profitPerc=${profitPerc}`)
     const automations = groupByAutomations(orders);
 
     res.json({
@@ -360,7 +372,11 @@ async function getMonthReport(req, res, next) {
     const profit = sellVolume - buyVolume;
 
     const wallet = beholder.getMemory(quote, 'WALLET');
-    const profitPerc = (profit * 100) / (parseFloat(wallet) - profit);
+    const profitPercAntigo = (profit * 100) / (parseFloat(wallet) - profit);
+    const profitPerc = ((profit)/buyVolume)*100
+console.log (`sellVolume1=${sellVolume} buyVolume=${buyVolume} profit=${profit}`)
+console.log(`profitPercAntigo=${profitPercAntigo} profitPerc=${profitPerc}`)
+console.log (`quote=${quote} wallet=${wallet}`)
     const automations = groupByAutomations(orders);
 
     res.json({

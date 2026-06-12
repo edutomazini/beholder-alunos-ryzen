@@ -33,12 +33,15 @@ function Dashboard() {
       console.log(`Connected to App WS`);
     },
     onMessage: () => {
+      //console.log('entrou')
       if (lastJsonMessage) {
         if (lastJsonMessage.miniTicker) setTickerState(lastJsonMessage.miniTicker);
         else if (lastJsonMessage.balance) {
           setBalanceState(lastJsonMessage.balance);
         }
-        else if (lastJsonMessage.book) {
+        //else if (Array.isArray(lastJsonMessage.book)) {
+          else if (lastJsonMessage.book) {
+        //  console.log('passou')
           lastJsonMessage.book.forEach(b => bookState[b.symbol] = b);
           setBookState(bookState);
         }

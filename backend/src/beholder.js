@@ -43,6 +43,11 @@ function init(automations) {
 }
 
 function isLocked(automationId) {
+  //  if (automationId === 114)
+   //     console.log(`automationid: ${automationId}`)
+  //  console.log(`brain: ${JSON.stringify(LOCK_BRAIN)}`)
+ // if (automationId === 114)
+   // console.log(`id ${automationId} lock? ${automationId.some(id => LOCK_BRAIN[id] === true)}`)
     if (Array.isArray(automationId))
         return automationId.some(id => LOCK_BRAIN[id] === true);
     return LOCK_BRAIN[automationId] === true;
@@ -115,7 +120,7 @@ function deleteBrain(automation) {
         setLocked(automation.id, true);
         delete BRAIN[automation.id];
         deleteBrainIndex(automation.indexes.split(','), automation.id);
-        if (automation.logs) logger('A:' + automation.id, `Automation removed from BRAIN #${automation.id}`);
+        logger('A:' + automation.id, `Automation removed from BRAIN #${automation.id}`);
     }
     finally {
         setLocked(automation.id, false);
@@ -189,6 +194,9 @@ function calcPrice(orderTemplate, symbol, isStopPrice) {
             throw new Error(`Error trying to get market price. OTID: ${orderTemplate.id}, ${isStopPrice}. No Book.`);
 
         newPrice = orderTemplate.side === 'BUY' ? memory.current.bestAsk : memory.current.bestBid;
+    //    console.log('calcPrice orderTemplate.side=' + orderTemplate.side);
+    //    console.log('calcPrice memory.current.bestAsk=' + memory.current.bestAsk);
+    //    console.log('calcPrice memory.current.bestBid=' + memory.current.bestBid);
         newPrice = isStopPrice ? newPrice * orderTemplate.stopPriceMultiplier : newPrice * orderTemplate.limitPriceMultiplier;
     }
 
@@ -296,6 +304,7 @@ async function placeOrder(settings, automation, action) {
         && (isDynamicBuy || orderTemplate.quantity === 'MIN_NOTIONAL')) {
         order.options.quoteOrderQty = calcQuoteQty(orderTemplate, symbol);
     } else {
+    //console.log('aqui calcprice')
         const price = calcPrice(orderTemplate, symbol, false);
 
         if (!isFinite(price) || !price)
@@ -328,6 +337,7 @@ async function placeOrder(settings, automation, action) {
     const exchange = require('./utils/exchange')(settings);
 
     try {
+console.log('order: ' + JSON.stringify(order))        
         if (order.side === 'BUY')
             result = await exchange.buy(order.symbol, order.quantity, order.limitPrice, order.options);
         else
@@ -384,6 +394,8 @@ async function gridEval(settings, automation) {
         if (!book) return { type: 'error', text: `No book info for ${automation.symbol}` };
 
         const result = await placeOrder(settings, automation, automation.actions[0]);
+        //dispara msg telegram if log ativo
+        //console.log('DISPARA TELEGRAM')
         if (automation.logs) await require('./utils/telegram')(settings, result.text);
         if (result.type === 'error') return result;
 
@@ -547,7 +559,8 @@ async function withdrawCrypto(settings, automation, action) {
 }
 
 async function sendTelegram(settings, automation) {
-    await require('./utils/telegram')(settings, automation.name + ' has fired!');
+    // console.log('Telegram ')
+    await require('./utils/telegram')(settings, automation.name + ' has fired! \n' + 'conditions: ' + automation.conditions.replace('MEMORY', ''));
     if (automation.logs) logger('A:' + automation.id, `Telegram sent!`);
     return { text: `Telegram sent from automation '${automation.name}'`, type: 'success' };
 }
@@ -568,12 +581,12 @@ async function trailingEval(settings, automation, action) {
 
     if (!isPriceActivated) return false;
 
-    if (LOGS)
+ 
         logger('A:' + automation.id, `Beholder is in the Trailing zone at ${automation.name}`);
 
     const isStopActivated = isBuy ? currentPrice >= stopPrice && previousPrice < stopPrice
         : currentPrice <= stopPrice && previousPrice > stopPrice;
-
+console.log(`isStopActivated ${isStopActivated} isBuy ${isBuy} currentPrice ${currentPrice} stopPrice ${stopPrice} previousPrice ${previousPrice}`)
     if (isStopActivated) {
         if (automation.logs || LOGS)
             logger('A:' + automation.id, `Stop price activated at ${automation.name}`);
@@ -602,7 +615,7 @@ async function trailingEval(settings, automation, action) {
 }
 
 function doAction(settings, action, automation) {
-
+console.log(action.type)
     try {
         switch (action.type) {
             case actionTypes.ALERT_EMAIL: return sendEmail(settings, automation);
@@ -614,44 +627,52 @@ function doAction(settings, action, automation) {
             case actionTypes.GRID: return gridEval(settings, automation);
         }
     } catch (err) {
-        if (automation.logs) {
-            logger('A:' + automation.id, `${automation.name}:${action.type}`);
-            logger('A:' + automation.id, err);
-        }
+        logger('A:' + automation.id, `${automation.name}:${action.type}`);
+        logger('A:' + automation.id, err);
         return { text: `Error at ${automation.name}: ${err.message}`, type: 'error' };
     }
 }
 
 function shouldntInvert(automation, memoryKey) {
-    //return true;//descomente para desabilitar 'double check' (teste de condição invertida)
+    return true;//descomente para desabilitar 'double check' (teste de condição invertida)
     return ['GRID', 'TRAILING'].includes(automation.actions[0].type)
         || automation.schedule
         || memoryKey.indexOf(':LAST_ORDER') !== -1
         || memoryKey.indexOf(':LAST_CANDLE') !== -1
-        || memoryKey.indexOf(':PREVIOUS_CANDLE') !== -1;
+        || memoryKey.indexOf(':PREVIOUS_CANDLE') !== -1
+        || memoryKey.indexOf(':P_PREVIOUS_CANDLE') !== -1;
 }
 
 async function evalDecision(memoryKey, automation) {
+//console.log('--------------INICIO evalDecision ----------------------')
     if (!automation) return false;
-
+console.log('tem automation')
     try {
         const indexes = automation.indexes ? automation.indexes.split(',') : [];
+//console.log(`INDEX ${automation.indexes}`)        
 
         if (indexes.length) {
             const isChecked = indexes.every(ix => MEMORY[ix] !== null && MEMORY[ix] !== undefined);
             if (!isChecked) return false;
 
-            const invertedCondition = shouldntInvert(automation, memoryKey) ? '' : invertCondition(memoryKey, automation.conditions);
+            const invertedCondition = shouldntInvert(automation, memoryKey) ? '' : invertCondition(memoryKey, automation.conditions);           
+//console.log(`invertedCondition ${invertedCondition} id ${automation.id}, automaçao ${automation.indexes}`)
             const evalCondition = automation.conditions + (invertedCondition ? ' && ' + invertedCondition : '');
+console.log(`evalCondition ${evalCondition}`)            
+        
 
-            if (LOGS) logger('A:' + automation.id, `Beholder trying to evaluate:\n${evalCondition}\n at ${automation.name}`);
+            logger('A:' + automation.id, `Beholder trying to evaluate:\n${evalCondition}\n at ${automation.name}`);
 
-            const isValid = evalCondition ? Function("MEMORY", "return " + evalCondition)(MEMORY) : true;
+            var isValid = evalCondition ? Function("MEMORY", "return " + evalCondition)(MEMORY) : true;
+//if (automation.indexes == 'DOGEUSDT:LAST_ORDER,DOGEUSDT:MACD_12_26_9_1m')
+           //isValid = true;
+
+//console.log('--------------FIM evalDecision ----------------------')
             if (!isValid) return false;
         }
-
+        console.log(`isValid ${isValid}`)
         if (!automation.actions || !automation.actions.length) {
-            if (LOGS || automation.logs) logger('A:' + automation.id, `No actions defined for automation ${automation.name}`);
+            logger('A:' + automation.id, `No actions defined for automation ${automation.name}`);
             return false;
         }
 
@@ -660,7 +681,7 @@ async function evalDecision(memoryKey, automation) {
 
         const settings = await getDefaultSettings();
         const results = [];
-
+console.log('aqui')
         for (let i = 0; i < automation.actions.length; i++) {
             const action = automation.actions[i];
             const result = await doAction(settings, action, automation);
@@ -680,14 +701,18 @@ async function evalDecision(memoryKey, automation) {
 }
 
 async function testAutomations(memoryKey) {
-
+//console.log('-------------------- INICIO testAutomations -------------------------')
+    // if (memoryKey.includes('LAST_ORDER')) return false; // para evitar que last_order dispare testes de automacao
+    //if (memoryKey.includes('LAST_CANDLE')) //return false;
+    //console.log('tem LAST_CANDLE')
+    
     const automations = findAutomations(memoryKey);
-
+    
     if (!automations || !automations.length || isLocked(automations.filter(a => a).map(a => a.id))) {
         if (LOGS) console.log(`Beholder has no automations for memoryKey: ${memoryKey} or the brain is locked!`);
         return false;
     }
-
+        
     setLocked(automations.map(a => a.id), true);
     let results;
 
@@ -714,7 +739,7 @@ async function testAutomations(memoryKey) {
         results = await Promise.all(promises);
         if (Array.isArray(results) && results.length)
             results = results.flat().filter(r => r);
-
+//console.log('-------------------- FIM testAutomations -------------------------')
         if (!results || (Array.isArray(results) && !results.length))
             return false;
         else

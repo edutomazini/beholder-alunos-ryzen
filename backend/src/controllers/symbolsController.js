@@ -45,6 +45,7 @@ async function syncSymbols(req, res, next) {
         const notionalFilter = item.filters.find(filter => filter.filterType === 'NOTIONAL');
         const lotSizeFilter = item.filters.find(filter => filter.filterType === 'LOT_SIZE');
         const priceFilter = item.filters.find(filter => filter.filterType === 'PRICE_FILTER');
+//console.log(`filter prcice ${priceFilter}`)        
 
         return {
             symbol: item.symbol,

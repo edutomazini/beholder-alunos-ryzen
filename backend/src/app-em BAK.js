@@ -1,6 +1,5 @@
 const ordersRepository = require('./repositories/ordersRepository');
 const { orderStatus, insertOrder } = require('./repositories/ordersRepository');
-//const { orderStatus } = require('./repositories/ordersRepository');
 const { monitorTypes, getActiveMonitors } = require('./repositories/monitorsRepository');
 const { execCalc, indexKeys } = require('./utils/indexes');
 const logger = require('./utils/logger');
@@ -183,13 +182,13 @@ function processExecutionData(monitorId, executionData, broadcastLabel) {
             if (updatedOrder) {
 
                 notifyOrderUpdate(order);
-//console.log('ORDER rep') //aqui
-//console.log(order)
+console.log('ORDER rep') //aqui
+console.log(order)
 
                 const orderCopy = getLightOrder(updatedOrder.get({ plain: true }));
                 const results = await beholder.updateMemory(order.symbol, indexKeys.LAST_ORDER, null, orderCopy);
-                
-               /* if (order.side == 'BUY' && order.status == 'FILLED'){
+
+                if (order.side == 'BUY' && order.status == 'FILLED'){
                     const symbol = await getSymbol(order.symbol);
                     const tickSize = parseFloat(symbol.tickSize);
                     let newPrice, factor;
@@ -207,10 +206,10 @@ function processExecutionData(monitorId, executionData, broadcastLabel) {
                         },
                         limitPrice: newPrice
                     }
-                 //   console.log('order buy: ' + JSON.stringify(orderBuy))    
+                    console.log('order buy: ' + JSON.stringify(orderBuy))    
                         const resultSell = await exchange.sell(orderBuy.symbol, orderBuy.quantity, orderBuy.limitPrice, orderBuy.options);
-                   //     console.log('result SELL')
-                    //    console.log(resultSell)
+                        console.log('result SELL')
+                        console.log(resultSell)
                         const savedOrder = await insertOrder({
                             automationId: null,
                             symbol: orderBuy.symbol,
@@ -225,56 +224,10 @@ function processExecutionData(monitorId, executionData, broadcastLabel) {
                             transactTime: resultSell.transactTime,
                             status: 'NEW'
                         })
-                      //  console.log('saved order')
-                     //   console.log(savedOrder)
-                }*/
-
-                     if (order.side == 'BUY' && order.status == 'FILLED'){ //stop trailing
-                        const symbol = await getSymbol(order.symbol);
-                        const tickSize = parseFloat(symbol.tickSize);
-                        let newPrice, factor, factorStop, stopPrice;
-                        newPrice = order.avgPrice * 1 ;
-                        stopPrice = order.avgPrice * 0.99;
-
-                        factor = Math.floor(newPrice / tickSize);
-                        factorStop = Math.floor(stopPrice / tickSize);
-
-                        newPrice = (factor * tickSize).toFixed(symbol.quotePrecision);
-                        stopPrice = (factorStop * tickSize).toFixed(symbol.quotePrecision);  
-                                              
-                    //    console.log (`price calc=${newPrice} SYMBOL=${symbol}  quote=${symbol.quotePrecision}`)
-                        const orderBuy = {
-                            symbol: order.symbol,
-                            side: 'SELL',
-                            quantity: order.quantity,
-                            options: {
-                                type: 'TAKE_PROFIT',
-                                stopPrice: newPrice,
-                                trailingDelta: 50
-                            },
-                            //limitPrice: newPrice
-                        }
-                        //console.log('order buy: ' + JSON.stringify(orderBuy))    
-                            const resultSell = await exchange.sell(orderBuy.symbol, orderBuy.quantity, null, orderBuy.options);
-                       //     console.log('result SELL')
-                        //    console.log(resultSell)
-                            const savedOrder = await insertOrder({
-                                automationId: null,
-                                symbol: orderBuy.symbol,
-                                quantity: orderBuy.quantity || resultSell.executedQty,
-                                type: orderBuy.options.type,
-                                side: orderBuy.side,
-                                limitPrice: orderBuy.limitPrice,
-                                stopPrice: 0,
-                                icebergQty: null,
-                                orderId: resultSell.orderId,
-                                clientOrderId: resultSell.clientOrderId,
-                                transactTime: resultSell.transactTime,
-                                status: 'NEW'
-                            })
-                          //  console.log('saved order')
-                         //   console.log(savedOrder)
-                    }
+                        console.log('saved order')
+                        console.log(savedOrder)
+   
+                }
 
                 if (results) results.map(r => sendMessage({ notification: r }));
                 if (broadcastLabel) sendMessage({ [broadcastLabel]: order });
@@ -317,7 +270,7 @@ async function startUserDataMonitor(monitorId, broadcastLabel, logs) {
 }
 
 async function processChartData(monitorId, symbol, indexes, interval, ohlc, logs) {
-//console.log('---------------------- INICIO processChartData ----------------------')
+console.log('---------------------- INICIO processChartData ----------------------')
     if (typeof indexes === 'string') indexes = indexes.split(',');
     if (!indexes || !Array.isArray(indexes) || indexes.length === 0) return false;
 
@@ -339,7 +292,7 @@ async function processChartData(monitorId, symbol, indexes, interval, ohlc, logs
             logger('M:' + monitorId, err);
         }
     });
-//console.log('--------------FIM processChartData ----------------------')
+console.log('--------------FIM processChartData ----------------------')
     return Promise.all(memoryKeys.map(async (key) => {
         return beholder.testAutomations(key);
     }))
@@ -375,11 +328,11 @@ function startChartMonitor(monitorId, symbol, interval, indexes, broadcastLabel,
         };
 
         const previousPreviousPreviousCandle = {
-            open: ohlc.open[ohlc.open.length - 4],
-            close: ohlc.close[ohlc.close.length - 4],
-            high: ohlc.high[ohlc.high.length - 4],
-            low: ohlc.low[ohlc.low.length - 4],
-            volume: ohlc.volume[ohlc.volume.length - 4],
+            open: ohlc.open[ohlc.open.length - 3],
+            close: ohlc.close[ohlc.close.length - 3],
+            high: ohlc.high[ohlc.high.length - 3],
+            low: ohlc.low[ohlc.low.length - 3],
+            volume: ohlc.volume[ohlc.volume.length - 3],
         };
 
         if (logs) logger('M:' + monitorId, lastCandle);

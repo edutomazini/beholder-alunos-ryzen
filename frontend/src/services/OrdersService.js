@@ -24,6 +24,7 @@ export async function syncOrder(beholderOrderId, token) {
 }
 
 export async function placeOrder(order, token) {
+    console.log('post order')
     const postOrder = {
         symbol: order.symbol.toUpperCase(),
         quantity: order.quantity,
@@ -46,6 +47,7 @@ export async function placeOrder(order, token) {
         postOrder.options.stopPriceMultiplier = order.stopPriceMultiplier;
 
     const headers = { 'authorization': token };
+console.log('post order', postOrder)    
     const response = await axios.post(ORDERS_URL, postOrder, { headers });
     return response.data;
 }
